@@ -16,22 +16,7 @@
 #include "global.h"
 #include "colors.h"
 
-global_t global;
-
-char* size_format(gint64 size) {
-  static char str[2048];
-
-  if (size < 0x400) sprintf(str, "%lld B", size);
-  else if (size < 0x10000) sprintf(str, "%.1f kB", (double)size/(double)0x400);
-  else if (size < 0x100000) sprintf(str, "%lld kB", size/0x400);
-  else if (size < 0x4000000) sprintf(str, "%.1f MB", (double)size/(double)0x100000);
-  else if (size < 0x40000000) sprintf(str, "%lld MB", size/0x100000);
-  else if (size < 0x1000000000) sprintf(str, "%.1f GB", (double)size/(double)0x40000000);
-  else sprintf(str, "%lld GB", size/0x40000000);
-  return str;
-}
-
-int directory_exists(char* dir) {
+static int directory_exists(char* dir) {
   struct stat st;
 
   if (stat(dir, &st) < 0) return 0; 
@@ -56,6 +41,24 @@ void create_dir(char* dir) {
   if (!directory_exists(dir)) {
     mkdir(dir, 7*64+5*8+5);
   }
+}
+
+void global_init() {
+  char str[2048];
+
+  sprintf(str, "%s/.gdmap", g_get_home_dir());
+  create_dir(str);
+  sprintf(str, "%s/colors", g_get_home_dir());
+  create_dir(str);
+
+  if (!color_load("default")) {
+    color_create_default();
+    color_save("default");
+  }
+}
+
+void global_exit() {
+  gtk_main_quit();
 }
 
 char* arg(char* data, int last) {
@@ -102,41 +105,26 @@ char* arg(char* data, int last) {
   return NULL;
 }
 
-void setup_widgets() {
+char* size_format(gint64 size) {
+  static char str[2048];
+
+  if (size < 0x400) sprintf(str, "%lld B", size);
+  else if (size < 0x10000) sprintf(str, "%.1f kB", (double)size/(double)0x400);
+  else if (size < 0x100000) sprintf(str, "%lld kB", size/0x400);
+  else if (size < 0x4000000) sprintf(str, "%.1f MB", (double)size/(double)0x100000);
+  else if (size < 0x40000000) sprintf(str, "%lld MB", size/0x100000);
+  else if (size < 0x1000000000) sprintf(str, "%.1f GB", (double)size/(double)0x40000000);
+  else sprintf(str, "%lld GB", size/0x40000000);
+  return str;
 }
 
-void global_init() {
-  char str[2048];
-
-  global.current_tree = NULL;
-  global.trees = NULL;
-  global.mark = NULL;
-  global.expose_timer = -1;
-  global.paint_mode = P_SIMPLE;
-  global.max_depth = 0;
-
-  sprintf(str, "%s/.gdmap", getenv("HOME"));
-  global.gdmap_home = strdup(str);
-  create_dir(str);
-
-  sprintf(str, "%s/colors", global.gdmap_home);
-  create_dir(str);
-
-  sprintf(str, "Graphical Disk Map %s", VERSION);
-  gtk_window_set_title (GTK_WINDOW(global.win), str);
-
-  if (!color_load("default")) {
-    color_create_default();
-    color_save(global.colors, "default");
-  }
-  
-  setup_widgets();
+char* per_format(gint64 size1, gint64 size2) {
+  static char str[2048];
+  sprintf(str, "%.2f %%", (double)size1/(double)size2*100);
+  return str;
 }
 
-void global_exit() {
-  gtk_exit(0);
-}
-
+/*
 int expose_timeout_cb(gpointer data) {
   if (global.expose_timer >= 0) {
     gtk_timeout_remove(global.expose_timer);
@@ -147,3 +135,4 @@ int expose_timeout_cb(gpointer data) {
   return 0;
 }
  
+*/

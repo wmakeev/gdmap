@@ -560,6 +560,11 @@
 	  <handler>on_drawingarea1_button_press_event</handler>
 	  <last_modification_time>Sat, 03 Mar 2001 22:03:08 GMT</last_modification_time>
 	</signal>
+	<signal>
+	  <name>configure_event</name>
+	  <handler>on_drawingarea1_configure_event</handler>
+	  <last_modification_time>Wed, 12 Mar 2003 13:08:53 GMT</last_modification_time>
+	</signal>
       </widget>
     </widget>
   </widget>

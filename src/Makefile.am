@@ -1,19 +1,19 @@
 ## Process this file with automake to produce Makefile.in
 
 INCLUDES = \
-	@GTK_CFLAGS@
+	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
+	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
+	@UI_CFLAGS@
 
 bin_PROGRAMS = gdmap
 
 gdmap_SOURCES = \
 	main.c \
-	support.c support.h \
-	interface.c interface.h \
-	callbacks.c callbacks.h \
-	global.c global..h \
-	tree.c tree.h \
-	colors.c colors.h \
-	dirselect.c dirselect.h
+	gui_main.c \
+	dirselect.c \
+	global.c \
+	colors.c \
+	tree.c
 
-gdmap_LDADD = @GTK_LIBS@
+gdmap_LDADD = @UI_LIBS@
 

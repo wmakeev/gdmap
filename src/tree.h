@@ -1,24 +1,34 @@
-typedef struct _dir_tree_t       dir_tree_t;
-typedef struct _geometry_t       geometry_t;
+/* Copyright (C) 2003 sgop@users.sourceforge.net
+   This is free software distributed under the terms of the
+   GNU Public License.  See the file COPYING for details. */
 
-struct _dir_tree_t {
+#ifndef _TREE_H_
+#define _TREE_H_
+
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
+typedef struct _tree_t tree_t;
+
+struct _tree_t {
   char* name;
   gint64 size;
-  long dir_size;
+  gint64 dir_size;
   GList* entries;
-  dir_tree_t* parent;
-  double geo[2][2];
+  tree_t* parent;
+  int geo[2][2];
   int depth;
-
-  int width;
-  int height;
-  unsigned char* buf;
 };
 
-dir_tree_t* dir_tree_search(char* name);
-void dir_tree_show(char* name);
-void dir_tree_display(dir_tree_t* tree);
-dir_tree_t* dir_tree_search_file(dir_tree_t* tree, int x, int y);
-void dir_tree_mark(dir_tree_t* sub_tree);
-GtkWidget* create_right_popup(dir_tree_t* current);
-char* dir_tree_full_name(dir_tree_t* tree);
+extern int MaxDepth;
+extern tree_t* CurrentTree;
+
+void tree_load(char* folder);
+char* tree_full_name(tree_t* tree);
+tree_t* tree_search_file(tree_t* tree, int x, int y);
+tree_t* tree_find_path(tree_t* root, tree_t* child);
+tree_t* dir_tree_get_root(tree_t* dir);
+void tree_refresh(tree_t* tree);
+
+#endif

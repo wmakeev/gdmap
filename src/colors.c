@@ -1,20 +1,31 @@
+/* Copyright (C) 2003 sgop@users.sourceforge.net
+   This is free software distributed under the terms of the
+   GNU Public License.  See the file COPYING for details. */
+
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
 
-#include "support.h"
 #include "tree.h"
 #include "global.h"
 #include "colors.h"
+#include "gui_main.h"
 
-void color_save(GList* colors, char* name) {
+static GList* Colors = NULL;
+
+void color_save(char* name) {
   char filename[2048];
   color_t* color;
   GList* dlist;
   FILE* file;
   
-  sprintf(filename, "%s/colors/%s", global.gdmap_home, name);
+  sprintf(filename, "%s/colors/%s", 
+	  g_get_home_dir(), name);
 
   file = fopen(filename, "w");
   if (file == NULL) {
@@ -22,7 +33,7 @@ void color_save(GList* colors, char* name) {
     return;
   }
 
-  for (dlist = colors; dlist; dlist = dlist->next) {
+  for (dlist = Colors; dlist; dlist = dlist->next) {
     color = (color_t*)(dlist->data);
     fprintf(file, "%s %s\n", color->suffix, color->color);
   }
@@ -32,15 +43,15 @@ void color_save(GList* colors, char* name) {
 int color_load(char* name) {
   char filename[2048];
   char temp[2048];
-  GtkWidget* area;
   FILE* file;
   char* suffix;
   char* c;
   color_t* color;
   GdkColor gcolor;
   int def = 0;
+  GtkWidget* win = gui_get_main_win();
 
-  sprintf(filename, "%s/colors/%s", global.gdmap_home, name);
+  sprintf(filename, "%s/colors/%s", g_get_home_dir(), name);
 
   file = fopen(filename, "r");
   if (file == NULL) {
@@ -48,12 +59,11 @@ int color_load(char* name) {
     return 0;
   }
 
-  area = lookup_widget(global.win, "drawingarea1");
   while (fgets(temp, 1024, file)) {
     if (strlen(temp) <3) continue;
     if (temp[0] == '#') continue;
     temp[strlen(temp)-1] = 0;
-    if (!area->window) {
+    if (!win || !win->window) {
       printf("no window\n");
       continue;
     }
@@ -62,10 +72,10 @@ int color_load(char* name) {
     if (!suffix || ! c) continue;
     if (!strcasecmp(suffix, "Default")) def = 1;
     
-    color = (color_t*)malloc(sizeof(color_t));
-    color->suffix = strdup(suffix);
-    color->color = strdup(c);
-    color->gc = gdk_gc_new(area->window);
+    color = g_malloc(sizeof(color_t));
+    color->suffix = g_strdup(suffix);
+    color->color = g_strdup(c);
+    color->gc = gdk_gc_new(win->window);
     gdk_color_parse(c, &gcolor);
     gdk_colormap_alloc_color(gdk_rgb_get_cmap (), &gcolor, FALSE, FALSE);
     gdk_gc_set_foreground(color->gc, &gcolor);
@@ -73,20 +83,20 @@ int color_load(char* name) {
 	!strcasecmp(suffix, "color2")) {
       gdk_gc_set_function(color->gc, GDK_XOR);
     }
-    global.colors = g_list_append(global.colors, color);
+    Colors = g_list_append(Colors, color);
   }
 
   fclose(file);
 
   if (!def) {
-    color = (color_t*)malloc(sizeof(color_t));
-    color->suffix = strdup("Default");
-    color->color = strdup("#aaaaaa");
-    color->gc = gdk_gc_new(area->window);
+    color = g_malloc(sizeof(color_t));
+    color->suffix = g_strdup("Default");
+    color->color = g_strdup("#aaaaaa");
+    color->gc = gdk_gc_new(win->window);
     gdk_color_parse(color->color, &gcolor);
     gdk_colormap_alloc_color(gdk_rgb_get_cmap (), &gcolor, FALSE, FALSE);
     gdk_gc_set_foreground(color->gc, &gcolor);
-    global.colors = g_list_append(global.colors, color);
+    Colors = g_list_append(Colors, color);
   }
 
   return 1;
@@ -95,7 +105,6 @@ int color_load(char* name) {
 #define N_COL  25
 
 void color_create_default() {
-  GtkWidget* area;
   color_t* color;
   GdkColor gcolor;
   int i1;
@@ -126,21 +135,20 @@ void color_create_default() {
     {"EXE", "#FF00FF"},
     {"DLL", "#DD00DD"}
   };
-
-  area = lookup_widget(global.win, "drawingarea1");
+  GtkWidget* win = gui_get_main_win();
 
   for (i1 = 0; i1 < N_COL; i1++) {
-    color = (color_t*)malloc(sizeof(color_t));
-    color->suffix = strdup(dcolors[i1][0]);
-    color->color = strdup(dcolors[i1][1]);
-    color->gc = gdk_gc_new(area->window);
+    color = g_malloc(sizeof(color_t));
+    color->suffix = g_strdup(dcolors[i1][0]);
+    color->color = g_strdup(dcolors[i1][1]);
+    color->gc = gdk_gc_new(win->window);
     gdk_colormap_alloc_color(gdk_rgb_get_cmap(), &gcolor, FALSE, FALSE);
     gdk_gc_set_foreground(color->gc, &gcolor);
     if (!strcasecmp(dcolors[i1][0], "color1") ||
 	!strcasecmp(dcolors[i1][0], "color2")) {
       gdk_gc_set_function(color->gc, GDK_XOR);
     }
-    global.colors = g_list_append(global.colors, color);
+    Colors = g_list_append(Colors, color);
   }
 }
 
@@ -153,8 +161,8 @@ color_t* color_search(char* filename) {
   suffix = strrchr(filename, '.');
   if (suffix) suffix++;
 
-  for (dlist = global.colors; dlist; dlist = dlist->next) {
-    color = (color_t*)(dlist->data);
+  for (dlist = Colors; dlist; dlist = dlist->next) {
+    color = dlist->data;
     if (suffix)
       if (!strcasecmp(color->suffix, suffix)) return color;
     if (!strcasecmp(color->suffix, "Default")) temp = color;

@@ -57,23 +57,27 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
 CC = @CC@
-GTK_CFLAGS = @GTK_CFLAGS@
-GTK_CONFIG = @GTK_CONFIG@
-GTK_LIBS = @GTK_LIBS@
+MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
+PKG_CONFIG = @PKG_CONFIG@
+RANLIB = @RANLIB@
+UI_CFLAGS = @UI_CFLAGS@
+UI_LIBS = @UI_LIBS@
 VERSION = @VERSION@
 
-INCLUDES =  	@GTK_CFLAGS@
+INCLUDES =  	-DPACKAGE_DATA_DIR=\""$(datadir)"\" 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" 	@UI_CFLAGS@
 
 
 bin_PROGRAMS = gdmap
 
-gdmap_SOURCES =  	main.c 	support.c support.h 	interface.c interface.h 	callbacks.c callbacks.h 	global.c global..h 	tree.c tree.h 	colors.c colors.h 	dirselect.c dirselect.h
+gdmap_SOURCES =  	main.c 	gui_main.c 	dirselect.c 	global.c 	colors.c 	tree.c
 
 
-gdmap_LDADD = @GTK_LIBS@
+gdmap_LDADD = @UI_LIBS@
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -84,8 +88,7 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-gdmap_OBJECTS =  main.o support.o interface.o callbacks.o global.o \
-tree.o colors.o dirselect.o
+gdmap_OBJECTS =  main.o gui_main.o dirselect.o global.o colors.o tree.o
 gdmap_DEPENDENCIES = 
 gdmap_LDFLAGS = 
 CFLAGS = @CFLAGS@
@@ -97,18 +100,17 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
-DEP_FILES =  .deps/callbacks.P .deps/colors.P .deps/dirselect.P \
-.deps/global.P .deps/interface.P .deps/main.P .deps/support.P \
-.deps/tree.P
+DEP_FILES =  .deps/colors.P .deps/dirselect.P .deps/global.P \
+.deps/gui_main.P .deps/main.P .deps/tree.P
 SOURCES = $(gdmap_SOURCES)
 OBJECTS = $(gdmap_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
 .SUFFIXES: .S .c .o .s
-$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
@@ -203,7 +205,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \

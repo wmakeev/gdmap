@@ -1,10 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = src
+SUBDIRS = src po
 
-EXTRA_DIST = \
-	autogen.sh \
-	gdmap.glade
+EXTRA_DIST = autogen.sh
 
 install-data-local:
 	@$(NORMAL_INSTALL)
