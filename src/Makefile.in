@@ -70,7 +70,7 @@ INCLUDES =  	@GTK_CFLAGS@
 
 bin_PROGRAMS = gdmap
 
-gdmap_SOURCES =  	main.c 	support.c support.h 	interface.c interface.h 	callbacks.c callbacks.h 	global.c global..h 	tree.c tree.h 	colors.c colors.h
+gdmap_SOURCES =  	main.c 	support.c support.h 	interface.c interface.h 	callbacks.c callbacks.h 	global.c global..h 	tree.c tree.h 	colors.c colors.h 	dirselect.c dirselect.h
 
 
 gdmap_LDADD = @GTK_LIBS@
@@ -85,7 +85,7 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 gdmap_OBJECTS =  main.o support.o interface.o callbacks.o global.o \
-tree.o colors.o
+tree.o colors.o dirselect.o
 gdmap_DEPENDENCIES = 
 gdmap_LDFLAGS = 
 CFLAGS = @CFLAGS@
@@ -99,8 +99,9 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/callbacks.P .deps/colors.P .deps/global.P \
-.deps/interface.P .deps/main.P .deps/support.P .deps/tree.P
+DEP_FILES =  .deps/callbacks.P .deps/colors.P .deps/dirselect.P \
+.deps/global.P .deps/interface.P .deps/main.P .deps/support.P \
+.deps/tree.P
 SOURCES = $(gdmap_SOURCES)
 OBJECTS = $(gdmap_OBJECTS)
 

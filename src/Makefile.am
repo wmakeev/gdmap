@@ -12,7 +12,8 @@ gdmap_SOURCES = \
 	callbacks.c callbacks.h \
 	global.c global..h \
 	tree.c tree.h \
-	colors.c colors.h
+	colors.c colors.h \
+	dirselect.c dirselect.h
 
 gdmap_LDADD = @GTK_LIBS@
 

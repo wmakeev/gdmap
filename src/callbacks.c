@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <gtk/gtk.h>
 
+#include "dirselect.h"
 #include "callbacks.h"
 #include "interface.h"
 #include "support.h"
@@ -38,16 +39,24 @@ on_main_win_delete_event               (GtkWidget       *widget,
 }
 
 
+void on_dir_select(gchar* dir) {
+  GtkWidget* temp;
+  
+  temp = lookup_widget(global.win, "combo_entry1");
+  if (dir) {
+    gtk_entry_set_text(GTK_ENTRY(temp), dir);
+  }
+}
+
 void
 on_button3_clicked                     (GtkButton       *button,
                                         gpointer         user_data)
 {
-  GtkWidget* entry;
-  char* text;
+  GtkWidget* win;
 
-  entry = lookup_widget(global.win, "combo_entry1");
-  text = gtk_entry_get_text(GTK_ENTRY(entry));
-  dir_tree_show(text);
+  win = create_dir_browser("Select Directory", NULL, 
+                           GTK_SELECTION_SINGLE, on_dir_select);
+  gtk_widget_show(win);
 }
 
 
@@ -97,31 +106,10 @@ on_combo_entry1_changed                (GtkEditable     *editable,
                                         gpointer         user_data)
 {
   char* text;
-  dir_tree_t* tree;
 
   text = gtk_entry_get_text(GTK_ENTRY(editable));
 
-  tree = dir_tree_search(text);
-  if (!tree) return;
-
-  if (tree != global.current_tree) dir_tree_display(tree);
-}
-
-
-void
-on_combo_entry2_changed                (GtkEditable     *editable,
-                                        gpointer         user_data)
-{
-  char* text;
-
-  text = gtk_entry_get_text(GTK_ENTRY(editable));
-  if (!strcasecmp(text, "simple")) global.paint_mode = P_SIMPLE;
-  else if (!strcasecmp(text, "3d")) global.paint_mode = P_3D;
-  else if (!strcasecmp(text, "gradient")) global.paint_mode = P_GRADIENT;
-  else if (!strcasecmp(text, "cushion")) global.paint_mode = P_CUSHION;
-  else global.paint_mode = P_SIMPLE;
-
-  dir_tree_display(global.current_tree);
+  dir_tree_show(text);
 }
 
 

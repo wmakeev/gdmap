@@ -3,3 +3,4 @@
  */
 
 GtkWidget* create_main_win (void);
+GtkWidget* create_window1 (void);

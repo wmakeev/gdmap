@@ -30,9 +30,5 @@ on_combo_entry1_changed                (GtkEditable     *editable,
                                         gpointer         user_data);
 
 void
-on_combo_entry2_changed                (GtkEditable     *editable,
-                                        gpointer         user_data);
-
-void
 on_spinbutton1_changed                 (GtkEditable     *editable,
                                         gpointer         user_data);

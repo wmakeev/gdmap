@@ -109,6 +109,10 @@ void dir_tree_setup_popdown() {
   GList* dlist;
   dir_tree_t* tree;
   GtkWidget* temp;
+  char* text;
+
+  temp = lookup_widget(global.win, "combo_entry1");
+  text = strdup(gtk_entry_get_text(GTK_ENTRY(temp)));
 
   for (dlist = global.trees; dlist; dlist = dlist->next) {
     tree = (dir_tree_t*)(dlist->data);
@@ -124,6 +128,10 @@ void dir_tree_setup_popdown() {
     free(dlist->data);
   }
   if (pop) g_list_free(pop);
+
+  temp = lookup_widget(global.win, "combo_entry1");
+  gtk_entry_set_text(GTK_ENTRY(temp), text);
+  free(text);
 }
 
 dir_tree_t* dir_tree_read(char* name) {
@@ -325,6 +333,13 @@ void dir_tree_display_rec(GtkWidget* area, dir_tree_t* tree,
     if (d == X) d = Y;
     else d = X;
 
+    /*
+    new_r[X][Min] += 1;
+    new_r[X][Max] -= 1;
+    new_r[Y][Min] += 1;
+    new_r[Y][Max] -= 1;
+    */
+
     if (tree->size)
       w = (new_r[d][Max] - new_r[d][Min])/tree->size;
     else w = 0;
@@ -372,15 +387,14 @@ void dir_tree_display(dir_tree_t* tree) {
     r[X][Max] = (double)(area->allocation.width);
     r[Y][Max] = (double)(area->allocation.height);
 
-    printf("*** [%.1f %.1f %.1f %.1f]\n",
-	   r[0][0],r[1][0],r[0][1],r[1][1]);
-
     /*
     gtk_paint_box(area->style, area->window,
 		  GTK_STATE_NORMAL, GTK_SHADOW_NONE,
 		  NULL, area, "trough",
-		  alloc.x, alloc.y, alloc.width, alloc.height);
+		  0, 0, area->allocation.width,
+		  area->allocation.height);
     */
+
     //  dir_tree_drec(tree, 0);
     s[X][0] = s[X][1] = s[Y][0] = s[Y][1] = 0;
     dir_tree_display_rec(area, tree, r, 0.7, 1.0, (tree->depth%2)?X:Y, s);
@@ -444,6 +458,10 @@ void dir_tree_unmark2(GtkWidget* area, dir_tree_t* tree) {
 		     tree->geo[X][Min],tree->geo[Y][Min],
 		     tree->geo[X][Max]-tree->geo[X][Min],
 		     tree->geo[Y][Max]-tree->geo[Y][Min]);
+  gdk_draw_rectangle(area->window, color->gc, 0,
+		     tree->geo[X][Min]-1,tree->geo[Y][Min]-1,
+		     tree->geo[X][Max]-tree->geo[X][Min]+2,
+		     tree->geo[Y][Max]-tree->geo[Y][Min]+2);
   global.mark2 = NULL;
 }
 
@@ -483,6 +501,10 @@ void dir_tree_mark2(GtkWidget* area, dir_tree_t* tree) {
 		     tree->geo[X][Min],tree->geo[Y][Min],
 		     tree->geo[X][Max]-tree->geo[X][Min],
 		     tree->geo[Y][Max]-tree->geo[Y][Min]);
+  gdk_draw_rectangle(area->window, color->gc, 0,
+		     tree->geo[X][Min]-1,tree->geo[Y][Min]-1,
+		     tree->geo[X][Max]-tree->geo[X][Min]+2,
+		     tree->geo[Y][Max]-tree->geo[Y][Min]+2);
 
   if (tree != global.mark2) {
     temp = lookup_widget(global.win, "entry2");
