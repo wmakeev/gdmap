@@ -82,6 +82,8 @@ gui_show_pix(GtkWidget* area) {
 		       0, 0, Width, Height,
 		       GDK_RGB_DITHER_NONE,
 		       Buffer, Width*3);
+    Mark1 = NULL;
+    Mark2 = NULL;
   }
 }
 
@@ -112,7 +114,8 @@ gui_tree_mark1(tree_t* tree) {
 		     tree->geo[0][1]-tree->geo[0][0]-1,
 		     tree->geo[1][1]-tree->geo[1][0]-1);
   if (tree != Mark1) {
-    gtk_label_set_text(GTK_LABEL(FileLabel), tree_full_name(tree));
+    gtk_label_set_text(GTK_LABEL(FileLabel), 
+		       to_utf8(tree_full_name(tree)));
     gtk_label_set_text(GTK_LABEL(FileSize), size_format(tree->size));
     gtk_label_set_text(GTK_LABEL(FilePer), 
 		       per_format(tree->size, CurrentTree->size));
@@ -141,7 +144,8 @@ void gui_tree_mark2(tree_t* tree) {
 		     tree->geo[1][1]-tree->geo[1][0]+1);
 
   if (tree != Mark2) {
-    gtk_label_set_text(GTK_LABEL(DirLabel), tree_full_name(tree));
+    gtk_label_set_text(GTK_LABEL(DirLabel), 
+		       to_utf8(tree_full_name(tree)));
     gtk_label_set_text(GTK_LABEL(DirSize), size_format(tree->size));
     gtk_label_set_text(GTK_LABEL(DirPer), 
 		       per_format(tree->size, CurrentTree->size));
@@ -405,6 +409,7 @@ static GtkWidget* gui_create_info_box() {
   gtk_container_add(GTK_CONTAINER(frame), label);
   gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
   gtk_misc_set_padding(GTK_MISC(label), 5, 0);
+  gtk_widget_set_size_request(label, 10, -1);
 
   vbox = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox);
@@ -453,13 +458,13 @@ static GtkWidget* gui_create_info_box() {
 
   frame = gtk_frame_new(NULL);
   gtk_widget_show (frame);
+  gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_ETCHED_OUT);
   label = gtk_label_new("");
   DirPer = label;
   gtk_widget_show (label);
   gtk_container_add(GTK_CONTAINER(frame), label);
   gtk_misc_set_padding(GTK_MISC(label), 5, 2);
   gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-  gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_ETCHED_OUT);
   
   gtk_table_attach (GTK_TABLE (table), frame, 1, 2, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
@@ -467,13 +472,14 @@ static GtkWidget* gui_create_info_box() {
 
   frame = gtk_frame_new(NULL);
   gtk_widget_show (frame);
+  gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_ETCHED_OUT);
   label = gtk_label_new("");
   DirLabel = label;
   gtk_widget_show (label);
   gtk_container_add(GTK_CONTAINER(frame), label);
   gtk_misc_set_padding(GTK_MISC(label), 5, 2);
   gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-  gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_ETCHED_OUT);
+  gtk_widget_set_size_request(label, 10, -1);
 
   gtk_table_attach (GTK_TABLE (table), frame, 2, 3, 1, 2,
                     (GtkAttachOptions) (GTK_FILL|GTK_EXPAND),
@@ -510,13 +516,14 @@ static GtkWidget* gui_create_info_box() {
 
   frame = gtk_frame_new(NULL);
   gtk_widget_show (frame);
+  gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_ETCHED_OUT);
   label = gtk_label_new("");
   FileLabel = label;
   gtk_widget_show (label);
   gtk_container_add(GTK_CONTAINER(frame), label);
   gtk_misc_set_padding(GTK_MISC(label), 5, 2);
   gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-  gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_ETCHED_OUT);
+  gtk_widget_set_size_request(label, 10, -1);
 
   gtk_table_attach (GTK_TABLE (table), frame, 2, 3, 2, 3,
                     (GtkAttachOptions) (GTK_FILL|GTK_EXPAND),
@@ -695,10 +702,8 @@ void gui_tree_display(tree_t* tree) {
   //  gtk_entry_set_text(GTK_ENTRY(tree_name), tree_full_name(tree));
   gui_show_pix(Area);
 
-  Mark1 = NULL;
-  Mark2 = NULL;
-
-  gtk_label_set_text(GTK_LABEL(TreeLabel), tree_full_name(tree));
+  gtk_label_set_text(GTK_LABEL(TreeLabel), 
+		     to_utf8(tree_full_name(tree)));
   gtk_label_set_text(GTK_LABEL(TreeSize), size_format(tree->size));
   gtk_label_set_text(GTK_LABEL(TreePer), 
 		     per_format(tree->size, CurrentTree->size));

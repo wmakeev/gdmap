@@ -17,6 +17,7 @@ char* arg(char* data, int last);
 void create_dir(char* dir);
 char* size_format(gint64 size);
 char* per_format(gint64 size1, gint64 size2);
+char* to_utf8(const char* str);
 
 
 #endif

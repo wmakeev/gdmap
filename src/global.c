@@ -124,15 +124,10 @@ char* per_format(gint64 size1, gint64 size2) {
   return str;
 }
 
-/*
-int expose_timeout_cb(gpointer data) {
-  if (global.expose_timer >= 0) {
-    gtk_timeout_remove(global.expose_timer);
-    global.expose_timer = -1;
-  }
-  dir_tree_display(global.current_tree);
-
-  return 0;
+char* to_utf8(const char* str) {
+  static char* result = NULL;
+  
+  if (result) g_free(result);
+  result = g_locale_to_utf8(str, -1, NULL, NULL, NULL);
+  return result;
 }
- 
-*/
