@@ -82,7 +82,7 @@ on_drawingarea1_button_press_event     (GtkWidget       *widget,
   if (sub_tree) {
     dir_tree_mark(sub_tree);
     if (event->button == 3) {
-      pop = create_right_popup(global.current_tree);
+      pop = create_right_popup(sub_tree);
       gtk_menu_popup(GTK_MENU(pop), NULL, NULL, NULL, NULL,
 		     event->button, event->time);
     }

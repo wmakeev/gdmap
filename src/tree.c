@@ -10,17 +10,16 @@
 #include "support.h"
 #include "colors.h"
 
-dir_tree_t* dir_tree_new(char* lname, char* sname, int is_dir) {
+dir_tree_t* dir_tree_new(char* sname, int is_dir) {
   dir_tree_t* result;
   char str[2048];
 
-  strcpy(str, lname);
+  strcpy(str, sname);
   if (is_dir)
     if (str[strlen(str)-1] != '/') strcat(str, "/");
 
   result = (dir_tree_t*)malloc(sizeof(dir_tree_t));
-  result->full_name = strdup(str);
-  result->name = strdup(sname);
+  result->name = strdup(str);
   result->size = 0;
   result->dir_size = 0;
   result->entries = NULL;
@@ -45,7 +44,6 @@ void dir_tree_destroy(dir_tree_t* tree) {
     }
     g_list_free(tree->entries);
   }
-  if (tree->full_name) free(tree->full_name);
   if (tree->name) free(tree->name);
   free(tree);
 }
@@ -58,27 +56,30 @@ dir_tree_t* dir_tree_rec(char* dirname, char* shortname, int depth) {
   dir_tree_t* result = NULL;
   dir_tree_t* tree = NULL;
   
-  lstat(dirname, &buf);
+  if (lstat(dirname, &buf) < 0) return NULL;
   if (buf.st_mode&S_IFDIR) {
-    result = dir_tree_new(dirname, shortname, 1);
+    result = dir_tree_new(shortname, 1);
     result->dir_size += buf.st_size;
   } else {
-    result = dir_tree_new(dirname, shortname, 0);
+    result = dir_tree_new(shortname, 0);
     result->size += buf.st_size;
+    //    printf("[%s][%lu]\n", dirname, result->size);
     return result;
   }
   result->depth = depth;
 
-  if ((dir = opendir(result->full_name)) == NULL) {
-    printf("could not open dir [%s] (add_shared)\n", result->full_name);
-    return 0;
+  if ((dir = opendir(dirname)) == NULL) {
+    printf("could not open dir [%s][%s] (add_shared)\n", 
+	   dirname, shortname);
+    return NULL;
   }
 
   while ((entry = readdir(dir)) != NULL) {
     if (!strcmp(entry->d_name, ".")) continue;
     if (!strcmp(entry->d_name, "..")) continue;
     
-    strcpy(name, result->full_name);
+    strcpy(name, dirname);
+    if (name[strlen(name)-1] != '/') strcat(name, "/");
     strcat(name, entry->d_name);
     tree = dir_tree_rec(name, entry->d_name, depth+1);
     
@@ -101,18 +102,18 @@ void dir_tree_setup_popdown() {
 
   for (dlist = global.trees; dlist; dlist = dlist->next) {
     tree = (dir_tree_t*)(dlist->data);
-    pop = g_list_append(pop, strdup(tree->full_name));
+    pop = g_list_append(pop, strdup(dir_tree_full_name(tree)));
   }
 
   temp = lookup_widget(global.win, "combo1");
   if (pop && temp) {
     gtk_combo_set_popdown_strings (GTK_COMBO (temp), pop);
   }
-
+  
   for (dlist = pop; dlist; dlist = dlist->next) {
     free(dlist->data);
   }
-  g_list_free(pop);
+  if (pop) g_list_free(pop);
 }
 
 dir_tree_t* dir_tree_read(char* name) {
@@ -132,7 +133,7 @@ dir_tree_t* dir_tree_search(char* name) {
 
   for (dlist = global.trees; dlist; dlist = dlist->next) {
     tree = (dir_tree_t*)(dlist->data);
-    if (!strcmp(tree->full_name, name)) return tree;
+    if (!strcmp(dir_tree_full_name(tree), name)) return tree;
   }
   return NULL;
 }
@@ -239,7 +240,7 @@ void dir_tree_display_file(GtkWidget* area, dir_tree_t* tree) {
   long pos;
 
   if (tree->entries) color = color_search(".dir");
-  else color = color_search(tree->full_name);
+  else color = color_search(tree->name);
 
   if (global.paint_mode == P_3D) {
     gdk_color_parse(color->color, &gcolor);
@@ -323,7 +324,7 @@ void dir_tree_display_rec(dir_tree_t* tree, GtkWidget* area,
   dir_tree_t* sub_tree;
   GtkAllocation alloc2;
   int x1, x2;
-  long size;
+  guint64 size;
 
   /*
   printf("display [%s] at [%d %d %d %d] [%ld]\n", tree->full_name,
@@ -478,7 +479,7 @@ void dir_tree_mark1(GtkWidget* area, dir_tree_t* tree, dir_tree_t*  parent) {
   global.mark = tree;
   
   temp = lookup_widget(global.win, "entry1");
-  gtk_entry_set_text(GTK_ENTRY(temp), tree->full_name);
+  gtk_entry_set_text(GTK_ENTRY(temp), dir_tree_full_name(tree));
   temp = lookup_widget(global.win, "label12");
   str = size_format(tree->size);
   gtk_label_set_text(GTK_LABEL(temp), str);
@@ -506,7 +507,7 @@ void dir_tree_mark2(GtkWidget* area, dir_tree_t* tree) {
   
   if (tree != global.mark2) {
     temp = lookup_widget(global.win, "entry2");
-    gtk_entry_set_text(GTK_ENTRY(temp), tree->full_name);
+    gtk_entry_set_text(GTK_ENTRY(temp), dir_tree_full_name(tree));
     temp = lookup_widget(global.win, "label3");
     str = size_format(tree->size);
     gtk_label_set_text(GTK_LABEL(temp), str);
@@ -543,25 +544,33 @@ void dir_tree_mark(dir_tree_t* sub_tree) {
 void dir_tree_refresh(dir_tree_t* tree) {
   dir_tree_t* parent;
   dir_tree_t* new_tree;
+  dir_tree_t* temp;
+  char str[2048];
 
   if (!tree) return;
   parent = tree->parent;
 
   if (parent) {
     parent->entries = g_list_remove(parent->entries, tree);
-    parent->size -= tree->size;
-    //    parent->dir_size -= tree->dir_size;
-    new_tree = dir_tree_rec(tree->full_name, tree->name, tree->depth);
+    for (temp = parent; temp; temp = temp->parent) {
+      temp->size -= tree->size;
+      //    temp->dir_size -= tree->dir_size;
+    }
+    new_tree = dir_tree_rec(dir_tree_full_name(tree), tree->name, tree->depth);
     dir_tree_destroy(tree);
     if (new_tree) {
-      parent->size += new_tree->size;
+      for (temp = parent; temp; temp = temp->parent) {
+	temp->size += new_tree->size;
+      }
       parent->entries = g_list_append(parent->entries, new_tree);
       new_tree->parent = parent;
       dir_tree_display(new_tree);
     }
   } else {
-    new_tree = dir_tree_read(tree->full_name);
+    strcpy(str, dir_tree_full_name(tree));
     dir_tree_destroy(tree);
+    global.trees = g_list_remove(global.trees, tree);
+    new_tree = dir_tree_read(str);
     if (new_tree) dir_tree_display(new_tree);
   }
 }
@@ -572,20 +581,16 @@ void on_level_down (GtkMenuItem     *menuitem,
   dir_tree_t* dir = (dir_tree_t*)user_data;
   dir_tree_t* sub_tree;
 
-  sub_tree = dir_tree_find_path(dir, global.mark);
-  if (sub_tree) {
-    dir_tree_display(sub_tree);
-  }
+  sub_tree = dir_tree_find_path(global.current_tree, dir);
+  if (sub_tree) dir_tree_display(sub_tree);
 }
 
 void on_level_up (GtkMenuItem     *menuitem, gpointer         user_data)
 {
-  dir_tree_t* dir = (dir_tree_t*)user_data;
+  if (!global.current_tree) return;
+  if (!global.current_tree->parent) return;
 
-  if (!dir) return;
-  if (!dir->parent) return;
-
-  dir_tree_display(dir->parent);
+  dir_tree_display(global.current_tree->parent);
 }
 
 void on_level_root (GtkMenuItem     *menuitem, gpointer         user_data)
@@ -596,14 +601,25 @@ void on_level_root (GtkMenuItem     *menuitem, gpointer         user_data)
   if (!dir) return;
 
   root = dir_tree_get_root(dir);
-  if (dir != root) dir_tree_display(root);
+  if (global.current_tree != root) dir_tree_display(root);
 }
 
 void on_refresh (GtkMenuItem     *menuitem, gpointer         user_data) {
-  dir_tree_t* dir = (dir_tree_t*)user_data;
+  if (!global.current_tree) return;
+  dir_tree_refresh(global.current_tree);
+}
 
-  if (!dir) return;
-  dir_tree_refresh(dir);
+void on_delete (GtkMenuItem     *menuitem, gpointer         user_data) {
+  dir_tree_t* dir = (dir_tree_t*)user_data;
+  char str[2048];
+
+  if (dir->entries) {
+    snprintf(str, 2047, "rm -r \"%s\"", dir_tree_full_name(dir));
+    system(str);
+  } else {
+    unlink(dir_tree_full_name(dir));
+  }
+  on_refresh(NULL, NULL);
 }
 
 
@@ -612,6 +628,11 @@ GtkWidget* create_right_popup(dir_tree_t* current) {
   GtkAccelGroup *popup_accels;
   GtkWidget *item;
   GtkWidget *separator;
+  GtkWidget *menu;
+  dir_tree_t* c;
+
+  c = global.current_tree;
+  if (!c) return NULL;
 
   popup = gtk_menu_new ();
   popup_accels = gtk_menu_ensure_uline_accel_group (GTK_MENU (popup));
@@ -622,7 +643,7 @@ GtkWidget* create_right_popup(dir_tree_t* current) {
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC (on_level_root),
                       (gpointer)current);
-  if (!current->parent)
+  if (!c->parent)
     gtk_widget_set_sensitive(item, FALSE);
   
   separator = gtk_menu_item_new ();
@@ -637,7 +658,7 @@ GtkWidget* create_right_popup(dir_tree_t* current) {
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC (on_level_up),
                       (gpointer)current);
-  if (!current->parent)
+  if (!c->parent)
     gtk_widget_set_sensitive(item, FALSE);
   
   item = gtk_menu_item_new_with_label ("One Level Down");
@@ -646,7 +667,7 @@ GtkWidget* create_right_popup(dir_tree_t* current) {
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC (on_level_down),
                       (gpointer)current);
-  if (!current->entries)
+  if (!c->entries)
     gtk_widget_set_sensitive(item, FALSE);
   
   separator = gtk_menu_item_new ();
@@ -660,5 +681,38 @@ GtkWidget* create_right_popup(dir_tree_t* current) {
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC (on_refresh),
                       (gpointer)current);
+
+  separator = gtk_menu_item_new ();
+  gtk_widget_show (separator);
+  gtk_container_add (GTK_CONTAINER (popup), separator);
+  gtk_widget_set_sensitive (separator, FALSE);
+
+  item = gtk_menu_item_new_with_label ("Delete");
+  gtk_widget_show (item);
+  gtk_container_add (GTK_CONTAINER (popup), item);
+
+  menu = gtk_menu_new ();
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), menu);
+  for (; current; current = current->parent) {
+    item = gtk_menu_item_new_with_label (dir_tree_full_name(current));
+    gtk_widget_show (item);
+    gtk_container_add (GTK_CONTAINER (menu), item);
+    gtk_signal_connect (GTK_OBJECT (item), "activate",
+			GTK_SIGNAL_FUNC (on_delete),
+			(gpointer)current);
+  }
   return popup;
+}
+
+char* dir_tree_full_name(dir_tree_t* tree) {
+  static char dir[4096];
+
+  if (tree->parent) {
+    strcpy(dir, dir_tree_full_name(tree->parent));
+    strcat(dir, tree->name);
+  } else {
+    strcpy(dir, tree->name);
+  }
+
+  return dir;
 }
