@@ -10,6 +10,16 @@
 #include "support.h"
 #include "colors.h"
 
+typedef enum {
+  X = 0,
+  Y = 1
+} dir_t;
+
+typedef enum {
+  Min = 0,
+  Max = 1
+} bound_t;
+
 dir_tree_t* dir_tree_new(char* sname, int is_dir) {
   dir_tree_t* result;
   char str[2048];
@@ -229,139 +239,104 @@ double cfunc2(int x, int y, int width, int height) {
   return (x1+x2)/2;
 }
 
-void dir_tree_display_file(GtkWidget* area, dir_tree_t* tree) {
-  color_t* color;
-  int red, green, blue;
-  char* scolor;
-  int i1, i2;
-  GdkColor gcolor;
-  int x;
-  double val;
+void dir_tree_display_file(GtkWidget* area, dir_tree_t* tree,
+			   double r[2][2], double s[2][2]) {
+  static int Ia = 40;
+  static int Is = 215;
+  static double Lx = 0.09759;
+  static double Ly = 0.19518;
+  static double Lz = 0.9759;
+  int ix, iy;
+  double nx, ny, cosa, val;
+  int x1, y1, x2, y2;
+  int width, height;
   long pos;
+  int red, green, blue;
+  color_t* color;
 
-  if (tree->entries) color = color_search(".dir");
-  else color = color_search(tree->name);
+  x1 = (int)(r[X][Min]+0.5);
+  y1 = (int)(r[Y][Min]+0.5);
+  x2 = (int)(r[X][Max]+0.5);
+  y2 = (int)(r[Y][Max]+0.5);
 
-  if (global.paint_mode == P_3D) {
-    gdk_color_parse(color->color, &gcolor);
-    gdk_colormap_alloc_color(gdk_rgb_get_cmap (), &gcolor, FALSE, FALSE);
-    gdk_gc_set_foreground(color->gc, &gcolor);
+  width = x2 - x1 +1;
+  height = y2 - y1 +1;
+  if (width + height == 0) return;
 
-    gdk_draw_rectangle(area->window, area->style->white_gc, 0,
-		       tree->geo.x, tree->geo.y, 
-		       tree->geo.width-1, tree->geo.height-1);
-    if ((tree->geo.width > 2) && (tree->geo.height > 2))
-      gdk_draw_rectangle(area->window, area->style->black_gc, 0,
-			 tree->geo.x+1, tree->geo.y+1, 
-			 tree->geo.width-2, tree->geo.height-2);
-    if ((tree->geo.width > 3) && (tree->geo.height > 3))
-      gdk_draw_rectangle(area->window, color->gc, 1,
-			 tree->geo.x+1, tree->geo.y+1, 
-			 tree->geo.width-3, tree->geo.height-3);
-  } else if (global.paint_mode == P_GRADIENT) {
+  if (!tree->buf || (tree->width != width) ||
+      (tree->height != height)) {
+    tree->width = width;
+    tree->height = height;
+    if (tree->buf) free(tree->buf);
+    tree->buf = malloc(width * height * 3);
+
+    if (tree->entries) color = color_search(".dir");
+    else color = color_search(tree->name);
+
     extract_rgb(color->color, &red, &green, &blue);
-    if (tree->depth%2) x = tree->geo.width;
-    else x = tree->geo.height;
 
-    for (i1 = 0; i1 < x; i1++) {
-      scolor = calc_color(red, green, blue, (double)(i1+1)/(double)x);
-      gdk_color_parse(scolor, &gcolor);
-      gdk_colormap_alloc_color(gdk_rgb_get_cmap (), &gcolor, FALSE, FALSE);
-      gdk_gc_set_foreground(color->gc, &gcolor);
-      if (tree->depth%2) {
-	gdk_draw_line(area->window, color->gc,
-		      tree->geo.x+i1, tree->geo.y, 
-		      tree->geo.x+i1, tree->geo.y+tree->geo.height);
-      } else {
-	gdk_draw_line(area->window, color->gc,
-		      tree->geo.x, tree->geo.y+i1, 
-		      tree->geo.x+tree->geo.width, tree->geo.y+i1);
+    pos = 0;
+    for (iy = y1; iy <= y2; iy++) 
+      for (ix = x1; ix <= x2; ix++) {
+	nx = -(2*s[X][1]*(ix+0.5)+s[X][0]);
+	ny = -(2*s[Y][1]*(iy+0.5)+s[Y][0]);
+	cosa = (nx*Lx + ny*Ly + Lz)/sqrt(nx*nx + ny*ny +1.0);
+	val = (Ia+MAX(0, Is*cosa));
+	tree->buf[pos++] = (int)(red*val/255.);
+	tree->buf[pos++] = (int)(green*val/255.);
+	tree->buf[pos++] = (int)(blue*val/255.);
       }
-    }
-  } else if (global.paint_mode == P_CUSHION) {
-    if (!tree->buf || (tree->geo.width != tree->width) ||
-	(tree->geo.height != tree->height)) {
-      extract_rgb(color->color, &red, &green, &blue);
-      
-      tree->width = tree->geo.width;
-      tree->height = tree->geo.height;
-
-      pos = 0;
-      if (tree->buf) free(tree->buf);
-      tree->buf = (char*)malloc(3*tree->width * tree->height);
-
-      for (i2 = 0; i2 < tree->height; i2++) {
-	for (i1 = 0; i1 < tree->width; i1++) {
-	  val = cfunc(i1+1, i2+1, tree->width, tree->height);
-	  tree->buf[pos++] = (int)(red*val);
-	  tree->buf[pos++] = (int)(green*val);
-	  tree->buf[pos++] = (int)(blue*val);
-	}
-      }
-    }
-    gdk_draw_rgb_image (area->window,
-			area->style->white_gc,
-			tree->geo.x, tree->geo.y, 
-			tree->width, tree->height,
-			GDK_RGB_DITHER_NONE,
-			tree->buf, tree->width*3);
-  } else {
-    gdk_color_parse(color->color, &gcolor);
-    gdk_colormap_alloc_color(gdk_rgb_get_cmap (), &gcolor, FALSE, FALSE);
-    gdk_gc_set_foreground(color->gc, &gcolor);
-    gdk_draw_rectangle(area->window, area->style->black_gc, 0,
-		       tree->geo.x, tree->geo.y, 
-		       tree->geo.width-1, tree->geo.height-1);
-    gdk_draw_rectangle(area->window, color->gc, 1,
-		       tree->geo.x+1, tree->geo.y+1, 
-		       tree->geo.width-1, tree->geo.height-1);
   }
+  gdk_draw_rgb_image (area->window,
+		      area->style->white_gc,
+		      x1, y1, width, height,
+		      GDK_RGB_DITHER_NONE,
+		      tree->buf, width*3);
+  
 }
 
-void dir_tree_display_rec(dir_tree_t* tree, GtkWidget* area,
-			  GtkAllocation alloc) {
+void AddRidge(double x1, double x2, double h, double* s1, double* s2) {
+  *s1 += 4*h*(x2+x1)/(x2-x1);
+  *s2 -= 4*h/(x2-x1);
+}
+
+
+void dir_tree_display_rec(GtkWidget* area, dir_tree_t* tree,
+			  double r[2][2], double h, double f,
+			  dir_t d, double s[2][2]) {
+  double w;
   GList* dlist;
   dir_tree_t* sub_tree;
-  GtkAllocation alloc2;
-  int x1, x2;
-  guint64 size;
-
+  double new_r[2][2];
+  double new_s[2][2];
+  
   /*
-  printf("display [%s] at [%d %d %d %d] [%ld]\n", tree->full_name,
-	 alloc.x, alloc.y, alloc.width, alloc.height, tree->size);
+  printf("display [%s] at [%.1f %.1f %.1f %.1f] [%lld]\n", dir_tree_full_name(tree),
+	 r[0][0],r[1][0],r[0][1],r[1][1], tree->size);
   */
-  tree->geo = alloc;
+  memcpy(new_r, r, sizeof(double)*4);
+  memcpy(new_s, s, sizeof(double)*4);
+  memcpy(tree->geo, r, sizeof(double)*4);
+
+  if (tree->parent) 
+    AddRidge(new_r[d][Min], new_r[d][Max], h, &(new_s[d][0]), &(new_s[d][1]));
+
   if (tree->entries && ((global.max_depth==0) || (tree->depth < global.max_depth))) {
-    if (tree->depth%2) {
-      alloc2.x = alloc.x;
-      alloc2.width = alloc.width;
-    } else {
-      alloc2.y = alloc.y;
-      alloc2.height = alloc.height;
-    }
-    x1 = 0;
-    size = 0;
+    if (d == X) d = Y;
+    else d = X;
+
+    if (tree->size)
+      w = (new_r[d][Max] - new_r[d][Min])/tree->size;
+    else w = 0;
+    
     for (dlist = tree->entries; dlist; dlist = dlist->next) {
       sub_tree = (dir_tree_t*)(dlist->data);
-      size += sub_tree->size;
-      if (tree->depth%2)
-	x2 = (int)(alloc.height * ((double)size/(double)tree->size));
-      else
-	x2 = (int)(alloc.width * ((double)size/(double)tree->size));
-      if (tree->depth%2) {
-	alloc2.y = alloc.y+x1;
-	alloc2.height = x2-x1;
-      } else {
-	alloc2.x = alloc.x+x1;
-	alloc2.width = x2-x1;
-      }
-      dir_tree_display_rec(sub_tree, area, alloc2);
-      x1 = x2;
+      new_r[d][Max] = new_r[d][Min] + w*sub_tree->size;
+      dir_tree_display_rec(area, sub_tree, new_r, h*f, f, d, new_s);
+      new_r[d][Min] = new_r[d][Max];
     }
   } else {
-    if ((alloc.width >= BORDER) && (alloc.height >= BORDER)) {
-      dir_tree_display_file(area, tree);
-    }
+    dir_tree_display_file(area, tree, new_r, new_s);
   }
 }
 
@@ -376,9 +351,10 @@ dir_tree_t* dir_tree_get_root(dir_tree_t* dir) {
 
 void dir_tree_display(dir_tree_t* tree) {
   GtkWidget* area;
-  GtkAllocation alloc;
   GtkWidget* temp;
   char* str;
+  double s[2][2];
+  double r[2][2];
 
   if (!tree) return;
   if (global.mark) global.mark = NULL;
@@ -391,16 +367,24 @@ void dir_tree_display(dir_tree_t* tree) {
   */
   if (tree) {
     area = lookup_widget(global.win, "drawingarea1");
-    alloc = area->allocation;
-    alloc.x = 0;
-    alloc.y = 0;
+    r[X][Min] = .0;
+    r[Y][Min] = .0;
+    r[X][Max] = (double)(area->allocation.width);
+    r[Y][Max] = (double)(area->allocation.height);
+
+    printf("*** [%.1f %.1f %.1f %.1f]\n",
+	   r[0][0],r[1][0],r[0][1],r[1][1]);
+
+    /*
     gtk_paint_box(area->style, area->window,
 		  GTK_STATE_NORMAL, GTK_SHADOW_NONE,
 		  NULL, area, "trough",
 		  alloc.x, alloc.y, alloc.width, alloc.height);
+    */
     //  dir_tree_drec(tree, 0);
-    dir_tree_display_rec(tree, area, alloc);
-
+    s[X][0] = s[X][1] = s[Y][0] = s[Y][1] = 0;
+    dir_tree_display_rec(area, tree, r, 0.7, 1.0, (tree->depth%2)?X:Y, s);
+    
     temp = lookup_widget(global.win, "label10");
     str = size_format(tree->size);
     gtk_label_set_text(GTK_LABEL(temp), str);
@@ -415,9 +399,8 @@ dir_tree_t* dir_tree_search_file(dir_tree_t* tree, int x, int y) {
 
   if (!tree) return NULL;
 
-  if ((x < tree->geo.x) || (y < tree->geo.y) ||
-      (x >= tree->geo.x + tree->geo.width) ||
-      (y >= tree->geo.y + tree->geo.height))
+  if ((x < tree->geo[X][Min]) || (y < tree->geo[Y][Min]) ||
+      (x >= tree->geo[X][Max]) || (y >= tree->geo[Y][Max]))
     return NULL;
 
   if (!global.max_depth || (global.max_depth > tree->depth)) {
@@ -428,9 +411,7 @@ dir_tree_t* dir_tree_search_file(dir_tree_t* tree, int x, int y) {
     }
   }
   
-  if ((tree->geo.width >= BORDER) && (tree->geo.height >= BORDER)) 
-    return tree;
-  else return NULL;
+  return tree;
 }
 
 dir_tree_t* dir_tree_find_path(dir_tree_t* root, dir_tree_t* child) {
@@ -449,8 +430,9 @@ void dir_tree_unmark1(GtkWidget* area, dir_tree_t* tree) {
 
   color = color_search(".color1");
   gdk_draw_rectangle(area->window, color->gc, 0,
-		     tree->geo.x, tree->geo.y,
-		     tree->geo.width-1, tree->geo.height-1);
+		     tree->geo[X][Min],tree->geo[Y][Min],
+		     tree->geo[X][Max]-tree->geo[X][Min],
+		     tree->geo[Y][Max]-tree->geo[Y][Min]);
   global.mark = NULL;
 }
 
@@ -459,11 +441,9 @@ void dir_tree_unmark2(GtkWidget* area, dir_tree_t* tree) {
 
   color = color_search(".color2");
   gdk_draw_rectangle(area->window, color->gc, 0,
-		     tree->geo.x, tree->geo.y,
-		     tree->geo.width-1, tree->geo.height-1);
-  gdk_draw_rectangle(area->window, color->gc, 0,
-		     tree->geo.x-1, tree->geo.y-1,
-		     tree->geo.width+1, tree->geo.height+1);
+		     tree->geo[X][Min],tree->geo[Y][Min],
+		     tree->geo[X][Max]-tree->geo[X][Min],
+		     tree->geo[Y][Max]-tree->geo[Y][Min]);
   global.mark2 = NULL;
 }
 
@@ -474,8 +454,9 @@ void dir_tree_mark1(GtkWidget* area, dir_tree_t* tree, dir_tree_t*  parent) {
 
   color = color_search(".color1");
   gdk_draw_rectangle(area->window, color->gc, 0,
-		     tree->geo.x, tree->geo.y,
-		     tree->geo.width-1, tree->geo.height-1);
+		     tree->geo[X][Min],tree->geo[Y][Min],
+		     tree->geo[X][Max]-tree->geo[X][Min],
+		     tree->geo[Y][Max]-tree->geo[Y][Min]);
   global.mark = tree;
   
   temp = lookup_widget(global.win, "entry1");
@@ -499,12 +480,10 @@ void dir_tree_mark2(GtkWidget* area, dir_tree_t* tree) {
 
   color = color_search(".color2");
   gdk_draw_rectangle(area->window, color->gc, 0,
-		     tree->geo.x, tree->geo.y,
-		     tree->geo.width-1, tree->geo.height-1);
-  gdk_draw_rectangle(area->window, color->gc, 0,
-		     tree->geo.x-1, tree->geo.y-1,
-		     tree->geo.width+1, tree->geo.height+1);
-  
+		     tree->geo[X][Min],tree->geo[Y][Min],
+		     tree->geo[X][Max]-tree->geo[X][Min],
+		     tree->geo[Y][Max]-tree->geo[Y][Min]);
+
   if (tree != global.mark2) {
     temp = lookup_widget(global.win, "entry2");
     gtk_entry_set_text(GTK_ENTRY(temp), dir_tree_full_name(tree));

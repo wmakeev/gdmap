@@ -7,7 +7,7 @@ struct _dir_tree_t {
   long dir_size;
   GList* entries;
   dir_tree_t* parent;
-  GtkAllocation geo;
+  double geo[2][2];
   int depth;
 
   int width;
