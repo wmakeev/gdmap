@@ -1,0 +1,11 @@
+For installation instructions please read INSTALL.
+
+This is the first release of gdmap. It only has a few features:
+
+*  You can setup colors for each filetype. For this you have to create the file
+   ~/.gdmap/colors/default
+   There is a sample file in the sources, Look for colors.sample
+
+Thats all for now.
+
+Sgop.
