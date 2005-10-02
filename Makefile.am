@@ -1,8 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = src po
+SUBDIRS = src po data
 
-EXTRA_DIST = autogen.sh
+EXTRA_DIST = autogen.sh ChangeLog intltool-extract.in intltool-merge.in intltool-update.in
 
 install-data-local:
 	@$(NORMAL_INSTALL)

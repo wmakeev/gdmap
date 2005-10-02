@@ -17,9 +17,7 @@ struct _color_t {
   GdkGC* gc;
 };
 
-void color_save(char* name);
-int color_load(char* name);
-void color_create_default();
+void colors_init();
 color_t* color_search(char* filename);
 
 #endif

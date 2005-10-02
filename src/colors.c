@@ -1,6 +1,11 @@
-/* Copyright (C) 2003 sgop@users.sourceforge.net
-   This is free software distributed under the terms of the
-   GNU Public License.  See the file COPYING for details. */
+/* Copyright (C) 2005 sgop@users.sourceforge.net This is free software
+ * distributed under the terms of the GNU Public License.  See the
+ * file COPYING for details.
+ */
+/* $Revision$
+ * $Date$
+ * $Author$
+ */
 
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
@@ -18,29 +23,24 @@
 
 static GList* Colors = NULL;
 
-void color_save(char* name) {
-  char filename[2048];
-  color_t* color;
-  GList* dlist;
-  FILE* file;
-  
-  sprintf(filename, "%s/colors/%s", 
-	  g_get_home_dir(), name);
-
-  file = fopen(filename, "w");
-  if (file == NULL) {
-    printf("Could not save colors!\n");
-    return;
+static void color_save(char* name) {
+  char* filename = g_strdup_printf("%s/.gdmap/%s", g_get_home_dir(), name);
+  FILE* file = fopen(filename, "w");
+  if (file) {
+    GList* dlist;
+    for (dlist = Colors; dlist; dlist = dlist->next) {
+      color_t* color = dlist->data;
+      fprintf(file, "%s %s\n", color->suffix, color->color);
+    }
+    fclose(file);
+  } else {
+    g_log("COLOR", G_LOG_LEVEL_WARNING,
+          "Could not save colors to '%s'", filename);
   }
-
-  for (dlist = Colors; dlist; dlist = dlist->next) {
-    color = (color_t*)(dlist->data);
-    fprintf(file, "%s %s\n", color->suffix, color->color);
-  }
-  fclose(file);
+  g_free(filename);
 }
 
-int color_load(char* name) {
+static int color_load(char* name) {
   char filename[2048];
   char temp[2048];
   FILE* file;
@@ -51,7 +51,7 @@ int color_load(char* name) {
   int def = 0;
   GtkWidget* win = gui_get_main_win();
 
-  sprintf(filename, "%s/colors/%s", g_get_home_dir(), name);
+  sprintf(filename, "%s/.gdmap/%s", g_get_home_dir(), name);
 
   file = fopen(filename, "r");
   if (file == NULL) {
@@ -104,7 +104,7 @@ int color_load(char* name) {
 
 #define N_COL  25
 
-void color_create_default() {
+static void color_create_default() {
   color_t* color;
   GdkColor gcolor;
   int i1;
@@ -163,10 +163,16 @@ color_t* color_search(char* filename) {
 
   for (dlist = Colors; dlist; dlist = dlist->next) {
     color = dlist->data;
-    if (suffix)
-      if (!strcasecmp(color->suffix, suffix)) return color;
+    if (suffix) if (!strcasecmp(color->suffix, suffix)) return color;
     if (!strcasecmp(color->suffix, "Default")) temp = color;
   }
 
   return temp;
+}
+
+void colors_init() {
+  if (!color_load("default.colors")) {
+    color_create_default();
+    color_save("default.colors");
+  }
 }

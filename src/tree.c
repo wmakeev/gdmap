@@ -1,6 +1,11 @@
-/* Copyright (C) 2003 sgop@users.sourceforge.net
-   This is free software distributed under the terms of the
-   GNU Public License.  See the file COPYING for details. */
+/* Copyright (C) 2005 sgop@users.sourceforge.net This is free software
+ * distributed under the terms of the GNU Public License.  See the
+ * file COPYING for details.
+ */
+/* $Revision$
+ * $Date$
+ * $Author$
+ */
 
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
@@ -13,26 +18,25 @@
 #include <stdio.h>
 #include <gtk/gtk.h>
 
+#include "global.h"
 #include "tree.h"
 #include "gui_main.h"
 
-tree_t* CurrentTree = NULL;
 int MaxDepth = 0;
 
-static void tree_print(tree_t* tree, int d) {
+static void tree_print(tree_t* tree) {
   GList* dlist;
-  printf("%*s%-20s [%4d,%4d][%4d,%4d] %lld\n", d*2, "", tree->name, 
-	 tree->geo[0][0], tree->geo[1][0], 
-	 tree->geo[0][1], tree->geo[1][1], tree->size);
+  printf("%*s%-20s "FF"\n", 
+         tree->depth*2, "", tree->name, tree->size);
   for (dlist = tree->entries; dlist; dlist = dlist->next) {
     tree = dlist->data;
-    tree_print(tree, d+1);
+    tree_print(tree);
   }
 }
 
 char* tree_full_name(tree_t* tree) {
   static char dir[4096];
-
+  //FIXME
   if (tree->parent) {
     strcpy(dir, tree_full_name(tree->parent));
     strcat(dir, tree->name);
@@ -43,32 +47,17 @@ char* tree_full_name(tree_t* tree) {
   return dir;
 }
 
-static void tree_destroy(tree_t* tree) {
-  GList* dlist;
-
-  g_assert(tree);
-  for (dlist = tree->entries; dlist; dlist = dlist->next) {
-    tree_t* sub_tree = dlist->data;
-    tree_destroy(sub_tree);
-  }
+void tree_destroy(tree_t* tree) {
+  g_list_foreach(tree->entries, (GFunc)tree_destroy, NULL);
   g_list_free(tree->entries);
   g_free(tree->name);
   g_free(tree);
 }
 
-static tree_t*
-tree_new(char* sname, int is_dir) {
-  tree_t* result;
-  char str[2048];
-
-  strcpy(str, sname);
-  if (is_dir)
-    if (str[strlen(str)-1] != '/') strcat(str, "/");
-
-  result = g_malloc(sizeof(tree_t));
-  result->name = g_strdup(str);
-  result->size = 0;
-  result->dir_size = 0;
+static tree_t* tree_new(const char* sname, gint64 size) {
+  tree_t* result = g_malloc0(sizeof(tree_t));
+  result->name = g_strdup(sname);
+  result->size = size;
   result->entries = NULL;
   result->parent = NULL;
   result->depth = 0;
@@ -76,8 +65,7 @@ tree_new(char* sname, int is_dir) {
   return result;
 }
 
-static gint
-comp_func (gconstpointer p1, gconstpointer p2) {
+static gint comp_func(gconstpointer p1, gconstpointer p2) {
   const tree_t* t1 = (tree_t*)p1;
   const tree_t* t2 = (tree_t*)p2;
   
@@ -86,94 +74,71 @@ comp_func (gconstpointer p1, gconstpointer p2) {
   return 0;
 }
 
-static tree_t*
-tree_scan_rec(char* dirname, char* shortname, int depth) {
-  DIR* dir;
-  struct dirent* entry;
+static tree_t* tree_scan_rec(const char* dirname, const char* shortname, int depth) {
   struct stat buf;
-  char name[2048];
+  const char* name;
   tree_t* result = NULL;
   tree_t* tree = NULL;
+  GDir* dir;
   
   if (lstat(dirname, &buf) < 0) return NULL;
-  if (buf.st_mode&S_IFDIR) {
-    result = tree_new(shortname, 1);
-    result->dir_size += buf.st_size;
-  } else {
-    result = tree_new(shortname, 0);
-    result->size += buf.st_size;
+
+  if (!(buf.st_mode&S_IFDIR)) {
+    result = tree_new(shortname, buf.st_size);
+    result->depth = depth;
     return result;
   }
-  result->depth = depth;
 
-  if ((dir = opendir(dirname)) == NULL) {
-    g_log("TREE", G_LOG_LEVEL_DEBUG,
-	  "could not open dir '%s'", dirname);
+  if ((dir = g_dir_open(dirname, 0, NULL)) == NULL) {
+    g_message("could not open dir '%s'", dirname);
     return NULL;
   }
 
-  while ((entry = readdir(dir)) != NULL) {
-    if (!strcmp(entry->d_name, ".")) continue;
-    if (!strcmp(entry->d_name, "..")) continue;
+  result = tree_new(shortname, /*buf.st_size*/0);
+  result->depth = depth;
+
+  while ((name = g_dir_read_name(dir)) != NULL) {
+    char* nname;
+    if (!strcmp(name, ".")) continue;
+    if (!strcmp(name, "..")) continue;
     
-    strcpy(name, dirname);
-    if (name[strlen(name)-1] != '/') strcat(name, "/");
-    strcat(name, entry->d_name);
-    tree = tree_scan_rec(name, entry->d_name, depth+1);
-    
-    if (tree) {
+    nname = g_strdup_printf("%s/%s", dirname, name);
+    if ((tree = tree_scan_rec(nname, name, depth+1)) != NULL) {
       tree->parent = result;
       result->size += tree->size;
-      result->entries =
-	g_list_insert_sorted(result->entries, tree, comp_func);
+      result->entries = g_list_insert_sorted(result->entries, tree, comp_func);
     }
+    g_free(nname);
   }
-  closedir(dir);
+  g_dir_close(dir);
 
   return result;
 }
 
-void tree_load(char* folder) {
+tree_t* tree_load(const char* folder) {
   tree_t* tree;
 
   g_assert(folder);
-
-  g_log("TREE", G_LOG_LEVEL_DEBUG,
-	"scanning folder '%s'", folder);
+  g_message("scanning folder '%s'", folder);
   tree = tree_scan_rec(folder, folder, 0);
-  if (tree) {
-    while (CurrentTree && CurrentTree->parent)
-      CurrentTree = CurrentTree->parent;
-    if (CurrentTree) tree_destroy(CurrentTree);
-    CurrentTree = tree;
-    gui_tree_display(CurrentTree);
-  } else {
-    g_log("TREE", G_LOG_LEVEL_DEBUG,
-	  "could not load tree '%s'", folder);
-  }
-}
-
-tree_t* tree_search_file(tree_t* tree, int x, int y) {
-  GList* dlist;
-  tree_t* ttree;
-
-  g_assert(tree);
-
-  if (x < tree->geo[0][0] ||
-      x >= tree->geo[0][1] ||
-      y < tree->geo[1][0] ||
-      y >= tree->geo[1][1])
-    return NULL;
-
-  if (!MaxDepth || MaxDepth > tree->depth) {
-    for (dlist = tree->entries; dlist; dlist = dlist->next) {
-      tree_t* sub_tree = dlist->data;
-      ttree = tree_search_file(sub_tree, x, y);
-      if (ttree) return ttree;
-    }
-  }
+/*   tree_print(tree); */
   return tree;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 tree_t* tree_find_path(tree_t* root, tree_t* child) {
   tree_t* temp;
@@ -195,35 +160,34 @@ tree_t* dir_tree_get_root(tree_t* dir) {
   return root;
 }
 
-void tree_refresh(tree_t* tree) {
-  tree_t* parent;
-  tree_t* new_tree;
-  tree_t* temp;
-  char str[2048];
+/* void tree_refresh(tree_t* tree) { */
+/*   tree_t* parent; */
+/*   tree_t* new_tree; */
+/*   tree_t* temp; */
+/*   char str[2048]; */
 
-  if (!tree) return;
-  parent = tree->parent;
+/*   if (!tree) return; */
+/*   parent = tree->parent; */
 
-  if (parent) {
-    parent->entries = g_list_remove(parent->entries, tree);
-    for (temp = parent; temp; temp = temp->parent) {
-      temp->size -= tree->size;
-      //    temp->dir_size -= tree->dir_size;
-    }
-    new_tree = tree_scan_rec(tree_full_name(tree), tree->name, tree->depth);
-    tree_destroy(tree);
-    if (new_tree) {
-      for (temp = parent; temp; temp = temp->parent) {
-	temp->size += new_tree->size;
-      }
-      parent->entries =
-	g_list_insert_sorted(parent->entries, new_tree, comp_func);
-      new_tree->parent = parent;
-      gui_tree_display(new_tree);
-    }
-  } else {
-    strcpy(str, tree_full_name(tree));
-    tree_load(str);
-  }
-}
+/*   if (parent) { */
+/*     parent->entries = g_list_remove(parent->entries, tree); */
+/*     for (temp = parent; temp; temp = temp->parent) { */
+/*       temp->size -= tree->size; */
+/*     } */
+/*     new_tree = tree_scan_rec(tree_full_name(tree), tree->name, tree->depth); */
+/*     tree_destroy(tree); */
+/*     if (new_tree) { */
+/*       for (temp = parent; temp; temp = temp->parent) { */
+/*         temp->size += new_tree->size; */
+/*       } */
+/*       parent->entries = */
+/*         g_list_insert_sorted(parent->entries, new_tree, comp_func); */
+/*       new_tree->parent = parent; */
+/*       gui_tree_display(new_tree); */
+/*     } */
+/*   } else { */
+/*     strcpy(str, tree_full_name(tree)); */
+/*     tree_load(str); */
+/*   } */
+/* } */
 
