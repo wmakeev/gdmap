@@ -1,3 +1,8 @@
+2005-10-03 [0.4.2]	Sgop	(sgop at users.sourceforge.net)
+	* fixed color save
+	* correct project makefiles
+	* added menu
+	
 2005-10-03 [0.4.1]	Sgop	(sgop at users.sourceforge.net)
 	* bugfix: removed uneccessary header
 	* added: size label for complete view.

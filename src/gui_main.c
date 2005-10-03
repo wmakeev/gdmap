@@ -47,17 +47,76 @@ static tree_info_t* Mark2 = NULL;
 static GtkWidget* Area = NULL;
 static tree_info_t* CurrentItem = NULL;
 
-static GtkWidget* ButtonBack = NULL;
-static GtkWidget* ButtonForward = NULL;
-static GtkWidget* ButtonUp = NULL;
-static GtkWidget* ButtonTop = NULL;
-
 static GtkLabel* FileLabel = NULL;
 static GtkLabel* SizeLabel = NULL;
 static GtkBox* PathBox = NULL;
 
 static GList* History = NULL;
 static GList* HistoryPos = NULL;
+
+static GtkUIManager* UIManager = NULL;
+static GtkActionGroup* ActionGroup = NULL;
+
+static void on_action_open();
+static void on_action_back();
+static void on_action_forward();
+static void on_action_up();
+static void on_action_top();
+static void on_action_exit();
+
+static GtkActionEntry Actions[] = {
+  { "FileMenu", NULL, "_File", 0,0,0 },
+  { "ViewMenu", NULL, "_View", 0,0,0 },
+  { "Open", GTK_STOCK_OPEN, "_Open",
+    "<control>O", "Open a folder",
+    G_CALLBACK(on_action_open)
+  },
+  { "Quit", GTK_STOCK_QUIT, "_Quit",
+    "<control>Q", "Exit program",
+    G_CALLBACK(on_action_exit)
+  },
+  { "Back", GTK_STOCK_GO_BACK, "_Back",
+    "b", "Go back one step",
+    G_CALLBACK(on_action_back)
+  },
+  { "Forward", GTK_STOCK_GO_FORWARD, "_Forward",
+    "f", "Go forward one step",
+    G_CALLBACK(on_action_forward)
+  },
+  { "Up", GTK_STOCK_GO_UP, "_Up",
+    "u", "Go up one level",
+    G_CALLBACK(on_action_up)
+  },
+  { "Top", GTK_STOCK_GOTO_TOP, "_Top",
+    "t", "Goto toplevel folder",
+    G_CALLBACK(on_action_top)
+  },
+};
+
+static const char* MenuDescription =
+  "<ui>\n"
+  "  <menubar action=\"MainMenu\">\n"
+  "    <menu action=\"FileMenu\">\n"
+  "      <menuitem action=\"Open\"/>\n"
+  "      <separator/>\n"
+  "      <menuitem action=\"Quit\"/>\n"
+  "    </menu>\n"
+  "    <menu action=\"ViewMenu\">\n"
+  "      <menuitem action=\"Back\"/>\n"
+  "      <menuitem action=\"Forward\"/>\n"
+  "      <menuitem action=\"Up\"/>\n"
+  "      <menuitem action=\"Top\"/>\n"
+  "    </menu>\n"
+  "  </menubar>\n"
+  "  <toolbar action=\"ToolBar\">\n"
+  "    <toolitem action=\"Open\"/>\n"
+  "    <separator/>\n"
+  "    <toolitem action=\"Back\"/>\n"
+  "    <toolitem action=\"Forward\"/>\n"
+  "    <toolitem action=\"Up\"/>\n"
+  "    <toolitem action=\"Top\"/>\n"
+  "  </toolbar>\n"
+  "</ui>\n";
 
 static void gui_tree_display(tree_info_t* info, gboolean destroy_old, gboolean new_history);
 
@@ -135,10 +194,6 @@ static tree_info_t* tree_info_find_path(tree_info_t* root, tree_info_t* child) {
 
 
 
-static GtkWidget* gui_create_menu() {
-  return NULL;
-}
-
 static tree_info_t* tree_info_create(tree_t* tree) {
   tree_info_t* info = g_malloc0(sizeof(*info));
   GList* dlist;
@@ -153,7 +208,11 @@ static tree_info_t* tree_info_create(tree_t* tree) {
   return info;
 }
 
-static void on_open_folder() {
+static void on_action_exit() {
+  gtk_main_quit();
+}
+
+static void on_action_open() {
   GtkWidget* dialog;
   char* res;
 
@@ -182,81 +241,37 @@ static void on_open_folder() {
 }
 
 static void gui_buttons_update() {
-  gtk_widget_set_sensitive(ButtonBack, HistoryPos && HistoryPos->prev);
-  gtk_widget_set_sensitive(ButtonForward, HistoryPos && HistoryPos->next);
-  gtk_widget_set_sensitive(ButtonUp, CurrentItem && CurrentItem->parent);
-  gtk_widget_set_sensitive(ButtonTop, CurrentItem && CurrentItem->parent);
+  gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Back"),
+                           HistoryPos && HistoryPos->prev);
+  gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Forward"),
+                           HistoryPos && HistoryPos->next);
+  gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Up"),
+                           CurrentItem && CurrentItem->parent);
+  gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Top"),
+                           CurrentItem && CurrentItem->parent);
 }
 
-static void on_level_root() {
+static void on_action_top() {
   tree_info_t* info = CurrentItem;
 
   if (!info || !info->parent) return;
   while (info->parent) info = info->parent;
   gui_tree_display(info, FALSE, TRUE);
 }
-
-static void on_level_up() {
+static void on_action_up() {
   tree_info_t* info = CurrentItem;
 
   if (!info || !info->parent) return;
   gui_tree_display(info->parent, FALSE, TRUE);
 }
-
-static GtkWidget* gui_create_toolbar() {
-  GtkWidget* bar;
-  GtkToolItem* item;
-
-  bar = gtk_toolbar_new();
-  gtk_widget_show(bar);
-
-  item = gtk_tool_button_new_from_stock(GTK_STOCK_OPEN);
-  gtk_tool_item_set_homogeneous(item, TRUE);
-  gtk_widget_show(GTK_WIDGET(item));
-  gtk_toolbar_insert(GTK_TOOLBAR(bar), item, -1);
-  g_signal_connect(G_OBJECT(item), "clicked",
-                   G_CALLBACK(on_open_folder), NULL);
-
-  item = gtk_separator_tool_item_new();
-  gtk_widget_show(GTK_WIDGET(item));
-  gtk_toolbar_insert(GTK_TOOLBAR(bar), item, -1);
-
-  item = gtk_tool_button_new_from_stock(GTK_STOCK_GO_BACK);
-  gtk_tool_item_set_homogeneous(item, TRUE);
-  gtk_widget_show(GTK_WIDGET(item));
-  gtk_toolbar_insert(GTK_TOOLBAR(bar), item, -1);
-  ButtonBack = GTK_WIDGET(item);
-  g_signal_connect(G_OBJECT(item), "clicked",
-                   G_CALLBACK(history_back), NULL);
-
-  item = gtk_tool_button_new_from_stock(GTK_STOCK_GO_FORWARD);
-  gtk_tool_item_set_homogeneous(item, TRUE);
-  gtk_widget_show(GTK_WIDGET(item));
-  gtk_toolbar_insert(GTK_TOOLBAR(bar), item, -1);
-  ButtonForward = GTK_WIDGET(item);
-  g_signal_connect(G_OBJECT(item), "clicked",
-                   G_CALLBACK(history_forward), NULL);
-
-  item = gtk_tool_button_new_from_stock(GTK_STOCK_GO_UP);
-  gtk_tool_item_set_homogeneous(item, TRUE);
-  gtk_widget_show(GTK_WIDGET(item));
-  gtk_toolbar_insert(GTK_TOOLBAR(bar), item, -1);
-  ButtonUp = GTK_WIDGET(item);
-  g_signal_connect(G_OBJECT(item), "clicked",
-                   G_CALLBACK(on_level_up), NULL);
-  
-  item = gtk_tool_button_new_from_stock(GTK_STOCK_GOTO_TOP);
-  gtk_tool_item_set_homogeneous(item, TRUE);
-  gtk_widget_show(GTK_WIDGET(item));
-  gtk_toolbar_insert(GTK_TOOLBAR(bar), item, -1);
-  ButtonTop = GTK_WIDGET(item);
-  g_signal_connect(G_OBJECT(item), "clicked",
-                   G_CALLBACK(on_level_root), NULL);
-
-  gui_buttons_update();
-
-  return bar;
+static void on_action_back() {
+  history_back();
 }
+static void on_action_forward() {
+  history_forward();
+}
+
+
 
 /* static void on_depth_change(GtkSpinButton* button) { */
 /*   int val = gtk_spin_button_get_value_as_int(button); */
@@ -404,75 +419,6 @@ static gboolean on_area_motion(GtkWidget* widget, GdkEventMotion* event) {
 }
 
 
-/* static void on_level_down(tree_t* tree) { */
-/*   tree_t* sub_tree; */
-
-/*   sub_tree = tree_find_path(CurrentTree, tree); */
-/*   if (sub_tree) gui_tree_display(sub_tree); */
-/* } */
-
-/* static void on_refresh(tree_t* tree) { */
-/*   tree_refresh(tree); */
-/* } */
-
-/* GtkWidget* create_right_popup(tree_t* current) { */
-/*   GtkWidget *popup; */
-/*   GtkWidget *item; */
-/*   GtkWidget *separator; */
-/*   tree_t* c; */
-
-/*   c = CurrentTree; */
-/*   if (!c) return NULL; */
-
-/*   popup = gtk_menu_new (); */
-
-/*   item = gtk_menu_item_new_with_label ("Up to Root"); */
-/*   gtk_widget_show (item); */
-/*   gtk_container_add (GTK_CONTAINER (popup), item); */
-/*   g_signal_connect_swapped(G_OBJECT(item), "activate", */
-/*                            G_CALLBACK (on_level_root), */
-/*                            (gpointer)c); */
-/*   if (!c->parent) */
-/*     gtk_widget_set_sensitive(item, FALSE); */
-  
-/*   separator = gtk_menu_item_new (); */
-/*   gtk_widget_show (separator); */
-/*   gtk_container_add (GTK_CONTAINER (popup), separator); */
-/*   gtk_widget_set_sensitive (separator, FALSE); */
-  
-/*   item = gtk_menu_item_new_with_label ("One Level up"); */
-/*   gtk_widget_show (item); */
-/*   gtk_container_add (GTK_CONTAINER (popup), item); */
-/*   g_signal_connect_swapped(G_OBJECT (item), "activate", */
-/*                            G_CALLBACK (on_level_up), */
-/*                            (gpointer)c); */
-/*   if (!c->parent) */
-/*     gtk_widget_set_sensitive(item, FALSE); */
-  
-/*   item = gtk_menu_item_new_with_label ("One Level Down"); */
-/*   gtk_widget_show (item); */
-/*   gtk_container_add (GTK_CONTAINER (popup), item); */
-/*   g_signal_connect_swapped(G_OBJECT (item), "activate", */
-/*                            G_CALLBACK (on_level_down), */
-/*                            (gpointer)current); */
-/*   if (!c->entries) */
-/*     gtk_widget_set_sensitive(item, FALSE); */
-
-/*   separator = gtk_menu_item_new (); */
-/*   gtk_widget_show (separator); */
-/*   gtk_container_add (GTK_CONTAINER (popup), separator); */
-/*   gtk_widget_set_sensitive (separator, FALSE); */
-
-/*   item = gtk_menu_item_new_with_label ("Refresh"); */
-/*   gtk_widget_show (item); */
-/*   gtk_container_add (GTK_CONTAINER (popup), item); */
-/*   g_signal_connect_swapped(G_OBJECT(item), "activate", */
-/*                            G_CALLBACK(on_refresh), */
-/*                            (gpointer)c); */
-
-/*   return popup; */
-/* } */
-
 static gboolean on_area_button_press(GtkWidget* widget, GdkEventButton* event) {
   tree_info_t* info;
 /*   GtkWidget* pop; */
@@ -497,17 +443,11 @@ static gboolean on_area_button_press(GtkWidget* widget, GdkEventButton* event) {
 }
 
 static GtkWidget* gui_create_display_box() {
-/*   GtkWidget* frame; */
   GtkWidget* da;
-
-/*   frame = gtk_frame_new(NULL); */
-/*   gtk_widget_show(frame); */
-/*   gtk_frame_set_shadow_type(GTK_FRAME (frame), GTK_SHADOW_IN); */
 
   da = gtk_drawing_area_new();
   Area = da;
   gtk_widget_show(da);
-/*   gtk_container_add(GTK_CONTAINER(frame), da); */
   gtk_widget_set_events(da, GDK_POINTER_MOTION_MASK | GDK_BUTTON_PRESS_MASK);
   // no need for offscreen support of gtk, we do it manually
   gtk_widget_set_double_buffered(da, FALSE);
@@ -520,7 +460,6 @@ static GtkWidget* gui_create_display_box() {
                    G_CALLBACK(on_area_motion), NULL);
   g_signal_connect(G_OBJECT(da), "button_press_event",
                    G_CALLBACK(on_area_button_press), NULL);
-/*   return frame; */
   return da;
 }
 
@@ -536,6 +475,22 @@ static GtkWidget* gui_create_status_bar() {
 static gboolean on_main_win_delete_event() {
   gtk_main_quit();
   return TRUE;
+}
+
+static void gui_setup_actions(GtkWidget* win) {
+  GError* error = NULL;
+
+  UIManager = gtk_ui_manager_new();
+  ActionGroup = gtk_action_group_new("Actions");
+  gtk_action_group_add_actions(ActionGroup, Actions, G_N_ELEMENTS(Actions), win);
+  gtk_action_group_set_sensitive(ActionGroup, TRUE);
+
+  gtk_ui_manager_insert_action_group(UIManager, ActionGroup, 0);
+  if (!gtk_ui_manager_add_ui_from_string(UIManager, MenuDescription, -1, &error)) {
+		g_warning("building menus failed: %s", error->message);
+		g_error_free(error);
+	}
+
 }
 
 GtkWidget* gui_create_main_win(void) {
@@ -556,10 +511,13 @@ GtkWidget* gui_create_main_win(void) {
   gtk_container_add(GTK_CONTAINER(win), vbox);
 /*   gtk_container_set_border_width(GTK_CONTAINER (vbox), 0); */
   
-  if ((item = gui_create_menu()) != NULL)
+
+  gui_setup_actions(win);
+  
+  if ((item = gtk_ui_manager_get_widget(UIManager, "/ui/MainMenu")) != NULL)
     gtk_box_pack_start(GTK_BOX (vbox), item, FALSE, FALSE, 0);
 
-  if ((item = gui_create_toolbar()) != NULL)
+  if ((item = gtk_ui_manager_get_widget(UIManager, "/ui/ToolBar")) != NULL)
     gtk_box_pack_start(GTK_BOX (vbox), item, FALSE, FALSE, 0);
 
   if ((item = gui_create_path_box()) != NULL)
@@ -574,6 +532,8 @@ GtkWidget* gui_create_main_win(void) {
   g_signal_connect(G_OBJECT (win), "delete_event",
                    G_CALLBACK(on_main_win_delete_event), NULL);
   
+  gui_buttons_update();
+
   gtk_widget_show(win);
 
   //  global.win = win;
