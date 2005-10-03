@@ -19,14 +19,14 @@
 #include <gtk/gtk.h>
 
 #include "tree.h"
+#include "utils.h"
 #include "gui_main.h"
 
 int MaxDepth = 0;
 
 static void tree_print(tree_t* tree) {
   GList* dlist;
-  printf("%*s%-20s "FF"\n", 
-         tree->depth*2, "", tree->name, tree->size);
+  printf("%*s%-20s "FF"\n", tree->depth*2, "", tree->name, tree->size);
   for (dlist = tree->entries; dlist; dlist = dlist->next) {
     tree = dlist->data;
     tree_print(tree);

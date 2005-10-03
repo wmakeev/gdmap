@@ -15,7 +15,6 @@
 
 #include "l_i18n.h"
 #include "gui_main.h"
-#include "global.h"
 #include "colors.h"
 
 int main (int argc, char *argv[]) {

@@ -5,10 +5,9 @@ bin_PROGRAMS = gdmap
 gdmap_SOURCES = \
 	main.c l_i18n.h \
 	utils.c utils.h \
-	gui_main.c \
-	global.c \
-	colors.c \
-	tree.c
+	gui_main.c gui_main.h \
+	colors.c colors.h \
+	tree.c tree.h
 
 gdmap_CFLAGS = \
 	-DGDMAP_LOCALE_DIR=\""$(localedir)"\" -DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\" @UI_CFLAGS@
