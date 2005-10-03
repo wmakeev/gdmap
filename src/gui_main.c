@@ -21,10 +21,10 @@
 
 #include "gui_main.h"
 #include "l_i18n.h"
-#include "dirselect.h"
 #include "tree.h"
 #include "colors.h"
 #include "global.h"
+#include "utils.h"
 
 
 typedef struct _tree_info_t tree_info_t;
@@ -54,6 +54,7 @@ static GtkWidget* ButtonUp = NULL;
 static GtkWidget* ButtonTop = NULL;
 
 static GtkLabel* FileLabel = NULL;
+static GtkLabel* SizeLabel = NULL;
 static GtkBox* PathBox = NULL;
 
 static GList* History = NULL;
@@ -273,6 +274,11 @@ static GtkWidget* gui_create_path_box() {
   hbox = gtk_hbox_new(FALSE, 0);
   PathBox = GTK_BOX(hbox);
   gtk_widget_show(hbox);
+
+  label = gtk_label_new("");
+  gtk_widget_show(label);
+  gtk_box_pack_end(PathBox, label, FALSE, FALSE, 5);
+  SizeLabel = GTK_LABEL(label);
 
   label = gtk_label_new("");
   gtk_widget_show(label);
@@ -858,4 +864,13 @@ static void gui_tree_display(tree_info_t* info, gboolean destroy_old, gboolean n
   gui_show_pix(Area);
 
   gui_buttons_update();
+  
+  {
+    char* temp1 = print_filesize(info->node->size);
+    char* temp2 = g_strdup_printf("<b>%s</b>", temp1);
+    gtk_label_set_markup(SizeLabel, temp2);
+    g_free(temp1);
+    g_free(temp2);
+  }
+
 }
