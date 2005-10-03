@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <gtk/gtk.h>
 
-#include "global.h"
 #include "tree.h"
 #include "gui_main.h"
 

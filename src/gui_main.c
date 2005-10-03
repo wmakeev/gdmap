@@ -23,7 +23,6 @@
 #include "l_i18n.h"
 #include "tree.h"
 #include "colors.h"
-#include "global.h"
 #include "utils.h"
 
 
@@ -318,13 +317,6 @@ static void gui_show_pix(GtkWidget* area) {
 static gboolean on_area_expose(GtkWidget* area) {
   gui_show_pix(area);
   return TRUE;
-}
-
-static char* to_utf8(const char* str) {
-  static char* result = NULL;
-  if (result) g_free(result);
-  result = g_locale_to_utf8(str, -1, NULL, NULL, NULL);
-  return result;
 }
 
 static void gui_tree_mark1(tree_info_t* info) {

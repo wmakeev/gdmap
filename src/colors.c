@@ -17,15 +17,16 @@
 #include <gtk/gtk.h>
 
 #include "tree.h"
-#include "global.h"
+#include "utils.h"
 #include "colors.h"
 #include "gui_main.h"
 
 static GList* Colors = NULL;
 
-static void color_save(char* name) {
-  char* filename = g_strdup_printf("%s/.gdmap/%s", g_get_home_dir(), name);
-  FILE* file = fopen(filename, "w");
+static void color_save(const char* filename) {
+  FILE* file;
+
+  file = fopen(filename, "w");
   if (file) {
     GList* dlist;
     for (dlist = Colors; dlist; dlist = dlist->next) {
@@ -37,11 +38,9 @@ static void color_save(char* name) {
     g_log("COLOR", G_LOG_LEVEL_WARNING,
           "Could not save colors to '%s'", filename);
   }
-  g_free(filename);
 }
 
-static int color_load(char* name) {
-  char filename[2048];
+static gboolean color_load(const char* filename) {
   char temp[2048];
   FILE* file;
   char* suffix;
@@ -51,20 +50,15 @@ static int color_load(char* name) {
   int def = 0;
   GtkWidget* win = gui_get_main_win();
 
-  sprintf(filename, "%s/.gdmap/%s", g_get_home_dir(), name);
-
   file = fopen(filename, "r");
-  if (file == NULL) {
-    printf("Could not load colors!\n");
-    return 0;
-  }
+  if (file == NULL) return FALSE;
 
   while (fgets(temp, 1024, file)) {
     if (strlen(temp) <3) continue;
     if (temp[0] == '#') continue;
     temp[strlen(temp)-1] = 0;
     if (!win || !win->window) {
-      printf("no window\n");
+      g_warning("no window\n");
       continue;
     }
     suffix = arg(temp, 0);
@@ -80,7 +74,7 @@ static int color_load(char* name) {
     gdk_colormap_alloc_color(gdk_rgb_get_cmap (), &gcolor, FALSE, FALSE);
     gdk_gc_set_foreground(color->gc, &gcolor);
     if (!strcasecmp(suffix, "color1") ||
-	!strcasecmp(suffix, "color2")) {
+        !strcasecmp(suffix, "color2")) {
       gdk_gc_set_function(color->gc, GDK_XOR);
     }
     Colors = g_list_append(Colors, color);
@@ -145,7 +139,7 @@ static void color_create_default() {
     gdk_colormap_alloc_color(gdk_rgb_get_cmap(), &gcolor, FALSE, FALSE);
     gdk_gc_set_foreground(color->gc, &gcolor);
     if (!strcasecmp(dcolors[i1][0], "color1") ||
-	!strcasecmp(dcolors[i1][0], "color2")) {
+        !strcasecmp(dcolors[i1][0], "color2")) {
       gdk_gc_set_function(color->gc, GDK_XOR);
     }
     Colors = g_list_append(Colors, color);
@@ -171,8 +165,12 @@ color_t* color_search(char* filename) {
 }
 
 void colors_init() {
-  if (!color_load("default.colors")) {
+  const char* home = g_get_home_dir();
+  char* filename = g_strdup_printf("%s/.gdmap/default.colors", home);
+  create_dir(filename);
+  if (!color_load(filename)) {
     color_create_default();
-    color_save("default.colors");
+    color_save(filename);
   }
+  g_free(filename);
 }
