@@ -7,8 +7,11 @@ gdmap_SOURCES = \
 	utils.c utils.h \
 	gui_main.c gui_main.h \
 	colors.c colors.h \
+	preferences.c preferences.h \
+	about.c about.h \
 	tree.c tree.h
 
+localedir = $(datadir)/locale
 gdmap_CFLAGS = \
 	-DGDMAP_LOCALE_DIR=\""$(localedir)"\" -DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\" @UI_CFLAGS@
 

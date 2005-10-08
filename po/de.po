@@ -1,13 +1,12 @@
 # GdMap.
 # Markus Lausser <sgop@users.sourceforge.net>, 2005
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: gdmap 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-09-24 00:30+0200\n"
-"PO-Revision-Date: 2005-09-24 00:31+0200\n"
+"POT-Creation-Date: 2005-10-09 00:18+0200\n"
+"PO-Revision-Date: 2005-10-09 00:24+0200\n"
 "Last-Translator: Markus Lausser <sgop@users.sourceforge.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -22,6 +21,118 @@ msgstr "Plattenspeicher graphisch darstellen"
 msgid "Graphical Disk Map"
 msgstr "Plattenspeicher anzeigen"
 
-#: ../src/gui_main.c:58
+#: ../src/gui_main.c:72
+msgid "_File"
+msgstr "_Datei"
+
+#: ../src/gui_main.c:73
+msgid "_View"
+msgstr "_Anzeige"
+
+#: ../src/gui_main.c:74
+msgid "_Help"
+msgstr "_Hilfe"
+
+#: ../src/gui_main.c:75
+msgid "_Open..."
+msgstr "Ö_ffnen..."
+
+#: ../src/gui_main.c:76
+msgid "Open a folder"
+msgstr "Verzeichnis öffnen"
+
+#: ../src/gui_main.c:79
+msgid "_Quit"
+msgstr "_Beenden"
+
+#: ../src/gui_main.c:80
+msgid "Exit program"
+msgstr "Programm beenden"
+
+#: ../src/gui_main.c:83
+msgid "_Back"
+msgstr "_Zurück"
+
+#: ../src/gui_main.c:84
+msgid "Go back one step"
+msgstr "Einen Schritt zurück"
+
+#: ../src/gui_main.c:87
+msgid "_Forward"
+msgstr "_Vorwärts"
+
+#: ../src/gui_main.c:88
+msgid "Go forward one step"
+msgstr "Einen Schritt nach vorne"
+
+#: ../src/gui_main.c:91
+msgid "_Up"
+msgstr "Nach _oben"
+
+#: ../src/gui_main.c:92
+msgid "Go up one level"
+msgstr "Ein Verzeichnis hochgehen"
+
+#: ../src/gui_main.c:95
+msgid "_Top"
+msgstr "_Höchstes"
+
+#: ../src/gui_main.c:96
+msgid "Goto toplevel folder"
+msgstr "Ins obereste Verzeichnis wechseln"
+
+#: ../src/gui_main.c:99
+msgid "_Options..."
+msgstr "_Optionen..."
+
+#: ../src/gui_main.c:100
+msgid "Edit settings"
+msgstr "Einstellungen bearbeiten"
+
+#: ../src/gui_main.c:103
+msgid "_About..."
+msgstr "_Über..."
+
+#: ../src/gui_main.c:104
+msgid "About this program"
+msgstr "Über dieses Programm"
+
+#: ../src/gui_main.c:248
 msgid "Choose folder"
 msgstr "Verzeichnis wählen"
+
+#: ../src/about.c:72
+msgid "GdMap is a tool which allows to graphically explore your disks."
+msgstr "GdMap ist ein Tool, das es ermöglicht\\ndie Festplatte graphisch darzustellen"
+
+#: ../src/about.c:75
+msgid "translator-credits"
+msgstr "Markus Lausser <sgop@users.sourceofrge.net>"
+
+#: ../src/preferences.c:102
+msgid "Preferences"
+msgstr "Einstellungen"
+
+#: ../src/preferences.c:113
+msgid "Display type"
+msgstr "Ansicht"
+
+#: ../src/preferences.c:119
+msgid "Standard cushioned treemaps"
+msgstr "Standardansicht als Kissen"
+
+#: ../src/preferences.c:123
+msgid "Squarified cushioned treemaps"
+msgstr "Quadratische Ansicht als Kissen"
+
+#: ../src/preferences.c:137
+msgid "Cushion settings"
+msgstr "Optionen für die Kissendarstellung"
+
+#: ../src/preferences.c:145
+msgid "Height factor:"
+msgstr "Faktor für die Höhe:"
+
+#: ../src/preferences.c:158
+msgid "Decreasing height:"
+msgstr "Höhenabnahme pro Tiefe"

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([GdMap], [0.4.2], [http://sourceforge.net/tracker/?atid=373401&group_id=21965])
+AC_INIT([GdMap], [0.5.0], [http://sourceforge.net/tracker/?atid=373401&group_id=21965])
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
 
@@ -67,12 +67,14 @@ AC_TRY_COMPILE( , [
   ]
 )
 
-
-PKG_CHECK_MODULES(UI, gtk+-2.0 >= 2.4.1)
+PKG_CHECK_MODULES(UI, gtk+-2.0 >= 2.6.0)
 UI_CFLAGS="$UI_CFLAGS -DGTK_DISABLE_DEPRECATED"
 
 AC_SUBST(UI_CFLAGS)
 AC_SUBST(UI_LIBS)
+
+dnl packagesrcdir=`cd $srcdir && pwd`
+dnl AC_DEFINE_UNQUOTED(PACKAGE_SOURCE_DIR, "${packagesrcdir}", [Location of GdMap's sources])
 
 AC_CONFIG_FILES([
   Makefile

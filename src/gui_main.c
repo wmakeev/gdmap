@@ -24,6 +24,8 @@
 #include "tree.h"
 #include "colors.h"
 #include "utils.h"
+#include "preferences.h"
+#include "about.h"
 
 
 typedef struct _tree_info_t tree_info_t;
@@ -63,33 +65,44 @@ static void on_action_forward();
 static void on_action_up();
 static void on_action_top();
 static void on_action_exit();
+static void on_action_preferences();
+static void on_action_about();
 
 static GtkActionEntry Actions[] = {
-  { "FileMenu", NULL, "_File", 0,0,0 },
-  { "ViewMenu", NULL, "_View", 0,0,0 },
-  { "Open", GTK_STOCK_OPEN, "_Open",
-    "<control>O", "Open a folder",
+  { "FileMenu", NULL, N_("_File"), 0,0,0 },
+  { "ViewMenu", NULL, N_("_View"), 0,0,0 },
+  { "HelpMenu", NULL, N_("_Help"), 0,0,0 },
+  { "Open", GTK_STOCK_OPEN, N_("_Open..."),
+    "<control>O", N_("Open a folder"),
     G_CALLBACK(on_action_open)
   },
-  { "Quit", GTK_STOCK_QUIT, "_Quit",
-    "<control>Q", "Exit program",
+  { "Quit", GTK_STOCK_QUIT, N_("_Quit"),
+    "<control>Q", N_("Exit program"),
     G_CALLBACK(on_action_exit)
   },
-  { "Back", GTK_STOCK_GO_BACK, "_Back",
-    "b", "Go back one step",
+  { "Back", GTK_STOCK_GO_BACK, N_("_Back"),
+    NULL, N_("Go back one step"),
     G_CALLBACK(on_action_back)
   },
-  { "Forward", GTK_STOCK_GO_FORWARD, "_Forward",
-    "f", "Go forward one step",
+  { "Forward", GTK_STOCK_GO_FORWARD, N_("_Forward"),
+    NULL, N_("Go forward one step"),
     G_CALLBACK(on_action_forward)
   },
-  { "Up", GTK_STOCK_GO_UP, "_Up",
-    "u", "Go up one level",
+  { "Up", GTK_STOCK_GO_UP, N_("_Up"),
+    NULL, N_("Go up one level"),
     G_CALLBACK(on_action_up)
   },
-  { "Top", GTK_STOCK_GOTO_TOP, "_Top",
-    "t", "Goto toplevel folder",
+  { "Top", GTK_STOCK_GOTO_TOP, N_("_Top"),
+    NULL, N_("Goto toplevel folder"),
     G_CALLBACK(on_action_top)
+  },
+  { "Options", GTK_STOCK_PREFERENCES, N_("_Options..."),
+    NULL, N_("Edit settings"),
+    G_CALLBACK(on_action_preferences)
+  },
+  { "About", GTK_STOCK_PREFERENCES, N_("_About..."),
+    NULL, N_("About this program"),
+    G_CALLBACK(on_action_about)
   },
 };
 
@@ -99,6 +112,8 @@ static const char* MenuDescription =
   "    <menu action=\"FileMenu\">\n"
   "      <menuitem action=\"Open\"/>\n"
   "      <separator/>\n"
+  "      <menuitem action=\"Options\"/>\n"
+  "      <separator/>\n"
   "      <menuitem action=\"Quit\"/>\n"
   "    </menu>\n"
   "    <menu action=\"ViewMenu\">\n"
@@ -106,6 +121,9 @@ static const char* MenuDescription =
   "      <menuitem action=\"Forward\"/>\n"
   "      <menuitem action=\"Up\"/>\n"
   "      <menuitem action=\"Top\"/>\n"
+  "    </menu>\n"
+  "    <menu action=\"HelpMenu\">\n"
+  "      <menuitem action=\"About\"/>\n"
   "    </menu>\n"
   "  </menubar>\n"
   "  <toolbar action=\"ToolBar\">\n"
@@ -115,6 +133,8 @@ static const char* MenuDescription =
   "    <toolitem action=\"Forward\"/>\n"
   "    <toolitem action=\"Up\"/>\n"
   "    <toolitem action=\"Top\"/>\n"
+  "    <separator/>\n"
+  "    <toolitem action=\"Options\"/>\n"
   "  </toolbar>\n"
   "</ui>\n";
 
@@ -212,6 +232,14 @@ static void on_action_exit() {
   gtk_main_quit();
 }
 
+static void on_action_preferences() {
+  gui_show_preferences();
+}
+
+static void on_action_about() {
+  gui_show_about();
+}
+
 static void on_action_open() {
   GtkWidget* dialog;
   char* res;
@@ -294,13 +322,6 @@ static GtkWidget* gui_create_path_box() {
   gtk_box_pack_end(PathBox, label, FALSE, FALSE, 5);
   SizeLabel = GTK_LABEL(label);
 
-  label = gtk_label_new("");
-  gtk_widget_show(label);
-  gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-  gtk_widget_set_size_request(label, 10, -1);
-  gtk_box_pack_end(PathBox, label, TRUE, TRUE, 5);
-  FileLabel = GTK_LABEL(label);
-
   return hbox;
 }
 
@@ -343,16 +364,19 @@ static void gui_tree_mark1(tree_info_t* info) {
                      info->geo[1][1]-info->geo[1][0]-1);
   
   if (info != Mark1) {
+    char* temp;
     char* text = g_strdup("");
     Mark1 = info;
     while (info != CurrentItem) {
-      char* temp = g_strdup_printf("/%s%s", info->node->name, text);
+      temp = g_strdup_printf("/%s%s", info->node->name, text);
       g_free(text);
       text = temp;
       info = info->parent;
     }
-    gtk_label_set_text(GTK_LABEL(FileLabel), to_utf8(text));
+    temp = g_strdup_printf("...%s", text);
     g_free(text);
+    gtk_label_set_text(GTK_LABEL(FileLabel), to_utf8(temp));
+    g_free(temp);
   }
 
 }
@@ -465,9 +489,22 @@ static GtkWidget* gui_create_display_box() {
 
 static GtkWidget* gui_create_status_bar() {
   GtkWidget* bar;
+  GtkWidget* frame;
+  GtkWidget* label;
 
-  bar = gtk_statusbar_new();
+  bar = gtk_hbox_new(FALSE, 5);
   gtk_widget_show(bar);
+
+  frame = gtk_frame_new(NULL);
+  gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
+  gtk_widget_show(frame);
+  gtk_box_pack_start(GTK_BOX(bar), frame, TRUE, TRUE, 0);
+
+  label = gtk_label_new("");
+  gtk_widget_show(label);
+  FileLabel = GTK_LABEL(label);
+  gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+  gtk_container_add(GTK_CONTAINER(frame), label);
 
   return bar;
 }
@@ -482,6 +519,7 @@ static void gui_setup_actions(GtkWidget* win) {
 
   UIManager = gtk_ui_manager_new();
   ActionGroup = gtk_action_group_new("Actions");
+  gtk_action_group_set_translation_domain(ActionGroup, GETTEXT_PACKAGE);
   gtk_action_group_add_actions(ActionGroup, Actions, G_N_ELEMENTS(Actions), win);
   gtk_action_group_set_sensitive(ActionGroup, TRUE);
 
@@ -493,6 +531,25 @@ static void gui_setup_actions(GtkWidget* win) {
 
 }
 
+static void gui_tree_redraw(void) {
+  if (CurrentItem) gui_tree_display(CurrentItem, FALSE, FALSE);
+}
+
+static GdkPixbuf* create_pixbuf(const gchar *filename) {
+  char* temp;
+  GdkPixbuf* pix;
+
+#ifdef PACKAGE_SOURCE_DIR
+  temp = g_strdup_printf("%s/data/%s", PACKAGE_SOURCE_DIR, filename);
+#else
+  temp = g_strdup_printf("%s/pixmaps/%s", PACKAGE_DATA_DIR, filename);
+#endif
+  pix = gdk_pixbuf_new_from_file(temp, NULL);
+  g_free(temp);
+
+  return pix;
+}
+
 GtkWidget* gui_create_main_win(void) {
   GtkWidget* win;
   GtkWidget* vbox;
@@ -502,8 +559,9 @@ GtkWidget* gui_create_main_win(void) {
   MainWin = win;
   gtk_window_set_title(GTK_WINDOW(win), "Graphical Disk Map "VERSION);
   gtk_window_set_role(GTK_WINDOW(win), "Main window");
-  //  gtk_window_set_default_icon(create_pixbuf("gdmap_icon.png"));
+  gtk_window_set_default_icon(create_pixbuf("gdmap_icon.png"));
   gtk_window_set_default_size(GTK_WINDOW(win), 700, 450);
+  g_object_add_weak_pointer(G_OBJECT(win), (void*)&MainWin);
 
 
   vbox = gtk_vbox_new(FALSE, 0);
@@ -536,24 +594,12 @@ GtkWidget* gui_create_main_win(void) {
 
   gtk_widget_show(win);
 
+  pref_set_redraw_callback(gui_tree_redraw);
+  
   //  global.win = win;
 
   return win;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -625,26 +671,21 @@ static void gui_tree_show_item(tree_info_t* info) {
   }
 }
 
-
-void AddRidge(tree_info_t* parent, tree_info_t* node, int d, double h) {
-  int x1 = node->geo[d][0];
-  int x2 = node->geo[d][1];
-
-  memcpy(node->s, parent->s, sizeof(node->s));
-
-/*   printf("AddRidge '%s' under '%s'\n", node->node->name, parent->node->name); */
-/*   printf(" -old s: [%.1f,%.1f][%.1f,%.1f] (%.1f)\n", */
-/*          node->s[0][0],node->s[0][1],node->s[1][0],node->s[1][1], h); */
-/*   printf(" -range: %d %d\n", x1, x2); */
-
-  node->s[d][0] += 4*h*(x2+x1)/(x2-x1);
-  node->s[d][1] -= 4*h/(x2-x1);
-
-/*   printf(" -new s: [%.1f,%.1f][%.1f,%.1f]\n", */
-/*          node->s[0][0],node->s[0][1],node->s[1][0],node->s[1][1]); */
+void AddRidge(double x1, double x2, double h, double* s1, double* s2) {
+  *s1 += 4*h*(x2+x1)/(x2-x1);
+  *s2 -= 4*h/(x2-x1);
 }
 
-static void gui_tree_evaluate_childs(tree_info_t* info, double h, double f) {
+
+/* void AddRidge(tree_info_t* node, int geo[2][2], int d, double h) { */
+/*   int x1 = geo[d][0]; */
+/*   int x2 = geo[d][1]; */
+
+/*   node->s[d][0] += 4*h*(x2+x1)/(x2-x1); */
+/*   node->s[d][1] -= 4*h/(x2-x1); */
+/* } */
+
+static void gui_tree_evaluate_childs1(tree_info_t* info, double h, double f) {
   tree_t* tree = info->node;
   int d = (tree->depth % 2);
   int pos = info->geo[d][0];
@@ -662,28 +703,163 @@ static void gui_tree_evaluate_childs(tree_info_t* info, double h, double f) {
     tree_t* sub = sinfo->node;
     int end_pos;
     
-    size += sub->size;
-    end_pos = info->geo[d][0] + size*width/tree->size;
-
     sinfo->geo[0][0] = sinfo->geo[0][1] = 0;
     sinfo->geo[1][0] = sinfo->geo[1][1] = 0;
 
-    if (end_pos > pos+1) {
+    if (sub->size <= 0) continue;
+
+    size += sub->size;
+    end_pos = info->geo[d][0] + size*width/tree->size;
+
+    if (end_pos > pos+1 || (!dlist->next && end_pos > pos)) {
       sinfo->geo[d][0] = pos;
       sinfo->geo[d][1] = end_pos;
       sinfo->geo[1-d][0] = info->geo[1-d][0];
       sinfo->geo[1-d][1] = info->geo[1-d][1];
       
-      AddRidge(info, sinfo, d, h);
+      memcpy(sinfo->s, info->s, sizeof(sinfo->s));
+      AddRidge(sinfo->geo[d][0], sinfo->geo[d][1], h,
+               &sinfo->s[d][0], &sinfo->s[d][1]);
 
       pos = end_pos;
-      if (sub->entries) gui_tree_evaluate_childs(sinfo, h*f, f);
+      if (sub->entries) gui_tree_evaluate_childs1(sinfo, h*f, f);
     }
   }
 
 }
-  
 
+static gint64 _find_next_size(GList* children, gint64 rsize,
+                              int width, int height) {
+  GList* dlist;
+  gint64 size = 0;
+  double best_ratio = 0.0;
+  gint64 best_size = 0;
+
+  g_assert(width >= height);
+
+/*   g_message("   have %ld in (%d,%d) (%u children)", rsize, width, height, */
+/*             g_list_length(children)); */
+
+  for (dlist = children; dlist; dlist = dlist->next) {
+    tree_info_t* sinfo = dlist->data;
+    tree_t* sub = sinfo->node;
+    int dx, dy;
+    double ratio;
+
+    size += sub->size;
+    if (size == 0) continue;
+
+    // get the width of the col
+    dx = (gint64)width * size / rsize;
+    // get the height of the last item.
+    dy = (gint64)height * sub->size / size;
+    // calculate the aspect ratio
+/*     g_message("   -size is %ld (%d %d)", sub->size, dx, dy); */
+    if (dx == 0 && dy == 0) continue;
+
+  
+    if (dx < dy) ratio = (double)dx/(double)dy;
+    else ratio = (double)dy/(double)dx;
+
+/*     g_message("   -ratio (%d,%d) %.1f (size %ld)", dx, dy, ratio, size); */
+
+    if (ratio >= best_ratio) {
+      best_ratio = ratio;
+      best_size = size;
+    } else {
+      break;
+    }
+  }
+  return best_size;
+}
+
+static void gui_tree_evaluate_childs2(tree_info_t* info, double h, double f) {
+  tree_t* tree = info->node;
+  GList* children = info->children;
+  gint64 rsize, size;
+  int d;
+  int geo[2][2];
+  double s[2][2];
+
+  memcpy(geo, info->geo, sizeof(geo));
+  rsize = tree->size;
+
+/*   g_message("%d evaluate '%s' with %u children", tree->depth, tree->name, */
+/*             g_list_length(tree->entries)); */
+  while (children) {
+    int width, height;
+    int dx, pos;
+    gint64 ssize;
+
+/*     g_message("+ layout in (%d,%d)(%d,%d)", geo[0][0], geo[1][0], geo[0][1], geo[1][1]); */
+    if (geo[0][1]-geo[0][0] < geo[1][1]-geo[1][0]) d = 1;
+    else d = 0;
+
+    width = geo[d][1]-geo[d][0];
+    height = geo[1-d][1]-geo[1-d][0];
+
+    size = _find_next_size(children, rsize, width, height);
+
+/*     g_message(" -display %ld bytes of %ld", size, rsize); */
+    
+/*   printf("  s: [%.1f,%.1f][%.1f,%.1f]\n", */
+/*          info->s[0][0],info->s[0][1],info->s[1][0],info->s[1][1]); */
+
+    if (rsize) dx = (gint64)width * size / rsize;
+    else dx = 0;
+
+/*     g_message(" -using %d width", dx); */
+
+    ssize = 0;
+    pos = geo[1-d][0];
+    
+    memcpy(s, info->s, sizeof(s));
+    AddRidge(geo[d][0], geo[d][0]+dx, h, &s[d][0], &s[d][1]);
+
+    for ( ; children; children = children->next) {
+      tree_info_t* sinfo = children->data;
+      tree_t* sub = sinfo->node;
+      int end_pos;
+      
+      sinfo->geo[0][0] = sinfo->geo[0][1] = 0;
+      sinfo->geo[1][0] = sinfo->geo[1][1] = 0;
+      
+      if (sub->size <= 0) {
+/*         g_message("  -skip %s", sub->name); */
+        continue;
+      }
+      ssize += sub->size;
+      if (ssize > size) {
+/*         g_message("   -stop %ld/%ld", ssize, size); */
+        break;
+      }
+/*       g_message("  -child %s, bytes %ld", sub->name, ssize); */
+
+      end_pos = geo[1-d][0] + ssize*height/size;
+      
+      if (end_pos > pos+1 || (ssize == size && end_pos > pos)) {
+        sinfo->geo[1-d][0] = pos;
+        sinfo->geo[1-d][1] = end_pos;
+        sinfo->geo[d][0] = geo[d][0];
+        sinfo->geo[d][1] = geo[d][0]+dx;
+/*         g_message("  +geo (%d,%d)(%d,%d)", sinfo->geo[0][0], sinfo->geo[1][0], */
+/*                   sinfo->geo[0][1], sinfo->geo[1][1]); */
+        
+        memcpy(sinfo->s, s, sizeof(sinfo->s));
+        AddRidge(sinfo->geo[1-d][0], sinfo->geo[1-d][1], h,
+                 &sinfo->s[1-d][0], &sinfo->s[1-d][1]);
+
+        pos = end_pos;
+        if (sub->entries) gui_tree_evaluate_childs2(sinfo, h*f, f);
+      }
+    }
+    geo[d][0] += dx;
+    rsize -= size;
+  }
+
+}
+  
+  
 static tree_info_t* gui_tree_evaluate(tree_info_t* info) {
   int Border = 1;
 
@@ -696,7 +872,12 @@ static tree_info_t* gui_tree_evaluate(tree_info_t* info) {
   info->s[1][0] = .0;
   info->s[1][1] = .0;
   
-  gui_tree_evaluate_childs(info, 0.5, 0.8);
+  if (pref_get_display_mode() == DISPLAY_STANDARD_CUSHION) {
+    gui_tree_evaluate_childs1(info, pref_get_h(), pref_get_f());
+  } else {
+    gui_tree_evaluate_childs2(info, pref_get_h(), pref_get_f());
+  }
+  
   return info;
 }
 
@@ -749,9 +930,9 @@ static void gui_paths_update() {
 
   if (dlist) {
     // only delete if we have to add a new end path.
-/*     if (item != CurrentItem) temp = dlist->next; */
-/*     else temp = NULL; */
-    temp = dlist->next;
+    if (item != CurrentItem) temp = dlist->next;
+    else temp = NULL;
+/*     temp = dlist->next; */
   } else {
     // delete all
     temp = Paths;
@@ -826,3 +1007,4 @@ static void gui_tree_display(tree_info_t* info, gboolean destroy_old, gboolean n
   }
 
 }
+

@@ -7,4 +7,4 @@ Exec=gdmap
 Icon=gdmap_icon.png
 Terminal=false
 Type=Application
-Categories=Network;P2P;GTK
+Categories=Filesystem;Utility;GTK

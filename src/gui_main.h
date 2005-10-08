@@ -18,6 +18,5 @@
 
 GtkWidget* gui_create_main_win (void);
 GtkWidget* gui_get_main_win();
-/* void gui_tree_display(tree_t* tree); */
 
 #endif

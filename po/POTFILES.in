@@ -1,2 +1,4 @@
 data/gdmap.desktop.in
 src/gui_main.c
+src/about.c
+src/preferences.c

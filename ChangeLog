@@ -1,3 +1,8 @@
+2005-10-09 [0.5.0]	Sgop	(sgop at users.sourceforge.net)
+	* added about dialog
+	* added preferences
+	* added squarified treemaps
+	
 2005-10-03 [0.4.2]	Sgop	(sgop at users.sourceforge.net)
 	* fixed color save
 	* correct project makefiles

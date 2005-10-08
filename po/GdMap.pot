@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-09-24 00:30+0200\n"
+"POT-Creation-Date: 2005-10-09 00:18+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,6 +24,118 @@ msgstr ""
 msgid "Graphical Disk Map"
 msgstr ""
 
-#: ../src/gui_main.c:58
+#: ../src/gui_main.c:72
+msgid "_File"
+msgstr ""
+
+#: ../src/gui_main.c:73
+msgid "_View"
+msgstr ""
+
+#: ../src/gui_main.c:74
+msgid "_Help"
+msgstr ""
+
+#: ../src/gui_main.c:75
+msgid "_Open..."
+msgstr ""
+
+#: ../src/gui_main.c:76
+msgid "Open a folder"
+msgstr ""
+
+#: ../src/gui_main.c:79
+msgid "_Quit"
+msgstr ""
+
+#: ../src/gui_main.c:80
+msgid "Exit program"
+msgstr ""
+
+#: ../src/gui_main.c:83
+msgid "_Back"
+msgstr ""
+
+#: ../src/gui_main.c:84
+msgid "Go back one step"
+msgstr ""
+
+#: ../src/gui_main.c:87
+msgid "_Forward"
+msgstr ""
+
+#: ../src/gui_main.c:88
+msgid "Go forward one step"
+msgstr ""
+
+#: ../src/gui_main.c:91
+msgid "_Up"
+msgstr ""
+
+#: ../src/gui_main.c:92
+msgid "Go up one level"
+msgstr ""
+
+#: ../src/gui_main.c:95
+msgid "_Top"
+msgstr ""
+
+#: ../src/gui_main.c:96
+msgid "Goto toplevel folder"
+msgstr ""
+
+#: ../src/gui_main.c:99
+msgid "_Options..."
+msgstr ""
+
+#: ../src/gui_main.c:100
+msgid "Edit settings"
+msgstr ""
+
+#: ../src/gui_main.c:103
+msgid "_About..."
+msgstr ""
+
+#: ../src/gui_main.c:104
+msgid "About this program"
+msgstr ""
+
+#: ../src/gui_main.c:248
 msgid "Choose folder"
+msgstr ""
+
+#: ../src/about.c:72
+msgid "GdMap is a tool which allows to graphically explore your disks."
+msgstr ""
+
+#: ../src/about.c:75
+msgid "translator-credits"
+msgstr ""
+
+#: ../src/preferences.c:102
+msgid "Preferences"
+msgstr ""
+
+#: ../src/preferences.c:113
+msgid "Display type"
+msgstr ""
+
+#: ../src/preferences.c:119
+msgid "Standard cushioned treemaps"
+msgstr ""
+
+#: ../src/preferences.c:123
+msgid "Squarified cushioned treemaps"
+msgstr ""
+
+#: ../src/preferences.c:137
+msgid "Cushion settings"
+msgstr ""
+
+#: ../src/preferences.c:145
+msgid "Height factor:"
+msgstr ""
+
+#: ../src/preferences.c:158
+msgid "Decreasing height:"
 msgstr ""
