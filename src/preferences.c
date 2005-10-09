@@ -91,7 +91,7 @@ void gui_show_preferences(void) {
   GtkWidget* vbox0;
   GtkWidget* item;
   GtkWidget* item2;
-  static GSList* Group = NULL;
+  GSList* Group = NULL;
 
   if (PrefWin) {
     gtk_window_present(GTK_WINDOW(PrefWin));

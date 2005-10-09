@@ -504,6 +504,7 @@ static GtkWidget* gui_create_status_bar() {
   gtk_widget_show(label);
   FileLabel = GTK_LABEL(label);
   gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+  gtk_widget_set_size_request(label, 50, -1);
   gtk_container_add(GTK_CONTAINER(frame), label);
 
   return bar;
