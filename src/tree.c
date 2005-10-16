@@ -12,6 +12,7 @@
 #endif
 
 #include <stdlib.h>
+#include <time.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -22,7 +23,12 @@
 #include "utils.h"
 #include "gui_main.h"
 
-int MaxDepth = 0;
+static ProgressFunc TheProgressFunc = NULL;
+static unsigned TheProgress = 0;
+static void* TheProgressData = NULL;
+static unsigned TheWork = 0;
+static unsigned MaxProgress = 2;
+static gboolean Aborted = FALSE;
 
 static void tree_print(tree_t* tree) {
   GList* dlist;
@@ -53,13 +59,26 @@ void tree_destroy(tree_t* tree) {
   g_free(tree);
 }
 
-static tree_t* tree_new(const char* sname, gint64 size) {
-  tree_t* result = g_malloc0(sizeof(tree_t));
+static tree_t* tree_new(const char* sname, gint64 size, unsigned depth) {
+  static time_t last_t = 0;
+  time_t t = 0;
+  tree_t* result;
+
+  result = g_malloc0(sizeof(tree_t));
   result->name = g_strdup(sname);
   result->size = size;
   result->entries = NULL;
   result->parent = NULL;
-  result->depth = 0;
+  result->depth = depth;
+
+  if (depth <= MaxProgress) TheProgress++;
+
+  if (TheProgressFunc && (t = time(NULL)) > last_t) {
+    if (!TheProgressFunc((double)TheProgress/(double)TheWork, TheProgressData)) 
+      Aborted = TRUE;
+    last_t = t;
+  }
+  
 
   return result;
 }
@@ -79,24 +98,22 @@ static tree_t* tree_scan_rec(const char* dirname, const char* shortname, int dep
   tree_t* result = NULL;
   tree_t* tree = NULL;
   GDir* dir;
-  
+  GError* error = NULL;
+
   if (lstat(dirname, &buf) < 0) return NULL;
 
   if (!(buf.st_mode&S_IFDIR)) {
-    result = tree_new(shortname, buf.st_size);
-    result->depth = depth;
+    result = tree_new(shortname, buf.st_size, depth);
     return result;
-  }
-
-  if ((dir = g_dir_open(dirname, 0, NULL)) == NULL) {
-    g_message("could not open dir '%s'", dirname);
+  } else if ((dir = g_dir_open(dirname, 0, &error)) == NULL) {
+    g_message("%s", error->message);
+    g_error_free(error);
     return NULL;
   }
 
-  result = tree_new(shortname, /*buf.st_size*/0);
-  result->depth = depth;
+  result = tree_new(shortname, /*buf.st_size*/0, depth);
 
-  while ((name = g_dir_read_name(dir)) != NULL) {
+  while (result && !Aborted && (name = g_dir_read_name(dir)) != NULL) {
     char* nname;
     if (!strcmp(name, ".")) continue;
     if (!strcmp(name, "..")) continue;
@@ -114,14 +131,58 @@ static tree_t* tree_scan_rec(const char* dirname, const char* shortname, int dep
   return result;
 }
 
-tree_t* tree_load(const char* folder) {
+static unsigned _tree_get_work(const char* dirname, unsigned d, unsigned res) {
+  struct stat buf;
+  const char* name;
+  GDir* dir;
+  
+  if (lstat(dirname, &buf) < 0) return res;
+
+  if (!(buf.st_mode&S_IFDIR)) {
+    res++;
+    return res;
+  } else if ((dir = g_dir_open(dirname, 0, NULL)) == NULL) {
+    return res;
+  } else {
+    res++;
+  }
+  
+  if (d > 0) {
+    while ((name = g_dir_read_name(dir)) != NULL) {
+      char* nname;
+      if (!strcmp(name, ".")) continue;
+      if (!strcmp(name, "..")) continue;
+      
+      nname = g_strdup_printf("%s/%s", dirname, name);
+      res = _tree_get_work(nname, d-1, res);
+      g_free(nname);
+    }
+  }
+  g_dir_close(dir);
+
+  return res;
+}
+
+tree_t* tree_load(const char* folder, ProgressFunc func, void* data) {
   tree_t* tree;
+  
+  TheProgressFunc = func;
+  TheProgress = 0;
+  TheProgressData = data;
+  TheWork = 0;
+  TheWork = _tree_get_work(folder, MaxProgress, TheWork);
+  Aborted = FALSE;
 
   g_assert(folder);
-  g_message("scanning folder '%s'", folder);
   tree = tree_scan_rec(folder, folder, 0);
-/*   tree_print(tree); */
-  return tree;
+
+  TheProgressFunc = NULL;
+  if (Aborted) {
+    tree_destroy(tree);
+    return NULL;
+  } else {
+    return tree;
+  }
 }
 
 

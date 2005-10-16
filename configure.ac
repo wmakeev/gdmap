@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([GdMap], [0.5.0], [http://sourceforge.net/tracker/?atid=373401&group_id=21965])
+AC_INIT([GdMap], [0.6.0], [http://sourceforge.net/tracker/?atid=373401&group_id=21965])
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
 

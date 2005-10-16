@@ -16,6 +16,8 @@
 
 typedef struct _tree_t tree_t;
 
+typedef gboolean (*ProgressFunc)(double percentage, void* data);
+
 struct _tree_t {
   char* name;
   gint64 size;
@@ -24,17 +26,12 @@ struct _tree_t {
   int depth;
 };
 
-extern int MaxDepth;
-extern tree_t* CurrentTree;
-
-tree_t* tree_load(const char* folder);
+tree_t* tree_load(const char* folder, ProgressFunc func, void* data);
 
 void tree_destroy(tree_t* tree);
 
 char* tree_full_name(tree_t* tree);
-tree_t* tree_search_file(tree_t* tree, int x, int y);
 tree_t* tree_find_path(tree_t* root, tree_t* child);
 tree_t* dir_tree_get_root(tree_t* dir);
-void tree_refresh(tree_t* tree);
 
 #endif

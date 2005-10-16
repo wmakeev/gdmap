@@ -96,38 +96,73 @@ static gboolean color_load(const char* filename) {
   return 1;
 }
 
-#define N_COL  25
+#define N_COL  60
 
 static void color_create_default() {
   color_t* color;
   GdkColor gcolor;
   int i1;
   static char dcolors[N_COL][2][20] = {
-    {"DEFAULT", "#AAAAAA"},
-    {"COLOR1", "#FFFF00"},
-    {"COLOR2", "#0FFFFF"},
-    {"DIR", "#666600"},
-    {"ASF", "#EE0000"},
-    {"MPG", "#dd0000"},
-    {"MPEG", "#cc0000"},
-    {"AVI", "#BB0000"},
-    {"MP3", "#00DDDD"},
-    {"WAV", "#00FFFF"},
-    {"JPG", "#EEEE00"},
-    {"JPEG", "#EEEE00"},
-    {"GIF", "#DDDD00"},
-    {"H", "#00ff00"},
-    {"HH", "#00ff00"},
-    {"C", "#00aa00"},
-    {"CC", "#00aa00"},
-    {"CPP", "#00aa00"},
-    {"bz", "#0000AA"},
-    {"ZIP", "#0000AA"},
-    {"GZ", "#0000AA"},
-    {"TGZ", "#0000CC"},
-    {"O", "#BB00BB"},
-    {"EXE", "#FF00FF"},
-    {"DLL", "#DD00DD"}
+    {"DEFAULT", "#AAAAAA"},             // Gray
+    {"COLOR1", "#FFFF00"},              // Yellow
+    {"COLOR2", "#0FFFFF"},              // Cyan
+    {"DIR",    "#666600"},              // Burnt
+    {"ASF",    "#DD0000"},              // Red        
+    {"AVI",    "#DD0000"},              // Red        
+    {"MPG",    "#DD0000"},              // Red        
+    {"MPEG",   "#DD0000"},              // Red        
+    {"WMV",    "#DD0000"},              // Red        
+    {"EXE",    "#FF00FF"},              // Magenta    
+    {"DLL",    "#BB00BB"},              // Magenta    
+    {"O",      "#BB00BB"},              // Magenta    
+    {"LO",     "#BB00BB"},              // Magenta    
+    {"A",      "#BB00BB"},              // Magenta    
+    {"SO",     "#BB00BB"},              // Magenta    
+    {"C",      "#00aa00"},              // Green      
+    {"CC",     "#00aa00"},              // Green      
+    {"CPP",    "#00aa00"},              // Green      
+    {"H",      "#00ff00"},              // Light Green
+    {"HH",     "#00ff00"},              // Light Green
+    {"EPS",    "#EEEE00"},              // Yellow     
+    {"BMP",    "#EEEE00"},              // Yellow     
+    {"SVG",    "#EEEE00"},              // Yellow     
+    {"GIF",    "#EEEE00"},              // Yellow     
+    {"PNG",    "#EEEE00"},              // Yellow
+    {"JPG",    "#EEEE00"},              // Yellow     
+    {"JPEG",   "#EEEE00"},              // Yellow     
+    {"TIF",    "#EEEE00"},              // Yellow     
+    {"TIFF",   "#EEEE00"},              // Yellow     
+    {"MP3",    "#00DDDD"},              // Cyan       
+    {"OGG",    "#00DDDD"},              // Cyan       
+    {"FLAC",   "#00DDDD"},              // Cyan       
+    {"WAV",    "#00DDDD"},              // Cyan       
+    {"ODP",    "#d8def1"},              // Power Blue 
+    {"ODS",    "#d8def1"},              // Power Blue 
+    {"ODT",    "#d8def1"},              // Power Blue 
+    {"OTP",    "#d8def1"},              // Power Blue 
+    {"OTS",    "#d8def1"},              // Power Blue 
+    {"OTT",    "#d8def1"},              // Power Blue 
+    {"STC",    "#d8def1"},              // Power Blue 
+    {"STW",    "#d8def1"},              // Power Blue 
+    {"sxc",    "#d8def1"},              // Power Blue 
+    {"SXC",    "#d8def1"},              // Power Blue 
+    {"SXI",    "#d8def1"},              // Power Blue 
+    {"SXW",    "#d8def1"},              // Power Blue 
+    {"MDB",    "#886937"},              // 
+    {"DOC",    "#886937"},              // 
+    {"PDF",    "#886937"},              // 
+    {"PS",     "#886937"},              // 
+    {"PPT",    "#886937"},              // 
+    {"TXT",    "#886937"},              // 
+    {"PO",     "#886937"},              // 
+    {"XLS",    "#886937"},              // 
+    {"XML",    "#886937"},              // 
+    {"HTML",   "#886937"},              // 
+    {"HTM",    "#886937"},              // 
+    {"TGZ",    "#0000AA"},              // Dark Blue  
+    {"bz2",    "#0000AA"},              // Dark Blue  
+    {"GZ",     "#0000AA"},              // Dark Blue  
+    {"ZIP",    "#0000AA"}               // Dark Blue  
   };
   GtkWidget* win = gui_get_main_win();
 

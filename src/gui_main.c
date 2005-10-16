@@ -38,6 +38,12 @@ struct _tree_info_t {
   tree_info_t* parent;
 };
 
+typedef struct {
+  GtkProgressBar* bar;
+  GtkButton* abort;
+  gboolean cancel;
+} progress_data_t;
+
 static GtkWidget* MainWin = NULL;
 
 static char* Buffer = NULL;
@@ -50,8 +56,12 @@ static GtkWidget* Area = NULL;
 static tree_info_t* CurrentItem = NULL;
 
 static GtkLabel* FileLabel = NULL;
+static GtkLabel* FileSizeLabel = NULL;
+static GtkLabel* SubLabel = NULL;
+static GtkLabel* SubSizeLabel = NULL;
 static GtkLabel* SizeLabel = NULL;
 static GtkBox* PathBox = NULL;
+static GtkBox* StatusBar = NULL;
 
 static GList* History = NULL;
 static GList* HistoryPos = NULL;
@@ -240,6 +250,67 @@ static void on_action_about() {
   gui_show_about();
 }
 
+static gboolean _update_progress(double percentage, void* data) {
+  progress_data_t* pdata = data;
+
+  if (pdata->cancel) return FALSE;
+
+/*   g_message("update progress %.2f", percentage); */
+  gtk_progress_bar_set_fraction(pdata->bar, percentage);
+  while (gtk_events_pending()) if (gtk_main_iteration()) return FALSE;
+
+  return TRUE;
+}
+
+static void on_abort_load(progress_data_t* data) {
+  data->cancel = TRUE;
+}
+
+static tree_t* gui_tree_load(const char* folder) {
+  GtkWidget* item1;
+  GtkWidget* item2;
+  tree_t* tree;
+  progress_data_t* data = g_malloc0(sizeof(*data));
+
+  data->cancel = FALSE;
+
+  gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Open"), FALSE);
+
+  item1 = gtk_progress_bar_new();
+  data->bar = GTK_PROGRESS_BAR(item1);
+  gtk_progress_bar_set_text(data->bar, _("scanning..."));
+  gtk_widget_show(item1);
+  gtk_box_pack_start(StatusBar, item1, FALSE, FALSE, 0);
+  
+  item2 = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
+  data->abort = GTK_BUTTON(item2);
+  gtk_widget_show(item2);
+  gtk_box_pack_start(StatusBar, item2, FALSE, FALSE, 0);
+  g_signal_connect_swapped(G_OBJECT(item2), "clicked",
+                           G_CALLBACK(on_abort_load), data);
+
+  tree = tree_load(folder, _update_progress, data);
+  
+  gtk_widget_destroy(item1);
+  gtk_widget_destroy(item2);
+  g_free(data);
+
+  gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Open"), TRUE);
+
+  return tree;
+}
+
+void gui_tree_load_and_display(const char* folder) {
+  tree_t* tree;
+
+  tree = gui_tree_load(folder);
+  if (tree) {
+    tree_info_t* info = tree_info_create(tree);
+    gui_tree_display(info, TRUE, TRUE);
+  }
+}
+
+
 static void on_action_open() {
   GtkWidget* dialog;
   char* res;
@@ -259,12 +330,8 @@ static void on_action_open() {
   gtk_widget_destroy(dialog);
 
   if (res) {
-    tree_t* tree = tree_load(res);
+    gui_tree_load_and_display(res);
     g_free(res);
-    if (tree) {
-      tree_info_t* info = tree_info_create(tree);
-      gui_tree_display(info, TRUE, TRUE);
-    }
   }
 }
 
@@ -365,18 +432,23 @@ static void gui_tree_mark1(tree_info_t* info) {
   
   if (info != Mark1) {
     char* temp;
-    char* text = g_strdup("");
+    char* text = g_strdup(info->node->name);
     Mark1 = info;
-    while (info != CurrentItem) {
-      temp = g_strdup_printf("/%s%s", info->node->name, text);
+    while (info != CurrentItem && info->parent != CurrentItem &&
+           info->parent->parent != CurrentItem) {
+      info = info->parent;
+      temp = g_strdup_printf("%s/%s", info->node->name, text);
       g_free(text);
       text = temp;
-      info = info->parent;
     }
-    temp = g_strdup_printf("...%s", text);
+    gtk_label_set_text(GTK_LABEL(FileLabel), to_utf8(text));
     g_free(text);
-    gtk_label_set_text(GTK_LABEL(FileLabel), to_utf8(temp));
+
+    temp = print_filesize(Mark1->node->size);
+    text = g_strdup_printf("<b>%s</b>", temp);
+    gtk_label_set_markup(FileSizeLabel, text);
     g_free(temp);
+    g_free(text);
   }
 
 }
@@ -406,14 +478,25 @@ static void gui_tree_mark2(tree_info_t* info) {
                      info->geo[0][1]-info->geo[0][0]+1,
                      info->geo[1][1]-info->geo[1][0]+1);
 
-/*   if (info != Mark2) { */
-/*     gtk_label_set_text(GTK_LABEL(DirLabel),  */
-/*                        to_utf8(tree_full_name(tree))); */
-/*     gtk_label_set_text(GTK_LABEL(DirSize), size_format(tree->size)); */
-/*     gtk_label_set_text(GTK_LABEL(DirPer),  */
-/*                        per_format(tree->size, CurrentTree->size)); */
-/*   } */
-  Mark2 = info;
+  if (info != Mark2) {
+    Mark2 = info;
+    if (Mark2 != Mark1) {
+      char* temp;
+      char* text;
+      
+      gtk_label_set_text(SubLabel, to_utf8(info->node->name));
+      
+      temp = print_filesize(Mark2->node->size);
+      text = g_strdup_printf("<b>%s</b>", temp);
+      gtk_label_set_markup(SubSizeLabel, text);
+      g_free(temp);
+      g_free(text);
+    } else {
+      gtk_label_set_markup(SubSizeLabel, "<b>-</b>");
+      gtk_label_set_text(SubLabel, "-");
+    }
+  }
+
 }
 
 static void gui_tree_mark(tree_info_t* info) {
@@ -489,23 +572,44 @@ static GtkWidget* gui_create_display_box() {
 
 static GtkWidget* gui_create_status_bar() {
   GtkWidget* bar;
-  GtkWidget* frame;
+  GtkWidget* table;
   GtkWidget* label;
 
   bar = gtk_hbox_new(FALSE, 5);
   gtk_widget_show(bar);
+  StatusBar = GTK_BOX(bar);
 
-  frame = gtk_frame_new(NULL);
-  gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
-  gtk_widget_show(frame);
-  gtk_box_pack_start(GTK_BOX(bar), frame, TRUE, TRUE, 0);
+  table = gtk_table_new(2,2, FALSE);
+/*   gtk_table_set_col_spacings(GTK_TABLE(table), 10); */
+/*   gtk_table_set_row_spacings(GTK_TABLE(table), 0); */
+  gtk_widget_show(table);
+  gtk_box_pack_start(GTK_BOX(bar), table, TRUE, TRUE, 0);
+
+  label = gtk_label_new("");
+  gtk_widget_show(label);
+  SubSizeLabel = GTK_LABEL(label);
+  gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 5, 0);
+
+  label = gtk_label_new("");
+  gtk_widget_show(label);
+  SubLabel = GTK_LABEL(label);
+/*   gtk_widget_set_size_request(label, 50, -1); */
+  gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 0, 1, GTK_FILL, GTK_FILL, 5, 0);
+
+  label = gtk_label_new("");
+  gtk_widget_show(label);
+  FileSizeLabel = GTK_LABEL(label);
+  gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2, GTK_FILL, GTK_FILL, 5, 0);
 
   label = gtk_label_new("");
   gtk_widget_show(label);
   FileLabel = GTK_LABEL(label);
-  gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
   gtk_widget_set_size_request(label, 50, -1);
-  gtk_container_add(GTK_CONTAINER(frame), label);
+  gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+  gtk_table_attach(GTK_TABLE(table), label, 1, 2, 1, 2, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND, 5, 0);
 
   return bar;
 }

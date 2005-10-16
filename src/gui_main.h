@@ -18,5 +18,6 @@
 
 GtkWidget* gui_create_main_win (void);
 GtkWidget* gui_get_main_win();
+void gui_tree_load_and_display(const char* folder);
 
 #endif

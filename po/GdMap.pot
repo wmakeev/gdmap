@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-09 00:18+0200\n"
+"POT-Creation-Date: 2005-10-16 16:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,91 +24,95 @@ msgstr ""
 msgid "Graphical Disk Map"
 msgstr ""
 
-#: ../src/gui_main.c:72
+#: ../src/gui_main.c:82
 msgid "_File"
 msgstr ""
 
-#: ../src/gui_main.c:73
+#: ../src/gui_main.c:83
 msgid "_View"
 msgstr ""
 
-#: ../src/gui_main.c:74
+#: ../src/gui_main.c:84
 msgid "_Help"
 msgstr ""
 
-#: ../src/gui_main.c:75
+#: ../src/gui_main.c:85
 msgid "_Open..."
 msgstr ""
 
-#: ../src/gui_main.c:76
+#: ../src/gui_main.c:86
 msgid "Open a folder"
 msgstr ""
 
-#: ../src/gui_main.c:79
+#: ../src/gui_main.c:89
 msgid "_Quit"
 msgstr ""
 
-#: ../src/gui_main.c:80
+#: ../src/gui_main.c:90
 msgid "Exit program"
 msgstr ""
 
-#: ../src/gui_main.c:83
+#: ../src/gui_main.c:93
 msgid "_Back"
 msgstr ""
 
-#: ../src/gui_main.c:84
+#: ../src/gui_main.c:94
 msgid "Go back one step"
 msgstr ""
 
-#: ../src/gui_main.c:87
+#: ../src/gui_main.c:97
 msgid "_Forward"
 msgstr ""
 
-#: ../src/gui_main.c:88
+#: ../src/gui_main.c:98
 msgid "Go forward one step"
 msgstr ""
 
-#: ../src/gui_main.c:91
+#: ../src/gui_main.c:101
 msgid "_Up"
 msgstr ""
 
-#: ../src/gui_main.c:92
+#: ../src/gui_main.c:102
 msgid "Go up one level"
 msgstr ""
 
-#: ../src/gui_main.c:95
+#: ../src/gui_main.c:105
 msgid "_Top"
 msgstr ""
 
-#: ../src/gui_main.c:96
+#: ../src/gui_main.c:106
 msgid "Goto toplevel folder"
 msgstr ""
 
-#: ../src/gui_main.c:99
+#: ../src/gui_main.c:109
 msgid "_Options..."
 msgstr ""
 
-#: ../src/gui_main.c:100
+#: ../src/gui_main.c:110
 msgid "Edit settings"
 msgstr ""
 
-#: ../src/gui_main.c:103
+#: ../src/gui_main.c:113
 msgid "_About..."
 msgstr ""
 
-#: ../src/gui_main.c:104
+#: ../src/gui_main.c:114
 msgid "About this program"
 msgstr ""
 
-#: ../src/gui_main.c:248
+#: ../src/gui_main.c:281
+msgid "scanning..."
+msgstr ""
+
+#: ../src/gui_main.c:319
 msgid "Choose folder"
 msgstr ""
 
-#: ../src/about.c:72
+#: ../src/about.c:53
 msgid "GdMap is a tool which allows to graphically explore your disks."
 msgstr ""
 
-#: ../src/about.c:75
+#: ../src/about.c:56
 msgid "translator-credits"
 msgstr ""
 
