@@ -16,6 +16,7 @@
 #include "l_i18n.h"
 #include "gui_main.h"
 #include "colors.h"
+#include "preferences.h"
 
 static const char* Folder = NULL;
 static GOptionEntry Options[] = {
@@ -24,7 +25,6 @@ static GOptionEntry Options[] = {
 };
 
 static gboolean on_load() {
-  g_message("on_load");
   if (Folder) gui_tree_load_and_display(Folder);
   return FALSE;
 }
@@ -51,7 +51,9 @@ int main (int argc, char *argv[]) {
   gtk_init(&argc, &argv);
   
   gui_create_main_win();
+
   colors_init();
+  pref_init();
 
   g_idle_add((GSourceFunc)on_load, NULL);
   

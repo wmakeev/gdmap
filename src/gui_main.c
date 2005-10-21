@@ -65,9 +65,14 @@ static GtkBox* StatusBar = NULL;
 
 static GList* History = NULL;
 static GList* HistoryPos = NULL;
+static gboolean Loading = FALSE;
 
 static GtkUIManager* UIManager = NULL;
 static GtkActionGroup* ActionGroup = NULL;
+
+static gboolean LUseColors = TRUE;
+static unsigned LMaxDepth = 0;
+static unsigned LDisplayMode = DISPLAY_SQUARE_CUSHION;
 
 static void on_action_open();
 static void on_action_back();
@@ -77,6 +82,7 @@ static void on_action_top();
 static void on_action_exit();
 static void on_action_preferences();
 static void on_action_about();
+static void on_action_refresh();
 
 static GtkActionEntry Actions[] = {
   { "FileMenu", NULL, N_("_File"), 0,0,0 },
@@ -106,13 +112,17 @@ static GtkActionEntry Actions[] = {
     NULL, N_("Goto toplevel folder"),
     G_CALLBACK(on_action_top)
   },
-  { "Options", GTK_STOCK_PREFERENCES, N_("_Options..."),
+  { "Options", GTK_STOCK_PREFERENCES, N_("_Settings..."),
     NULL, N_("Edit settings"),
     G_CALLBACK(on_action_preferences)
   },
   { "About", GTK_STOCK_PREFERENCES, N_("_About..."),
     NULL, N_("About this program"),
     G_CALLBACK(on_action_about)
+  },
+  { "Refresh", GTK_STOCK_REFRESH, N_("_Refresh"),
+    NULL, N_("Refresh current view"),
+    G_CALLBACK(on_action_refresh)
   },
 };
 
@@ -131,6 +141,8 @@ static const char* MenuDescription =
   "      <menuitem action=\"Forward\"/>\n"
   "      <menuitem action=\"Up\"/>\n"
   "      <menuitem action=\"Top\"/>\n"
+  "      <separator/>\n"
+  "      <menuitem action=\"Refresh\"/>\n"
   "    </menu>\n"
   "    <menu action=\"HelpMenu\">\n"
   "      <menuitem action=\"About\"/>\n"
@@ -144,11 +156,14 @@ static const char* MenuDescription =
   "    <toolitem action=\"Up\"/>\n"
   "    <toolitem action=\"Top\"/>\n"
   "    <separator/>\n"
+  "    <toolitem action=\"Refresh\"/>\n"
+  "    <separator/>\n"
   "    <toolitem action=\"Options\"/>\n"
   "  </toolbar>\n"
   "</ui>\n";
 
 static void gui_tree_display(tree_info_t* info, gboolean destroy_old, gboolean new_history);
+static tree_t* gui_tree_load(const char* folder, unsigned depth);
 
 
 // HISTORY
@@ -198,6 +213,9 @@ static void tree_info_destroy(tree_info_t* info) {
 
 static tree_info_t* tree_info_search(tree_info_t* info, int x, int y) {
   GList* dlist;
+  unsigned depth = LMaxDepth;
+
+  if (depth != 0 && depth < info->node->depth) return NULL;
 
   if (x < info->geo[0][0] || x >= info->geo[0][1] ||
       y < info->geo[1][0] || y >= info->geo[1][1])
@@ -250,6 +268,74 @@ static void on_action_about() {
   gui_show_about();
 }
 
+static gint comp_func(gconstpointer p1, gconstpointer p2) {
+  const tree_t* t1 = (tree_t*)p1;
+  const tree_t* t2 = (tree_t*)p2;
+  
+  if (t1->size < t2->size) return 1;
+  if (t1->size > t2->size) return -1;
+  return 0;
+}
+
+static gint comp_func2(gconstpointer p1, gconstpointer p2) {
+  const tree_info_t* t1 = (tree_info_t*)p1;
+  const tree_info_t* t2 = (tree_info_t*)p2;
+  
+  if (t1->node->size < t2->node->size) return 1;
+  if (t1->node->size > t2->node->size) return -1;
+  return 0;
+}
+
+static void gui_refresh_current() {
+  char* folder;
+  tree_t* new_tree;
+
+  if (!CurrentItem) return;
+  folder = tree_full_name(CurrentItem->node);
+  new_tree = gui_tree_load(folder, CurrentItem->node->depth);
+  if (new_tree) {
+    tree_t* tree = CurrentItem->node;
+    tree_t* parent = tree->parent;
+    tree_info_t* info = tree_info_create(new_tree);
+    char* t;
+
+    t = new_tree->name;
+    new_tree->name = tree->name;
+    tree->name = t;
+
+    if (parent) {
+      tree_t* temp;
+
+      // remove tree from parent
+      parent->entries = g_list_remove(parent->entries, tree);
+      CurrentItem->parent->children =
+        g_list_remove(CurrentItem->parent->children, CurrentItem);
+
+      // adjust sizes
+      for (temp = parent; temp; temp = temp->parent) {
+        temp->size -= tree->size;
+        temp->size += new_tree->size;
+      }
+      // insert tree in parent
+      parent->entries = g_list_insert_sorted(parent->entries, new_tree, comp_func);
+      new_tree->parent = parent;
+
+      CurrentItem->parent->children =
+        g_list_insert_sorted(CurrentItem->parent->children, info, comp_func2);
+      info->parent = CurrentItem->parent;
+    }
+    tree_destroy(tree);
+    tree_info_destroy(CurrentItem);
+    CurrentItem = NULL;
+    gui_tree_display(info, TRUE, TRUE);
+  }
+  g_free(folder);
+}
+
+static void on_action_refresh() {
+  gui_refresh_current();
+}
+
 static gboolean _update_progress(double percentage, void* data) {
   progress_data_t* pdata = data;
 
@@ -266,15 +352,17 @@ static void on_abort_load(progress_data_t* data) {
   data->cancel = TRUE;
 }
 
-static tree_t* gui_tree_load(const char* folder) {
+static tree_t* gui_tree_load(const char* folder, unsigned depth) {
   GtkWidget* item1;
   GtkWidget* item2;
   tree_t* tree;
   progress_data_t* data = g_malloc0(sizeof(*data));
 
   data->cancel = FALSE;
+  Loading = TRUE;
 
   gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Open"), FALSE);
+  gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Refresh"), FALSE);
 
   item1 = gtk_progress_bar_new();
   data->bar = GTK_PROGRESS_BAR(item1);
@@ -289,21 +377,21 @@ static tree_t* gui_tree_load(const char* folder) {
   g_signal_connect_swapped(G_OBJECT(item2), "clicked",
                            G_CALLBACK(on_abort_load), data);
 
-  tree = tree_load(folder, _update_progress, data);
+  tree = tree_load(folder, _update_progress, data, depth);
   
   gtk_widget_destroy(item1);
   gtk_widget_destroy(item2);
   g_free(data);
 
   gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Open"), TRUE);
+  gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Refresh"), TRUE);
+  Loading = FALSE;
 
   return tree;
 }
 
 void gui_tree_load_and_display(const char* folder) {
-  tree_t* tree;
-
-  tree = gui_tree_load(folder);
+  tree_t* tree = gui_tree_load(folder, 0);
   if (tree) {
     tree_info_t* info = tree_info_create(tree);
     gui_tree_display(info, TRUE, TRUE);
@@ -344,6 +432,8 @@ static void gui_buttons_update() {
                            CurrentItem && CurrentItem->parent);
   gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Top"),
                            CurrentItem && CurrentItem->parent);
+  gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Refresh"),
+                           CurrentItem != NULL && !Loading);
 }
 
 static void on_action_top() {
@@ -538,7 +628,7 @@ static gboolean on_area_button_press(GtkWidget* widget, GdkEventButton* event) {
   if (info) {
     if (event->button == 1 && event->type == GDK_2BUTTON_PRESS) {
       tree_info_t* sub = tree_info_find_path(CurrentItem, info);
-      gui_tree_display(sub, FALSE, TRUE);
+      if (sub) gui_tree_display(sub, FALSE, TRUE);
 /*     } else if (event->button == 3) { */
 /*       pop = create_right_popup(sub_tree); */
 /*       gtk_menu_popup(GTK_MENU(pop), NULL, NULL, NULL, NULL, */
@@ -637,6 +727,10 @@ static void gui_setup_actions(GtkWidget* win) {
 }
 
 static void gui_tree_redraw(void) {
+  LUseColors = pref_get_use_colors();
+  LMaxDepth = pref_get_max_depth();
+  LDisplayMode = pref_get_display_mode();
+
   if (CurrentItem) gui_tree_display(CurrentItem, FALSE, FALSE);
 }
 
@@ -749,11 +843,14 @@ static void gui_tree_show_item(tree_info_t* info) {
   if (x1 >= x2) return;
   if (y1 >= y2) return;
 
-  if (info->node->entries) color = color_search(".dir");
-  else color = color_search(info->node->name);
+  if (LUseColors) {
+    if (info->node->entries) color = color_search(".dir");
+    else color = color_search(info->node->name);
+  } else {
+    color = color_search("Default");
+  }
   
   extract_rgb(color->color, &red, &green, &blue);
-/*   extract_rgb("#aaaaaa", &red, &green, &blue); */
   
 /*   printf("paiting [%d,%d][%d,%d] with %d %d %d\n", x1,y1,x2,y2, */
 /*          red, green, blue); */
@@ -977,7 +1074,7 @@ static tree_info_t* gui_tree_evaluate(tree_info_t* info) {
   info->s[1][0] = .0;
   info->s[1][1] = .0;
   
-  if (pref_get_display_mode() == DISPLAY_STANDARD_CUSHION) {
+  if (LDisplayMode == DISPLAY_STANDARD_CUSHION) {
     gui_tree_evaluate_childs1(info, pref_get_h(), pref_get_f());
   } else {
     gui_tree_evaluate_childs2(info, pref_get_h(), pref_get_f());
@@ -987,10 +1084,12 @@ static tree_info_t* gui_tree_evaluate(tree_info_t* info) {
 }
 
 static void gui_tree_show(tree_info_t* info) {
+  unsigned depth = LMaxDepth;
+
   if (info->geo[0][0] >= info->geo[0][1]) return;
   if (info->geo[1][0] >= info->geo[1][1]) return;
 
-  if (info->children) {
+  if (info->children && (depth == 0 || info->node->depth < depth)) {
     GList* dlist;
     for (dlist = info->children; dlist; dlist = dlist->next) {
       tree_info_t* sub = dlist->data;

@@ -40,16 +40,17 @@ static void tree_print(tree_t* tree) {
 }
 
 char* tree_full_name(tree_t* tree) {
-  static char dir[4096];
-  //FIXME
+  char* res;
+
   if (tree->parent) {
-    strcpy(dir, tree_full_name(tree->parent));
-    strcat(dir, tree->name);
+    char* p = tree_full_name(tree->parent);
+    res = g_strdup_printf("%s/%s", p, tree->name);
+    g_free(p);
   } else {
-    strcpy(dir, tree->name);
+    res = g_strdup(tree->name);
   }
 
-  return dir;
+  return res;
 }
 
 void tree_destroy(tree_t* tree) {
@@ -163,7 +164,7 @@ static unsigned _tree_get_work(const char* dirname, unsigned d, unsigned res) {
   return res;
 }
 
-tree_t* tree_load(const char* folder, ProgressFunc func, void* data) {
+tree_t* tree_load(const char* folder, ProgressFunc func, void* data, unsigned depth) {
   tree_t* tree;
   
   TheProgressFunc = func;
@@ -174,7 +175,7 @@ tree_t* tree_load(const char* folder, ProgressFunc func, void* data) {
   Aborted = FALSE;
 
   g_assert(folder);
-  tree = tree_scan_rec(folder, folder, 0);
+  tree = tree_scan_rec(folder, folder, depth);
 
   TheProgressFunc = NULL;
   if (Aborted) {

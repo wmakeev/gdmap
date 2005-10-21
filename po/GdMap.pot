@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-16 16:34+0200\n"
+"POT-Creation-Date: 2005-10-21 15:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,87 +24,95 @@ msgstr ""
 msgid "Graphical Disk Map"
 msgstr ""
 
-#: ../src/gui_main.c:82
+#: ../src/gui_main.c:88
 msgid "_File"
 msgstr ""
 
-#: ../src/gui_main.c:83
+#: ../src/gui_main.c:89
 msgid "_View"
 msgstr ""
 
-#: ../src/gui_main.c:84
+#: ../src/gui_main.c:90
 msgid "_Help"
 msgstr ""
 
-#: ../src/gui_main.c:85
+#: ../src/gui_main.c:91
 msgid "_Open..."
 msgstr ""
 
-#: ../src/gui_main.c:86
+#: ../src/gui_main.c:92
 msgid "Open a folder"
 msgstr ""
 
-#: ../src/gui_main.c:89
+#: ../src/gui_main.c:95
 msgid "_Quit"
 msgstr ""
 
-#: ../src/gui_main.c:90
+#: ../src/gui_main.c:96
 msgid "Exit program"
 msgstr ""
 
-#: ../src/gui_main.c:93
+#: ../src/gui_main.c:99
 msgid "_Back"
 msgstr ""
 
-#: ../src/gui_main.c:94
+#: ../src/gui_main.c:100
 msgid "Go back one step"
 msgstr ""
 
-#: ../src/gui_main.c:97
+#: ../src/gui_main.c:103
 msgid "_Forward"
 msgstr ""
 
-#: ../src/gui_main.c:98
+#: ../src/gui_main.c:104
 msgid "Go forward one step"
 msgstr ""
 
-#: ../src/gui_main.c:101
+#: ../src/gui_main.c:107
 msgid "_Up"
 msgstr ""
 
-#: ../src/gui_main.c:102
+#: ../src/gui_main.c:108
 msgid "Go up one level"
 msgstr ""
 
-#: ../src/gui_main.c:105
+#: ../src/gui_main.c:111
 msgid "_Top"
 msgstr ""
 
-#: ../src/gui_main.c:106
+#: ../src/gui_main.c:112
 msgid "Goto toplevel folder"
 msgstr ""
 
-#: ../src/gui_main.c:109
-msgid "_Options..."
+#: ../src/gui_main.c:115
+msgid "_Settings..."
 msgstr ""
 
-#: ../src/gui_main.c:110
+#: ../src/gui_main.c:116
 msgid "Edit settings"
 msgstr ""
 
-#: ../src/gui_main.c:113
+#: ../src/gui_main.c:119
 msgid "_About..."
 msgstr ""
 
-#: ../src/gui_main.c:114
+#: ../src/gui_main.c:120
 msgid "About this program"
 msgstr ""
 
-#: ../src/gui_main.c:281
+#: ../src/gui_main.c:123
+msgid "_Refresh"
+msgstr ""
+
+#: ../src/gui_main.c:124
+msgid "Refresh current view"
+msgstr ""
+
+#: ../src/gui_main.c:369
 msgid "scanning..."
 msgstr ""
 
-#: ../src/gui_main.c:319
+#: ../src/gui_main.c:407
 msgid "Choose folder"
 msgstr ""
 
@@ -116,30 +124,50 @@ msgstr ""
 msgid "translator-credits"
 msgstr ""
 
-#: ../src/preferences.c:102
+#: ../src/preferences.c:166
 msgid "Preferences"
 msgstr ""
 
-#: ../src/preferences.c:113
+#: ../src/preferences.c:177
 msgid "Display type"
 msgstr ""
 
-#: ../src/preferences.c:119
+#: ../src/preferences.c:183
 msgid "Standard cushioned treemaps"
 msgstr ""
 
-#: ../src/preferences.c:123
+#: ../src/preferences.c:187
 msgid "Squarified cushioned treemaps"
 msgstr ""
 
-#: ../src/preferences.c:137
+#: ../src/preferences.c:201
 msgid "Cushion settings"
 msgstr ""
 
-#: ../src/preferences.c:145
+#: ../src/preferences.c:209
 msgid "Height factor:"
 msgstr ""
 
-#: ../src/preferences.c:158
+#: ../src/preferences.c:221
 msgid "Decreasing height:"
+msgstr ""
+
+#: ../src/preferences.c:234
+msgid "Color settings"
+msgstr ""
+
+#: ../src/preferences.c:242
+msgid "Enabled colors"
+msgstr ""
+
+#: ../src/preferences.c:249
+msgid "General display"
+msgstr ""
+
+#: ../src/preferences.c:257
+msgid "Maximum depth:"
+msgstr ""
+
+#: ../src/preferences.c:269
+msgid "(0=unlimited)"
 msgstr ""

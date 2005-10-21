@@ -26,6 +26,8 @@ static GList* Colors = NULL;
 static void color_save(const char* filename) {
   FILE* file;
 
+  create_dir(filename);
+
   file = fopen(filename, "w");
   if (file) {
     GList* dlist;
@@ -103,10 +105,10 @@ static void color_create_default() {
   GdkColor gcolor;
   int i1;
   static char dcolors[N_COL][2][20] = {
-    {"DEFAULT", "#AAAAAA"},             // Gray
+    {"DEFAULT","#CCCCCC"},              // Gray
     {"COLOR1", "#FFFF00"},              // Yellow
     {"COLOR2", "#0FFFFF"},              // Cyan
-    {"DIR",    "#666600"},              // Burnt
+    {"DIR",    "#224400"},              // Dark Green
     {"ASF",    "#DD0000"},              // Red        
     {"AVI",    "#DD0000"},              // Red        
     {"MPG",    "#DD0000"},              // Red        
@@ -148,17 +150,17 @@ static void color_create_default() {
     {"SXC",    "#d8def1"},              // Power Blue 
     {"SXI",    "#d8def1"},              // Power Blue 
     {"SXW",    "#d8def1"},              // Power Blue 
-    {"MDB",    "#886937"},              // 
-    {"DOC",    "#886937"},              // 
-    {"PDF",    "#886937"},              // 
-    {"PS",     "#886937"},              // 
-    {"PPT",    "#886937"},              // 
-    {"TXT",    "#886937"},              // 
-    {"PO",     "#886937"},              // 
-    {"XLS",    "#886937"},              // 
-    {"XML",    "#886937"},              // 
-    {"HTML",   "#886937"},              // 
-    {"HTM",    "#886937"},              // 
+    {"MDB",    "#66aaff"},              // 
+    {"DOC",    "#66aaff"},              // 
+    {"PDF",    "#66aaff"},              // 
+    {"PS",     "#66aaff"},              // 
+    {"PPT",    "#66aaff"},              // 
+    {"TXT",    "#66aaff"},              // 
+    {"PO",     "#66aaff"},              // 
+    {"XLS",    "#66aaff"},              // 
+    {"XML",    "#66aaff"},              // 
+    {"HTML",   "#66aaff"},              // 
+    {"HTM",    "#66aaff"},              // 
     {"TGZ",    "#0000AA"},              // Dark Blue  
     {"bz2",    "#0000AA"},              // Dark Blue  
     {"GZ",     "#0000AA"},              // Dark Blue  
@@ -202,7 +204,7 @@ color_t* color_search(char* filename) {
 void colors_init() {
   const char* home = g_get_home_dir();
   char* filename = g_strdup_printf("%s/.gdmap/default.colors", home);
-  create_dir(filename);
+
   if (!color_load(filename)) {
     color_create_default();
     color_save(filename);

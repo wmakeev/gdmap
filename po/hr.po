@@ -1,0 +1,174 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: GdMap 0.7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-10-21 15:16+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: MARIO DANIC <mario.danic@gmail.com>\n"
+"Language-Team: CROATIAN <mario.danic@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../data/gdmap.desktop.in.h:1
+msgid "Display disk space using tree maps"
+msgstr "Prikazi diskovni prostor koristeci drvo mapa"
+
+#: ../data/gdmap.desktop.in.h:2
+msgid "Graphical Disk Map"
+msgstr "Graficki disk mapa"
+
+#: ../src/gui_main.c:88
+msgid "_File"
+msgstr "_Datoteka"
+
+#: ../src/gui_main.c:89
+msgid "_View"
+msgstr "_Pregledaj"
+
+#: ../src/gui_main.c:90
+msgid "_Help"
+msgstr "_Pomoc"
+
+#: ../src/gui_main.c:91
+msgid "_Open..."
+msgstr "_Otvori..."
+
+#: ../src/gui_main.c:92
+msgid "Open a folder"
+msgstr "Otvori folder"
+
+#: ../src/gui_main.c:95
+msgid "_Quit"
+msgstr "_Izlaz"
+
+#: ../src/gui_main.c:96
+msgid "Exit program"
+msgstr "Izlaz iz programa"
+
+#: ../src/gui_main.c:99
+msgid "_Back"
+msgstr "_Natrag"
+
+#: ../src/gui_main.c:100
+msgid "Go back one step"
+msgstr "Ponisti"
+
+#: ../src/gui_main.c:103
+msgid "_Forward"
+msgstr "_Ponovi"
+
+#: ../src/gui_main.c:104
+msgid "Go forward one step"
+msgstr "Ponovi jedan korak"
+
+#: ../src/gui_main.c:107
+msgid "_Up"
+msgstr "_Gore"
+
+#: ../src/gui_main.c:108
+msgid "Go up one level"
+msgstr "Gore jedan stupanj"
+
+#: ../src/gui_main.c:111
+msgid "_Top"
+msgstr "_Vrh"
+
+#: ../src/gui_main.c:112
+msgid "Goto toplevel folder"
+msgstr "Idi u vrsnu mapu"
+
+#: ../src/gui_main.c:115
+#, fuzzy
+msgid "_Settings..."
+msgstr "_Postavke..."
+
+#: ../src/gui_main.c:116
+msgid "Edit settings"
+msgstr "Promijeni postavke"
+
+#: ../src/gui_main.c:119
+msgid "_About..."
+msgstr "_O programu..."
+
+#: ../src/gui_main.c:120
+msgid "About this program"
+msgstr "O ovom programu"
+
+#: ../src/gui_main.c:123
+msgid "_Refresh"
+msgstr "_Osvjezi"
+
+#: ../src/gui_main.c:124
+msgid "Refresh current view"
+msgstr "Osvjezi trenutni pogled"
+
+#: ../src/gui_main.c:369
+msgid "scanning..."
+msgstr "Skeniram..."
+
+#: ../src/gui_main.c:407
+msgid "Choose folder"
+msgstr "Odaberi mapu"
+
+#: ../src/about.c:53
+msgid "GdMap is a tool which allows to graphically explore your disks."
+msgstr "GdMap je alat koji vam omogucava graficki pregled diska."
+
+#: ../src/about.c:56
+msgid "translator-credits"
+msgstr "Mario Danic <mario.danic@gmail.com>"
+
+#: ../src/preferences.c:166
+msgid "Preferences"
+msgstr "Personalizacija"
+
+#: ../src/preferences.c:177
+msgid "Display type"
+msgstr "Tip prikaza"
+
+#: ../src/preferences.c:183
+msgid "Standard cushioned treemaps"
+msgstr "Standardno drvo mapa"
+
+#: ../src/preferences.c:187
+msgid "Squarified cushioned treemaps"
+msgstr "Kockasto drvo mapa"
+
+#: ../src/preferences.c:201
+msgid "Cushion settings"
+msgstr "Cushion postavke"
+
+#: ../src/preferences.c:209
+msgid "Height factor:"
+msgstr "Visinski faktor:"
+
+#: ../src/preferences.c:221
+msgid "Decreasing height:"
+msgstr "Smanji visinu:"
+
+#: ../src/preferences.c:234
+#, fuzzy
+msgid "Color settings"
+msgstr "Cushion postavke"
+
+#: ../src/preferences.c:242
+msgid "Enabled colors"
+msgstr "Omogucene boje"
+
+#: ../src/preferences.c:249
+msgid "General display"
+msgstr "Generalni prikaz"
+
+#: ../src/preferences.c:257
+msgid "Maximum depth:"
+msgstr "Maksimalna dubina:"
+
+#: ../src/preferences.c:269
+msgid "(0=unlimited)"
+msgstr "(0=neograniceno)"

@@ -23,10 +23,10 @@ struct _tree_t {
   gint64 size;
   GList* entries;
   tree_t* parent;
-  int depth;
+  unsigned depth;
 };
 
-tree_t* tree_load(const char* folder, ProgressFunc func, void* data);
+tree_t* tree_load(const char* folder, ProgressFunc func, void* data, unsigned depth);
 
 void tree_destroy(tree_t* tree);
 

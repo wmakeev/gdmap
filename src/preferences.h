@@ -16,9 +16,13 @@
 typedef void (*RedrawFunc)(void);
 
 void pref_set_redraw_callback(RedrawFunc func);
+void pref_init();
+
 unsigned pref_get_display_mode(void);
 double pref_get_h(void);
 double pref_get_f(void);
+unsigned pref_get_max_depth(void);
+gboolean pref_get_use_colors(void);
 
 void gui_show_preferences(void);
 
