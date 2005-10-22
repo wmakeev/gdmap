@@ -1,0 +1,175 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: GdMap 0.7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-10-20 20:08+0200\n"
+"PO-Revision-Date: 2005-10-22 10:28+0200\n"
+"Last-Translator: Burak CAYIR <burakcayir@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Turkish\n"
+"X-Poedit-Country: TURKEY\n"
+
+#: ../data/gdmap.desktop.in.h:1
+msgid "Display disk space using tree maps"
+msgstr "Disk alanını agac haritalarini kullanarak goster"
+
+#: ../data/gdmap.desktop.in.h:2
+msgid "Graphical Disk Map"
+msgstr "Grafik Disk Haritasi"
+
+#: ../src/gui_main.c:88
+msgid "_File"
+msgstr "_Dosya"
+
+#: ../src/gui_main.c:89
+msgid "_View"
+msgstr "_Gorunum"
+
+#: ../src/gui_main.c:90
+msgid "_Help"
+msgstr "_Yardim"
+
+#: ../src/gui_main.c:91
+msgid "_Open..."
+msgstr "_Ac..."
+
+#: ../src/gui_main.c:92
+msgid "Open a folder"
+msgstr "Klasor ac"
+
+#: ../src/gui_main.c:95
+msgid "_Quit"
+msgstr "_Cikis"
+
+#: ../src/gui_main.c:96
+msgid "Exit program"
+msgstr "Programi kapat"
+
+#: ../src/gui_main.c:99
+msgid "_Back"
+msgstr "_Geri"
+
+#: ../src/gui_main.c:100
+msgid "Go back one step"
+msgstr "Bir adim geri git"
+
+#: ../src/gui_main.c:103
+msgid "_Forward"
+msgstr "_Ileri"
+
+#: ../src/gui_main.c:104
+msgid "Go forward one step"
+msgstr "Bir adim ileri git"
+
+#: ../src/gui_main.c:107
+msgid "_Up"
+msgstr "_Yukari"
+
+#: ../src/gui_main.c:108
+msgid "Go up one level"
+msgstr "Bir seviye yukarı git"
+
+#: ../src/gui_main.c:111
+msgid "_Top"
+msgstr "_Zirve"
+
+#: ../src/gui_main.c:112
+msgid "Goto toplevel folder"
+msgstr "En ust seviye klasore git"
+
+#: ../src/gui_main.c:115
+msgid "_Settings..."
+msgstr "_Ayarlar..."
+
+#: ../src/gui_main.c:116
+msgid "Edit settings"
+msgstr "Ayarlari duzenle"
+
+#: ../src/gui_main.c:119
+msgid "_About..."
+msgstr "_Hakkinda..."
+
+#: ../src/gui_main.c:120
+msgid "About this program"
+msgstr "Bu program hakkinda"
+
+#: ../src/gui_main.c:123
+msgid "_Refresh"
+msgstr "_Yenile"
+
+#: ../src/gui_main.c:124
+msgid "Refresh current view"
+msgstr "Goruntuyu yenile"
+
+#: ../src/gui_main.c:369
+msgid "scanning..."
+msgstr "tariyor..."
+
+#: ../src/gui_main.c:407
+msgid "Choose folder"
+msgstr "Klasor sec"
+
+#: ../src/about.c:53
+msgid "GdMap is a tool which allows to graphically explore your disks."
+msgstr "GdMap, disklerinizde görsel olarak gezinmenizi saglayan bir aractir."
+
+#: ../src/about.c:56
+msgid "translator-credits"
+msgstr "Burak Çayır <burakcayir@gmail.com>"
+
+#: ../src/preferences.c:166
+msgid "Preferences"
+msgstr "Ozellikler"
+
+#: ../src/preferences.c:177
+msgid "Display type"
+msgstr "Goruntu tipi"
+
+#: ../src/preferences.c:183
+msgid "Standard cushioned treemaps"
+msgstr "Standart tamponlu agac haritalari"
+
+#: ../src/preferences.c:187
+msgid "Squarified cushioned treemaps"
+msgstr "Kareli tamponlu agac haritalari"
+
+#: ../src/preferences.c:201
+msgid "Cushion settings"
+msgstr "Tampon ayarlari"
+
+#: ../src/preferences.c:209
+msgid "Height factor:"
+msgstr "Yukseklik faktoru:"
+
+#: ../src/preferences.c:221
+msgid "Decreasing height:"
+msgstr "Azalan yukseklik:"
+
+#: ../src/preferences.c:234
+msgid "Color settings"
+msgstr "Renk ayarlari "
+
+#: ../src/preferences.c:242
+msgid "Enabled colors"
+msgstr "Etkin renkler"
+
+#: ../src/preferences.c:249
+msgid "General display"
+msgstr "Genel gorunum"
+
+#: ../src/preferences.c:257
+msgid "Maximum depth:"
+msgstr "Azami derinlik:"
+
+#: ../src/preferences.c:269
+msgid "(0=unlimited)"
+msgstr "(0=sinirsiz)"
+
