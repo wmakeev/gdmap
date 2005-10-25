@@ -1,0 +1,173 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: GdMap 0.7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-10-21 15:16+0200\n"
+"PO-Revision-Date: 2005-10-23 16:54+0200\n"
+"Last-Translator: Misha Bukin <misha.bukin@gmail.com>\n"
+"Language-Team: Russian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../data/gdmap.desktop.in.h:1
+msgid "Display disk space using tree maps"
+msgstr "Показать место на диске пользующеся древовидными схемами"
+
+#: ../data/gdmap.desktop.in.h:2
+msgid "Graphical Disk Map"
+msgstr "Графическая карта диска"
+
+#: ../src/gui_main.c:88
+msgid "_File"
+msgstr "_Файл"
+
+#: ../src/gui_main.c:89
+msgid "_View"
+msgstr "_Вид"
+
+#: ../src/gui_main.c:90
+msgid "_Help"
+msgstr "_Помощь"
+
+#: ../src/gui_main.c:91
+msgid "_Open..."
+msgstr "_Открыть..."
+
+#: ../src/gui_main.c:92
+msgid "Open a folder"
+msgstr "Открыть папку"
+
+#: ../src/gui_main.c:95
+msgid "_Quit"
+msgstr "_Выйти"
+
+#: ../src/gui_main.c:96
+msgid "Exit program"
+msgstr "Выйти из программы"
+
+#: ../src/gui_main.c:99
+msgid "_Back"
+msgstr "_Назад"
+
+#: ../src/gui_main.c:100
+msgid "Go back one step"
+msgstr "Иди назад на один шаг"
+
+#: ../src/gui_main.c:103
+msgid "_Forward"
+msgstr "_Вперед"
+
+#: ../src/gui_main.c:104
+msgid "Go forward one step"
+msgstr "Иди вперед на один шаг"
+
+#: ../src/gui_main.c:107
+msgid "_Up"
+msgstr "_Верх"
+
+#: ../src/gui_main.c:108
+msgid "Go up one level"
+msgstr "Перейти на один уровень высше"
+
+#: ../src/gui_main.c:111
+msgid "_Top"
+msgstr "_Высший"
+
+#: ../src/gui_main.c:112
+msgid "Goto toplevel folder"
+msgstr "Перейти на папку высшого уровеня"
+
+#: ../src/gui_main.c:115
+msgid "_Settings..."
+msgstr "_Настройки..."
+
+#: ../src/gui_main.c:116
+msgid "Edit settings"
+msgstr "Редактировать настройки"
+
+#: ../src/gui_main.c:119
+msgid "_About..."
+msgstr "_О..."
+
+#: ../src/gui_main.c:120
+msgid "About this program"
+msgstr "О этой программе"
+
+#: ../src/gui_main.c:123
+msgid "_Refresh"
+msgstr "_Обновить"
+
+#: ../src/gui_main.c:124
+msgid "Refresh current view"
+msgstr "Обновить текущий вид"
+
+#: ../src/gui_main.c:369
+msgid "scanning..."
+msgstr "Сканирование..."
+
+#: ../src/gui_main.c:407
+msgid "Choose folder"
+msgstr "Выберите папку"
+
+#: ../src/about.c:53
+msgid "GdMap is a tool which allows to graphically explore your disks."
+msgstr "GdMap это инструмент позволяющий графически исследовать ваши диски."
+
+#: ../src/about.c:56
+msgid "translator-credits"
+msgstr "Misha Bukin <misha_bomb@yahoo.com>"
+
+#: ../src/preferences.c:166
+msgid "Preferences"
+msgstr "Предпочтения"
+
+#: ../src/preferences.c:177
+msgid "Display type"
+msgstr "Тип дисплея"
+
+#: ../src/preferences.c:183
+msgid "Standard cushioned treemaps"
+msgstr "Заглушенные в стандартные древовидные схемы "
+
+#: ../src/preferences.c:187
+msgid "Squarified cushioned treemaps"
+msgstr "Заглушенные в квадрате  древовидные схемы "
+
+#: ../src/preferences.c:201
+msgid "Cushion settings"
+msgstr "Настройка заглушки"
+
+#: ../src/preferences.c:209
+msgid "Height factor:"
+msgstr "Фактор высоты:"
+
+#: ../src/preferences.c:221
+msgid "Decreasing height:"
+msgstr "Убывающая высота:"
+
+#: ../src/preferences.c:234
+msgid "Color settings"
+msgstr "Настройка цвета"
+
+#: ../src/preferences.c:242
+msgid "Enabled colors"
+msgstr "Разрешонные цвета"
+
+#: ../src/preferences.c:249
+msgid "General display"
+msgstr "Основной дисплей"
+
+#: ../src/preferences.c:257
+msgid "Maximum depth:"
+msgstr "Максимальная глубина:"
+
+#: ../src/preferences.c:269
+msgid "(0=unlimited)"
+msgstr "(0=неограниченный)"
+
