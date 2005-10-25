@@ -1,0 +1,173 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: GdMap 0.7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-10-21 15:16+0200\n"
+"PO-Revision-Date: 2005-10-23 14:00+0200\n"
+"Last-Translator: Misha Bukin <misha.bukin@gmail.com>\n"
+"Language-Team: Hebrew <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../data/gdmap.desktop.in.h:1
+msgid "Display disk space using tree maps"
+msgstr "הראה מקום בדיסק בעזרת מפות עץ"
+
+#: ../data/gdmap.desktop.in.h:2
+msgid "Graphical Disk Map"
+msgstr "מפת דיסק גרפית"
+
+#: ../src/gui_main.c:88
+msgid "_File"
+msgstr "_קובץ"
+
+#: ../src/gui_main.c:89
+msgid "_View"
+msgstr "_תצוגה"
+
+#: ../src/gui_main.c:90
+msgid "_Help"
+msgstr "_עזרה"
+
+#: ../src/gui_main.c:91
+msgid "_Open..."
+msgstr "_פתח..."
+
+#: ../src/gui_main.c:92
+msgid "Open a folder"
+msgstr "פתח תיקיה"
+
+#: ../src/gui_main.c:95
+msgid "_Quit"
+msgstr "_צא"
+
+#: ../src/gui_main.c:96
+msgid "Exit program"
+msgstr "צא מהתוכנה"
+
+#: ../src/gui_main.c:99
+msgid "_Back"
+msgstr "_אחורה"
+
+#: ../src/gui_main.c:100
+msgid "Go back one step"
+msgstr "לך אחורה צעד אחד"
+
+#: ../src/gui_main.c:103
+msgid "_Forward"
+msgstr "_קדימה"
+
+#: ../src/gui_main.c:104
+msgid "Go forward one step"
+msgstr "לך קדימה צעד אחד"
+
+#: ../src/gui_main.c:107
+msgid "_Up"
+msgstr "_למעלה"
+
+#: ../src/gui_main.c:108
+msgid "Go up one level"
+msgstr "לך למעלה שלב אחד"
+
+#: ../src/gui_main.c:111
+msgid "_Top"
+msgstr "_עליון"
+
+#: ../src/gui_main.c:112
+msgid "Goto toplevel folder"
+msgstr "לך לתיקיה בשלב עליון"
+
+#: ../src/gui_main.c:115
+msgid "_Settings..."
+msgstr "_הגדרות..."
+
+#: ../src/gui_main.c:116
+msgid "Edit settings"
+msgstr "ערוך הגדרות"
+
+#: ../src/gui_main.c:119
+msgid "_About..."
+msgstr "_על..."
+
+#: ../src/gui_main.c:120
+msgid "About this program"
+msgstr "על התוכנה הזו"
+
+#: ../src/gui_main.c:123
+msgid "_Refresh"
+msgstr "_רענן"
+
+#: ../src/gui_main.c:124
+msgid "Refresh current view"
+msgstr "רענן תצוגה נוכחית"
+
+#: ../src/gui_main.c:369
+msgid "scanning..."
+msgstr "סורק..."
+
+#: ../src/gui_main.c:407
+msgid "Choose folder"
+msgstr "בחר תיקיה"
+
+#: ../src/about.c:53
+msgid "GdMap is a tool which allows to graphically explore your disks."
+msgstr "התוכנה היא כלי המאפשר לך לחקור את הדיסקים בצורה גרפית"
+
+#: ../src/about.c:56
+msgid "translator-credits"
+msgstr "Misha Bukin <misha_bomb@yahoo.com>"
+
+#: ../src/preferences.c:166
+msgid "Preferences"
+msgstr "העדפות"
+
+#: ../src/preferences.c:177
+msgid "Display type"
+msgstr "סוג תצוגה"
+
+#: ../src/preferences.c:183
+msgid "Standard cushioned treemaps"
+msgstr "מפות עץ מרוככות רגילות"
+
+#: ../src/preferences.c:187
+msgid "Squarified cushioned treemaps"
+msgstr "מפות עץ מרוככות בריבוע"
+
+#: ../src/preferences.c:201
+msgid "Cushion settings"
+msgstr "הגדרות ריכוך"
+
+#: ../src/preferences.c:209
+msgid "Height factor:"
+msgstr "גורם גובה:"
+
+#: ../src/preferences.c:221
+msgid "Decreasing height:"
+msgstr "הקטנה בגובה:"
+
+#: ../src/preferences.c:234
+msgid "Color settings"
+msgstr "הגדרות צבע"
+
+#: ../src/preferences.c:242
+msgid "Enabled colors"
+msgstr "צבעים מאופשרים"
+
+#: ../src/preferences.c:249
+msgid "General display"
+msgstr "תצוגה כללית"
+
+#: ../src/preferences.c:257
+msgid "Maximum depth:"
+msgstr "עומק מקסימלי:"
+
+#: ../src/preferences.c:269
+msgid "(0=unlimited)"
+msgstr "(0=לא מוגבל)"
+
