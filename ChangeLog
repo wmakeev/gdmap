@@ -1,8 +1,9 @@
-2005-10-xx [0.7.0]	Sgop	(sgop at users.sourceforge.net)
+2005-10-26 [0.7.0]	Sgop	(sgop at users.sourceforge.net)
 	* added max depth setting
 	* now saving/loading preferences
 	* added refresh functionality
 	* added ability to disable colors
+	* added translations: croatian, turkish, russian, hebrew, french
 	
 2005-10-16 [0.6.0]	Sgop	(sgop at users.sourceforge.net)
 	* showing progress bar while scanning disk

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GdMap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-21 15:16+0200\n"
+"POT-Creation-Date: 2005-10-26 21:19+0200\n"
 "PO-Revision-Date: 2005-10-25 16:30-0700\n"
 "Last-Translator: Catherine Beauchemin <cbeau@users.sourceforge.net>\n"
 "Language-Team: French <cbeau@users.sourceforge.net>\n"
@@ -19,7 +19,9 @@ msgstr ""
 
 #: ../data/gdmap.desktop.in.h:1
 msgid "Display disk space using tree maps"
-msgstr "Afficher l'espace disque disponible à l'aide d'une structure arborescente (Treemaps)."
+msgstr ""
+"Afficher l'espace disque disponible à l'aide d'une structure arborescente "
+"(Treemaps)."
 
 #: ../data/gdmap.desktop.in.h:2
 msgid "Graphical Disk Map"
@@ -95,7 +97,7 @@ msgstr "Modifier les paramètres"
 
 #: ../src/gui_main.c:119
 msgid "_About..."
-msgstr "_À propos"
+msgstr "_À propos..."
 
 #: ../src/gui_main.c:120
 msgid "About this program"
@@ -119,11 +121,12 @@ msgstr "Choisir un dossier"
 
 #: ../src/about.c:53
 msgid "GdMap is a tool which allows to graphically explore your disks."
-msgstr "GdMap est un logiciel qui permet l'exploration graphique de vos disques."
+msgstr ""
+"GdMap est un logiciel qui permet l'exploration graphique de vos disques."
 
 #: ../src/about.c:56
 msgid "translator-credits"
-msgstr "mention des traducteurs"
+msgstr "Catherine Beauchemin <cbeau@users.sourceforge.net>"
 
 #: ../src/preferences.c:166
 msgid "Preferences"
@@ -172,4 +175,3 @@ msgstr "Profondeur maximale:"
 #: ../src/preferences.c:269
 msgid "(0=unlimited)"
 msgstr "(0=illimitée)"
-

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GdMap 0.7.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-21 15:16+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"POT-Creation-Date: 2005-10-26 21:19+0200\n"
+"PO-Revision-Date: 2005-10-26 21:19+0200\n"
 "Last-Translator: MARIO DANIC <mario.danic@gmail.com>\n"
 "Language-Team: CROATIAN <mario.danic@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -84,7 +84,6 @@ msgid "Goto toplevel folder"
 msgstr "Idi u vrsnu mapu"
 
 #: ../src/gui_main.c:115
-#, fuzzy
 msgid "_Settings..."
 msgstr "_Postavke..."
 
@@ -153,9 +152,8 @@ msgid "Decreasing height:"
 msgstr "Smanji visinu:"
 
 #: ../src/preferences.c:234
-#, fuzzy
 msgid "Color settings"
-msgstr "Cushion postavke"
+msgstr "Boje postavke"
 
 #: ../src/preferences.c:242
 msgid "Enabled colors"

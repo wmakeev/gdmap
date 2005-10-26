@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GdMap 0.7.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-21 15:16+0200\n"
+"POT-Creation-Date: 2005-10-26 21:19+0200\n"
 "PO-Revision-Date: 2005-10-23 16:54+0200\n"
 "Last-Translator: Misha Bukin <misha.bukin@gmail.com>\n"
 "Language-Team: Russian\n"
@@ -170,4 +170,3 @@ msgstr "Максимальная глубина:"
 #: ../src/preferences.c:269
 msgid "(0=unlimited)"
 msgstr "(0=неограниченный)"
-

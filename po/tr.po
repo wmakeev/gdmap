@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GdMap 0.7.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-20 20:08+0200\n"
+"POT-Creation-Date: 2005-10-26 21:19+0200\n"
 "PO-Revision-Date: 2005-10-22 10:28+0200\n"
 "Last-Translator: Burak CAYIR <burakcayir@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -172,4 +172,3 @@ msgstr "Azami derinlik:"
 #: ../src/preferences.c:269
 msgid "(0=unlimited)"
 msgstr "(0=sinirsiz)"
-
