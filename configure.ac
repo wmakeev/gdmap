@@ -33,7 +33,7 @@ dnl PKG_CHECK_MODULES(LIBXML, [$pkg_modules])
 dnl AC_SUBST(LIBXML_CFLAGS)
 dnl AC_SUBST(LIBXML_LIBS)
 
-ALL_LINGUAS="de hr tr ru he fr"
+ALL_LINGUAS="de hr tr ru he fr bg"
 AM_GLIB_GNU_GETTEXT
 AC_PROG_INTLTOOL
 

@@ -1,0 +1,172 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Stoyan Bonkov <stafex@gmail.com>, 2005.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: GdMap 0.7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-11-07 18:19+0200\n"
+"PO-Revision-Date: 2005-11-07 18:54+0200\n"
+"Last-Translator: Stoyan Bonkov <stafex@gmail.com>\n"
+"Language-Team: Bulgarian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../data/gdmap.desktop.in.h:1
+msgid "Display disk space using tree maps"
+msgstr "Показвай свободното пространство в дъвоиден стил"
+
+#: ../data/gdmap.desktop.in.h:2
+msgid "Graphical Disk Map"
+msgstr "Графична карта на диска"
+
+#: ../src/gui_main.c:88
+msgid "_File"
+msgstr "_Файл"
+
+#: ../src/gui_main.c:89
+msgid "_View"
+msgstr "_Виж"
+
+#: ../src/gui_main.c:90
+msgid "_Help"
+msgstr "_Помощ"
+
+#: ../src/gui_main.c:91
+msgid "_Open..."
+msgstr "_Отвори..."
+
+#: ../src/gui_main.c:92
+msgid "Open a folder"
+msgstr "Отвори папка"
+
+#: ../src/gui_main.c:95
+msgid "_Quit"
+msgstr "_Изход"
+
+#: ../src/gui_main.c:96
+msgid "Exit program"
+msgstr "Изход от програмата"
+
+#: ../src/gui_main.c:99
+msgid "_Back"
+msgstr "_Обратно"
+
+#: ../src/gui_main.c:100
+msgid "Go back one step"
+msgstr "Върни се с една стъпка"
+
+#: ../src/gui_main.c:103
+msgid "_Forward"
+msgstr "_Напред"
+
+#: ../src/gui_main.c:104
+msgid "Go forward one step"
+msgstr "Върви напред с една стъпка"
+
+#: ../src/gui_main.c:107
+msgid "_Up"
+msgstr "_Нагоре"
+
+#: ../src/gui_main.c:108
+msgid "Go up one level"
+msgstr "Върви нагоре с едно ниво"
+
+#: ../src/gui_main.c:111
+msgid "_Top"
+msgstr "_Горе"
+
+#: ../src/gui_main.c:112
+msgid "Goto toplevel folder"
+msgstr "Върви до папката в най-горно ниво"
+
+#: ../src/gui_main.c:115
+msgid "_Settings..."
+msgstr "_Настройки..."
+
+#: ../src/gui_main.c:116
+msgid "Edit settings"
+msgstr "Промени Настройките"
+
+#: ../src/gui_main.c:119
+msgid "_About..."
+msgstr "_Относно..."
+
+#: ../src/gui_main.c:120
+msgid "About this program"
+msgstr "Относно Програмата"
+
+#: ../src/gui_main.c:123
+msgid "_Refresh"
+msgstr "_Опресни"
+
+#: ../src/gui_main.c:124
+msgid "Refresh current view"
+msgstr "Опресни текущия преглед"
+
+#: ../src/gui_main.c:369
+msgid "scanning..."
+msgstr "сканиране..."
+
+#: ../src/gui_main.c:407
+msgid "Choose folder"
+msgstr "Изберете папка"
+
+#: ../src/about.c:53
+msgid "GdMap is a tool which allows to graphically explore your disks."
+msgstr "GdMap е инструмент който ви позволява да преглеждате диска си в графичен режим."
+
+#: ../src/about.c:56
+msgid "translator-credits"
+msgstr "Стоян Бонков <stafex@gmail.com>"
+
+#: ../src/preferences.c:166
+msgid "Preferences"
+msgstr "Опции"
+
+#: ../src/preferences.c:177
+msgid "Display type"
+msgstr "Стил на преглед"
+
+#: ../src/preferences.c:183
+msgid "Standard cushioned treemaps"
+msgstr "Стандартен"
+
+#: ../src/preferences.c:187
+msgid "Squarified cushioned treemaps"
+msgstr "Правоъгален"
+
+#: ../src/preferences.c:201
+msgid "преглед - настройки"
+msgstr ""
+
+#: ../src/preferences.c:209
+msgid "Height factor:"
+msgstr "Ръстов фактор:"
+
+#: ../src/preferences.c:221
+msgid "Decreasing height:"
+msgstr "Указан ръст:"
+
+#: ../src/preferences.c:234
+msgid "Color settings"
+msgstr "Цветове-настройки"
+
+#: ../src/preferences.c:242
+msgid "Enabled colors"
+msgstr "Разреши Цветове"
+
+#: ../src/preferences.c:249
+msgid "General display"
+msgstr "Общи настройки на екран"
+
+#: ../src/preferences.c:257
+msgid "Maximum depth:"
+msgstr "Максимум дълбочина :"
+
+#: ../src/preferences.c:269
+msgid "(0=unlimited)"
+msgstr "(0=неограничен)"
