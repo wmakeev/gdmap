@@ -10,6 +10,8 @@
 #ifndef _FILTER_H_
 #define _FILTER_H_
 
+#include "utils.h"
+
 void filters_init();
 
 void filter_clear();
