@@ -1,6 +1,11 @@
-/* Copyright (C) 2003 sgop@users.sourceforge.net
-   This is free software distributed under the terms of the
-   GNU Public License.  See the file COPYING for details. */
+/* Copyright (C) 2005 sgop@users.sourceforge.net This is free software
+ * distributed under the terms of the GNU Public License.  See the
+ * file COPYING for details.
+ */
+/* $Revision$
+ * $Date$
+ * $Author$
+ */
 
 #ifndef _COLORS_H_
 #define _COLORS_H_
@@ -9,15 +14,33 @@
 #  include <config.h>
 #endif
 
-typedef struct _color_t color_t;
+typedef enum {
+  COLOR_DEFAULT=0,
+  COLOR_FOLDER,
+  COLOR_MARK1,
+  COLOR_MARK2,
+  COLOR_EXTENSION
+} ColorType;
 
-struct _color_t {
-  char* suffix;
-  char* color;
+typedef struct {
+  ColorType type;
+  GList* ext;
+  GdkColor c;
   GdkGC* gc;
-};
+} color_t;
 
 void colors_init();
-color_t* color_search(char* filename);
+
+GdkGC* color_get_gc_by_type(ColorType type);
+const GdkColor* color_get_by_type(ColorType type);
+const GdkColor* color_get_by_ext(const char* ext);
+const GdkColor* color_get_by_file(const char* filename);
+GList* colors_get_list();
+
+void colors_clear();
+void color_add(color_t* color);
+color_t* color_new(int r, int g, int b, ColorType type);
+color_t* color_new_exts(const GdkColor* gcolor, const char* exts);
+
 
 #endif

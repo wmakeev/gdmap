@@ -16,198 +16,378 @@
 #include <string.h>
 #include <gtk/gtk.h>
 
+#include <libxml/parser.h>
+
 #include "tree.h"
 #include "utils.h"
 #include "colors.h"
 #include "gui_main.h"
 
 static GList* Colors = NULL;
+static int Saver = 0;
 
-static void color_save(const char* filename) {
-  FILE* file;
+static void color_destroy(color_t* color) {
+  g_list_foreach(color->ext, (GFunc)g_free, NULL);
+  if (color->gc) g_object_unref(G_OBJECT(color->gc));
+  g_free(color);
+}
+
+static void color_init(color_t* color, int r, int g, int b, ColorType type) {
+  color->ext = NULL;
+  color->gc = NULL;
+  color->c.red = r;
+  color->c.green = g;
+  color->c.blue = b;
+  color->type = type;
+}
+
+color_t* color_new(int r, int g, int b, ColorType type) {
+  color_t* color = g_malloc0(sizeof(*color));
+  color_init(color, r, g, b, type);
+  return color;
+}
+
+static void color_add_ext(color_t* color, const char* ext) {
+  if (color->type == COLOR_EXTENSION) {
+    color->ext = g_list_append(color->ext, g_strdup(ext));
+  } else {
+    g_log("COLOR", G_LOG_LEVEL_WARNING,
+          "cannot add extension '%s' to type %d", ext, color->type);
+  }
+}
+
+color_t* color_new_exts(const GdkColor* gcolor, const char* exts) {
+  color_t* color;
+
+  color = color_new(gcolor->red, gcolor->green, gcolor->blue, COLOR_EXTENSION);
+  if (exts) {
+    char* temp = g_strdup(exts);
+    char* cur = temp;
+    char* pos;
+
+    while ((pos = strchr(cur, ' ')) != NULL) {
+      *pos = 0;
+      color_add_ext(color, cur);
+      cur = pos+1;
+    }
+    color_add_ext(color, cur);
+  }
+  return color;
+}
+
+static color_t* color_new_with_exts(const char* c, const char* exts) {
+  GdkColor gcolor;
+  gdk_color_parse(c, &gcolor);
+  return color_new_exts(&gcolor, exts);
+}
+
+
+static void xml_ext_save(const char* ext, xmlNodePtr xnode) {
+  xmlNewTextChild(xnode, NULL, "Extension", ext);
+}
+
+static void xml_color_save(color_t* color, xmlNodePtr xnode) {
+  xmlNodePtr xsub = xmlNewChild(xnode, NULL, "Color", NULL);
+  char* temp;
+
+  switch (color->type) {
+  case COLOR_DEFAULT:
+    xmlNewProp(xsub, "type", "Default");
+    break;
+  case COLOR_FOLDER:
+    xmlNewProp(xsub, "type", "Folder");
+    break;
+  case COLOR_MARK1:
+    xmlNewProp(xsub, "type", "Mark1");
+    break;
+  case COLOR_MARK2:
+    xmlNewProp(xsub, "type", "Mark2");
+    break;
+  default:
+    break;
+  }
+
+  temp = g_strdup_printf("0x%04x", color->c.red);
+  xmlNewProp(xsub, "r", temp);
+  g_free(temp);
+  temp = g_strdup_printf("0x%04x", color->c.green);
+  xmlNewProp(xsub, "g", temp);
+  g_free(temp);
+  temp = g_strdup_printf("0x%04x", color->c.blue);
+  xmlNewProp(xsub, "b", temp);
+  g_free(temp);
+
+  if (color->type == COLOR_EXTENSION)
+    g_list_foreach(color->ext, (GFunc)xml_ext_save, xsub);
+
+}
+
+static void colors_save_real(const char* filename) {
+  xmlDocPtr xdoc;
+  xmlNodePtr xroot;
+
+  g_log("COLOR", G_LOG_LEVEL_DEBUG, "saving '%s'", filename);
+
+  xdoc = xmlNewDoc("1.0");
+  xroot = xmlNewNode(NULL, "Colors");
+  xmlDocSetRootElement(xdoc, xroot);
+
+  g_list_foreach(Colors, (GFunc)xml_color_save, xroot);
 
   create_dir(filename);
 
-  file = fopen(filename, "w");
-  if (file) {
-    GList* dlist;
-    for (dlist = Colors; dlist; dlist = dlist->next) {
-      color_t* color = dlist->data;
-      fprintf(file, "%s %s\n", color->suffix, color->color);
-    }
-    fclose(file);
+  xmlSaveFormatFile(filename, xdoc, 1);
+  xmlFreeDoc(xdoc);
+}
+
+
+static gboolean colors_save_delayed() {
+  const char* home = g_get_home_dir();
+  char* filename = g_strdup_printf("%s/.gdmap/colors.xml", home);
+  colors_save_real(filename);
+  g_free(filename);
+  if (Saver) g_source_remove(Saver);
+  Saver = 0;
+  return FALSE;
+}
+
+static void colors_save() {
+  if (Saver) return;
+  Saver = g_timeout_add(100, (GSourceFunc)colors_save_delayed, NULL);
+}
+
+
+static void xml_color_get(xmlDocPtr xfile, xmlNodePtr xnode) {
+  xmlChar* attr;
+  int r=0,g=0,b=0;
+  color_t* color;
+  ColorType type = COLOR_EXTENSION;
+
+  attr = xmlGetProp(xnode, "type");
+  if (attr) {
+    if (!strcmp(attr, "Default"))
+      type = COLOR_DEFAULT;
+    else if (!strcmp(attr, "Folder"))
+      type = COLOR_FOLDER;
+    else if (!strcmp(attr, "Mark1"))
+      type = COLOR_MARK1;
+    else if (!strcmp(attr, "Mark2"))
+      type = COLOR_MARK2;
+    else
+      g_log("COLOR", G_LOG_LEVEL_WARNING,
+            "unknown color type '%s'", attr);
+    xmlFree(attr);
+  }
+
+  attr = xmlGetProp(xnode, "r");
+  if (attr && !strncmp(attr, "0x", 2)) {
+    r = strtoul(attr+2, NULL, 16);
   } else {
-    g_log("COLOR", G_LOG_LEVEL_WARNING,
-          "Could not save colors to '%s'", filename);
+    r = atoi(attr);
+  }
+  if (attr) xmlFree(attr);
+
+  attr = xmlGetProp(xnode, "g");
+  if (attr && !strncmp(attr, "0x", 2)) {
+    g = strtoul(attr+2, NULL, 16);
+  } else {
+    g = atoi(attr);
+  }
+  if (attr) xmlFree(attr);
+
+  attr = xmlGetProp(xnode, "b");
+  if (attr && !strncmp(attr, "0x", 2)) {
+    b = strtoul(attr+2, NULL, 16);
+  } else {
+    b = atoi(attr);
+  }
+  if (attr) xmlFree(attr);
+
+  color = color_new(r, g, b, type);
+
+  if (type == COLOR_EXTENSION) {
+    xmlNodePtr xsub = xnode->xmlChildrenNode;
+    while (xsub != NULL) {
+      attr = xmlNodeListGetString(xfile, xsub->xmlChildrenNode, 1);
+      if (attr) {
+        color_add_ext(color, attr);
+        xmlFree(attr);
+      }
+      xsub = xsub->next;
+    }
+  }
+
+  Colors = g_list_append(Colors, color);
+}
+
+static void xml_colors_get(xmlDocPtr xfile, xmlNodePtr xnode) {
+  xmlNodePtr xsub = xnode->xmlChildrenNode;
+
+  while (xsub != NULL) {
+    if (!strcmp(xsub->name, "Color")) {
+      xml_color_get(xfile, xsub);
+    }
+    xsub = xsub->next;
   }
 }
 
-static gboolean color_load(const char* filename) {
-  char temp[2048];
-  FILE* file;
-  char* suffix;
-  char* c;
-  color_t* color;
-  GdkColor gcolor;
-  int def = 0;
-  GtkWidget* win = gui_get_main_win();
+static gboolean colors_load(const char* filename) {
+  xmlDocPtr xfile;
+  xmlNodePtr xroot;
 
-  file = fopen(filename, "r");
-  if (file == NULL) return FALSE;
+  if (!g_file_test(filename, G_FILE_TEST_EXISTS)) return FALSE;
+  g_log("COLOR", G_LOG_LEVEL_DEBUG, "loading '%s'", filename);
 
-  while (fgets(temp, 1024, file)) {
-    if (strlen(temp) <3) continue;
-    if (temp[0] == '#') continue;
-    temp[strlen(temp)-1] = 0;
-    if (!win || !win->window) {
-      g_warning("no window\n");
-      continue;
-    }
-    suffix = arg(temp, 0);
-    c = arg(NULL, 0);
-    if (!suffix || ! c) continue;
-    if (!strcasecmp(suffix, "Default")) def = 1;
-    
-    color = g_malloc(sizeof(color_t));
-    color->suffix = g_strdup(suffix);
-    color->color = g_strdup(c);
+  xfile = xmlParseFile(filename);
+  if (!xfile) return FALSE;
+
+  xroot = xmlDocGetRootElement(xfile);
+  if (xroot == NULL) {
+    g_log("COLOR", G_LOG_LEVEL_WARNING, "no root element in file: %s", filename);
+    xmlFreeDoc(xfile);
+    return FALSE;
+  }
+  
+  if (strcmp(xroot->name, "Colors")) {
+    g_log("COLOR", G_LOG_LEVEL_WARNING, "Root element != 'Colors'");
+    xmlFreeDoc(xfile);
+    return FALSE;
+  }
+  
+  xml_colors_get(xfile, xroot);
+  
+  xmlFreeDoc(xfile);
+
+  return TRUE;
+}
+
+static void colors_create_default() {
+
+  Colors = g_list_append(Colors, color_new(0xcccc, 0xcccc, 0xcccc, COLOR_DEFAULT));
+  Colors = g_list_append(Colors, color_new(0xffff, 0xffff, 0x0000, COLOR_MARK1));
+  Colors = g_list_append(Colors, color_new(0x0f0f, 0xffff, 0xffff, COLOR_MARK2));
+  Colors = g_list_append(Colors, color_new(0x2222, 0x4444, 0x0000, COLOR_FOLDER));
+
+  Colors = g_list_append(Colors, color_new_with_exts("#DD0000", "asf avi mpg mpeg wmv"));
+  Colors = g_list_append(Colors, color_new_with_exts("#FF00FF", "exe"));
+  Colors = g_list_append(Colors, color_new_with_exts("#BB00BB", "dll o lo a so"));
+  Colors = g_list_append(Colors, color_new_with_exts("#00AA00", "c cc cpp"));
+  Colors = g_list_append(Colors, color_new_with_exts("#00FF00", "h hh"));
+  Colors = g_list_append(Colors, color_new_with_exts("#EEEE00", "eps bmp svg gif png jpg jpeg tif tiff"));
+  Colors = g_list_append(Colors, color_new_with_exts("#00DDDD", "mp3 ogg flac wav"));
+/*   Colors = g_list_append(Colors, color_new_with_exts("#d8def1", "odp ods odt otp ots ott stc stw sxc sxi sxw")); */
+  Colors = g_list_append(Colors, color_new_with_exts("#66aaff", "mdb doc pdf ps ppt txt po xsl xls xml html htm"));
+  Colors = g_list_append(Colors, color_new_with_exts("#0000AA", "zip gz tgz rar bz2 7z"));
+
+}
+
+static GdkGC* color_get_gc(color_t* color) {
+  if (!color->gc) {
+    GtkWidget* win = gui_get_main_win();
     color->gc = gdk_gc_new(win->window);
-    gdk_color_parse(c, &gcolor);
-    gdk_colormap_alloc_color(gdk_rgb_get_cmap (), &gcolor, FALSE, FALSE);
-    gdk_gc_set_foreground(color->gc, &gcolor);
-    if (!strcasecmp(suffix, "color1") ||
-        !strcasecmp(suffix, "color2")) {
+    gdk_colormap_alloc_color(gdk_rgb_get_cmap(), &color->c, FALSE, FALSE);
+    gdk_gc_set_foreground(color->gc, &color->c);
+    if (color->type == COLOR_MARK1 || color->type == COLOR_MARK2)
       gdk_gc_set_function(color->gc, GDK_XOR);
-    }
-    Colors = g_list_append(Colors, color);
   }
-
-  fclose(file);
-
-  if (!def) {
-    color = g_malloc(sizeof(color_t));
-    color->suffix = g_strdup("Default");
-    color->color = g_strdup("#aaaaaa");
-    color->gc = gdk_gc_new(win->window);
-    gdk_color_parse(color->color, &gcolor);
-    gdk_colormap_alloc_color(gdk_rgb_get_cmap (), &gcolor, FALSE, FALSE);
-    gdk_gc_set_foreground(color->gc, &gcolor);
-    Colors = g_list_append(Colors, color);
-  }
-
-  return 1;
+  return color->gc;
 }
 
-#define N_COL  60
-
-static void color_create_default() {
-  color_t* color;
-  GdkColor gcolor;
-  int i1;
-  static char dcolors[N_COL][2][20] = {
-    {"DEFAULT","#CCCCCC"},              // Gray
-    {"COLOR1", "#FFFF00"},              // Yellow
-    {"COLOR2", "#0FFFFF"},              // Cyan
-    {"DIR",    "#224400"},              // Dark Green
-    {"ASF",    "#DD0000"},              // Red        
-    {"AVI",    "#DD0000"},              // Red        
-    {"MPG",    "#DD0000"},              // Red        
-    {"MPEG",   "#DD0000"},              // Red        
-    {"WMV",    "#DD0000"},              // Red        
-    {"EXE",    "#FF00FF"},              // Magenta    
-    {"DLL",    "#BB00BB"},              // Magenta    
-    {"O",      "#BB00BB"},              // Magenta    
-    {"LO",     "#BB00BB"},              // Magenta    
-    {"A",      "#BB00BB"},              // Magenta    
-    {"SO",     "#BB00BB"},              // Magenta    
-    {"C",      "#00aa00"},              // Green      
-    {"CC",     "#00aa00"},              // Green      
-    {"CPP",    "#00aa00"},              // Green      
-    {"H",      "#00ff00"},              // Light Green
-    {"HH",     "#00ff00"},              // Light Green
-    {"EPS",    "#EEEE00"},              // Yellow     
-    {"BMP",    "#EEEE00"},              // Yellow     
-    {"SVG",    "#EEEE00"},              // Yellow     
-    {"GIF",    "#EEEE00"},              // Yellow     
-    {"PNG",    "#EEEE00"},              // Yellow
-    {"JPG",    "#EEEE00"},              // Yellow     
-    {"JPEG",   "#EEEE00"},              // Yellow     
-    {"TIF",    "#EEEE00"},              // Yellow     
-    {"TIFF",   "#EEEE00"},              // Yellow     
-    {"MP3",    "#00DDDD"},              // Cyan       
-    {"OGG",    "#00DDDD"},              // Cyan       
-    {"FLAC",   "#00DDDD"},              // Cyan       
-    {"WAV",    "#00DDDD"},              // Cyan       
-    {"ODP",    "#d8def1"},              // Power Blue 
-    {"ODS",    "#d8def1"},              // Power Blue 
-    {"ODT",    "#d8def1"},              // Power Blue 
-    {"OTP",    "#d8def1"},              // Power Blue 
-    {"OTS",    "#d8def1"},              // Power Blue 
-    {"OTT",    "#d8def1"},              // Power Blue 
-    {"STC",    "#d8def1"},              // Power Blue 
-    {"STW",    "#d8def1"},              // Power Blue 
-    {"sxc",    "#d8def1"},              // Power Blue 
-    {"SXC",    "#d8def1"},              // Power Blue 
-    {"SXI",    "#d8def1"},              // Power Blue 
-    {"SXW",    "#d8def1"},              // Power Blue 
-    {"MDB",    "#66aaff"},              // 
-    {"DOC",    "#66aaff"},              // 
-    {"PDF",    "#66aaff"},              // 
-    {"PS",     "#66aaff"},              // 
-    {"PPT",    "#66aaff"},              // 
-    {"TXT",    "#66aaff"},              // 
-    {"PO",     "#66aaff"},              // 
-    {"XLS",    "#66aaff"},              // 
-    {"XML",    "#66aaff"},              // 
-    {"HTML",   "#66aaff"},              // 
-    {"HTM",    "#66aaff"},              // 
-    {"TGZ",    "#0000AA"},              // Dark Blue  
-    {"bz2",    "#0000AA"},              // Dark Blue  
-    {"GZ",     "#0000AA"},              // Dark Blue  
-    {"ZIP",    "#0000AA"}               // Dark Blue  
-  };
-  GtkWidget* win = gui_get_main_win();
-
-  for (i1 = 0; i1 < N_COL; i1++) {
-    color = g_malloc(sizeof(color_t));
-    color->suffix = g_strdup(dcolors[i1][0]);
-    color->color = g_strdup(dcolors[i1][1]);
-    color->gc = gdk_gc_new(win->window);
-    gdk_colormap_alloc_color(gdk_rgb_get_cmap(), &gcolor, FALSE, FALSE);
-    gdk_gc_set_foreground(color->gc, &gcolor);
-    if (!strcasecmp(dcolors[i1][0], "color1") ||
-        !strcasecmp(dcolors[i1][0], "color2")) {
-      gdk_gc_set_function(color->gc, GDK_XOR);
-    }
-    Colors = g_list_append(Colors, color);
-  }
-}
-
-color_t* color_search(char* filename) {
+static gboolean color_has_ext(color_t* color, const char* ext) {
   GList* dlist;
-  color_t* color;
-  char* suffix;
-  color_t* temp = NULL;
 
-  suffix = strrchr(filename, '.');
-  if (suffix) suffix++;
+  for (dlist = color->ext; dlist; dlist = dlist->next) {
+    const char* temp = dlist->data;
+    if (!strcasecmp(temp, ext)) return TRUE;
+  }
+  return FALSE;
+}
+
+static color_t* color_find_by_type(ColorType type) {
+  GList* dlist;
 
   for (dlist = Colors; dlist; dlist = dlist->next) {
-    color = dlist->data;
-    if (suffix) if (!strcasecmp(color->suffix, suffix)) return color;
-    if (!strcasecmp(color->suffix, "Default")) temp = color;
+    color_t* color = dlist->data;
+    if (color->type == type) return color;
   }
+  return NULL;
+}
 
-  return temp;
+static color_t* color_find_by_ext(const char* ext) {
+  GList* dlist;
+  
+  for (dlist = Colors; dlist; dlist = dlist->next) {
+    color_t* color = dlist->data;
+    if (color_has_ext(color, ext)) return color;
+  }
+  return NULL;
+}
+
+GdkGC* color_get_gc_by_type(ColorType type) {
+  color_t* color = color_find_by_type(type);
+  g_assert(color);
+  return color_get_gc(color);
+}
+
+const GdkColor* color_get_by_type(ColorType type) {
+  color_t* color = color_find_by_type(type);
+  g_assert(color);
+  return &color->c;
+}
+
+const GdkColor* color_get_by_ext(const char* ext) {
+  color_t* color = color_find_by_ext(ext);
+  if (color) return &color->c;
+  else return color_get_by_type(COLOR_DEFAULT);
+}
+
+const GdkColor* color_get_by_file(const char* filename) {
+  char* suffix = strrchr(filename, '.');
+  if (!suffix) return color_get_by_type(COLOR_DEFAULT);
+  else return color_get_by_ext(suffix+1);
+}
+
+
+static void colors_assure_defaults() {
+
+  if (!color_find_by_type(COLOR_FOLDER))
+    Colors = g_list_prepend(Colors, color_new(0x2200, 0x4400, 0x0000, COLOR_FOLDER));
+
+  if (!color_find_by_type(COLOR_MARK2))
+    Colors = g_list_prepend(Colors, color_new(0x0f00, 0xff00, 0xff00, COLOR_MARK2));
+
+  if (!color_find_by_type(COLOR_MARK1))
+    Colors = g_list_prepend(Colors, color_new(0xff00, 0xff00, 0x0000, COLOR_MARK1));
+
+  if (!color_find_by_type(COLOR_DEFAULT))
+    Colors = g_list_prepend(Colors, color_new(0xcc00, 0xcc00, 0xcc00, COLOR_DEFAULT));
+
+}
+
+GList* colors_get_list() {
+  return Colors;
+}
+
+void colors_clear() {
+  g_list_foreach(Colors, (GFunc)color_destroy, NULL);
+  g_list_free(Colors);
+  Colors = NULL;
+  colors_save();
+}
+
+void color_add(color_t* color) {
+  Colors = g_list_prepend(Colors, color);
+  colors_save();
 }
 
 void colors_init() {
   const char* home = g_get_home_dir();
-  char* filename = g_strdup_printf("%s/.gdmap/default.colors", home);
+  char* filename = g_strdup_printf("%s/.gdmap/colors.xml", home);
 
-  if (!color_load(filename)) {
-    color_create_default();
-    color_save(filename);
+  if (!colors_load(filename)) {
+    colors_create_default();
+  } else {
+    colors_assure_defaults();
   }
   g_free(filename);
 }

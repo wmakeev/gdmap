@@ -59,7 +59,7 @@ char* arg(char* data, int last) {
   return NULL;
 }
 
-char* print_filesize(gint64 bytes) {
+char* print_filesize(file_size_t bytes) {
   double size = bytes;
   if (size < 1024) return g_strdup_printf("%.0f B", size);
   size /= 1024.;
@@ -125,4 +125,99 @@ char* to_utf8(const char* str) {
   if (result) g_free(result);
   result = g_locale_to_utf8(str, -1, NULL, NULL, NULL);
   return result;
+}
+
+char* make_string_from_list(GList* glist, const char* sep) {
+  GList* dlist;
+  char* result;
+  unsigned len;
+  unsigned add = strlen(sep);
+
+  if (glist == NULL) return g_strdup("");
+
+  len = 0;
+  for (dlist = glist; dlist; dlist = dlist->next) {
+    char* text = dlist->data;
+    len += strlen(text)+add;
+  }
+  len -= add;
+  result = g_malloc0(len+1);
+  len = 0;
+  for (dlist = glist; dlist; dlist = dlist->next) {
+    char* text = dlist->data;
+    unsigned l = strlen(text);
+    if (l && dlist != glist) {
+      memcpy(result+len, sep, add);
+      len += add;
+    }
+    memcpy(result+len, text, l);
+    len += l;
+  }
+
+  return result;
+}
+
+file_size_t extract_bytes(const char* string) {
+  const char* pos;
+  file_size_t result = 0;
+
+  if (!string) return 0;
+  if (!isdigit(*string)) return 0;
+
+  pos = string;
+  while (isdigit(*pos)) {
+    result *= 10;
+    result += *pos -'0';
+    pos++;
+  }
+
+  if (*pos == ' ') pos++;
+  switch (*pos) {
+  case 't':
+  case 'T':
+    result *= 1024*1024;
+    result *= 1024*1024;
+    break;
+  case 'g':
+  case 'G':
+    result *= 1024*1024*1024;
+    break;
+  case 'm':
+  case 'M':
+    result *= 1024*1024;
+    break;
+  case 'k':
+  case 'K':
+    result *= 1024;
+    break;
+  case 'b':
+  case 'B':
+  case ' ':
+  case 0:
+  default:
+    break;
+  }
+
+  return result;
+}
+
+const char* print_bytes_exact(file_size_t bytes) {
+  static char* str = NULL;
+
+  g_free(str);
+
+  if (bytes == 0)
+    str = g_strdup("0B");
+  else if (bytes % ((file_size_t)1024*(file_size_t)1024*(file_size_t)1024*(file_size_t)1204) == 0)
+    str = g_strdup_printf(FF"T", bytes/1024/1024/1024);
+  else if (bytes % (1024*1024*1024) == 0)
+    str = g_strdup_printf(FF"G", bytes/1024/1024/1024);
+  else if (bytes % (1024*1024) == 0)
+    str = g_strdup_printf(FF"M", bytes/1024/1024);
+  else if (bytes % 1024 == 0)
+    str = g_strdup_printf(FF"K", bytes/1024);
+  else
+    str = g_strdup_printf(FF"B", bytes);
+
+  return str;
 }

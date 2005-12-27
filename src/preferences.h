@@ -23,6 +23,7 @@ double pref_get_h(void);
 double pref_get_f(void);
 unsigned pref_get_max_depth(void);
 gboolean pref_get_use_colors(void);
+gboolean pref_get_use_average(void);
 
 void gui_show_preferences(void);
 

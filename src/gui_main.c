@@ -51,6 +51,7 @@ static int Width = 0;
 static int Height = 0;
 static tree_info_t* Mark1 = NULL;
 static tree_info_t* Mark2 = NULL;
+static int RedrawTimer = 0;
 
 static GtkWidget* Area = NULL;
 static tree_info_t* CurrentItem = NULL;
@@ -71,6 +72,7 @@ static GtkUIManager* UIManager = NULL;
 static GtkActionGroup* ActionGroup = NULL;
 
 static gboolean LUseColors = TRUE;
+static gboolean LUseAverage = TRUE;
 static unsigned LMaxDepth = 0;
 static unsigned LDisplayMode = DISPLAY_SQUARE_CUSHION;
 
@@ -84,188 +86,204 @@ static void on_action_preferences();
 static void on_action_about();
 static void on_action_refresh();
 
-static GtkActionEntry Actions[] = {
-  { "FileMenu", NULL, N_("_File"), 0,0,0 },
-  { "ViewMenu", NULL, N_("_View"), 0,0,0 },
-  { "HelpMenu", NULL, N_("_Help"), 0,0,0 },
-  { "Open", GTK_STOCK_OPEN, N_("_Open..."),
-    "<control>O", N_("Open a folder"),
-    G_CALLBACK(on_action_open)
-  },
-  { "Quit", GTK_STOCK_QUIT, N_("_Quit"),
-    "<control>Q", N_("Exit program"),
-    G_CALLBACK(on_action_exit)
-  },
-  { "Back", GTK_STOCK_GO_BACK, N_("_Back"),
-    NULL, N_("Go back one step"),
-    G_CALLBACK(on_action_back)
-  },
-  { "Forward", GTK_STOCK_GO_FORWARD, N_("_Forward"),
+static GtkActionEntry Actions[] =
+{
+    { "FileMenu", NULL, N_("_File"), 0,0,0 },
+    { "ViewMenu", NULL, N_("_View"), 0,0,0 },
+    { "HelpMenu", NULL, N_("_Help"), 0,0,0 },
+    { "Open", GTK_STOCK_OPEN, N_("_Open..."),
+      "<control>O", N_("Open a folder"),
+      G_CALLBACK(on_action_open)
+    },
+    { "Quit", GTK_STOCK_QUIT, N_("_Quit"),
+      "<control>Q", N_("Exit program"),
+      G_CALLBACK(on_action_exit)
+    },
+    { "Back", GTK_STOCK_GO_BACK, N_("_Back"),
+      NULL, N_("Go back one step"),
+      G_CALLBACK(on_action_back)
+    },
+    { "Forward", GTK_STOCK_GO_FORWARD, N_("_Forward"),
     NULL, N_("Go forward one step"),
-    G_CALLBACK(on_action_forward)
-  },
-  { "Up", GTK_STOCK_GO_UP, N_("_Up"),
+      G_CALLBACK(on_action_forward)
+    },
+    { "Up", GTK_STOCK_GO_UP, N_("_Up"),
     NULL, N_("Go up one level"),
-    G_CALLBACK(on_action_up)
-  },
-  { "Top", GTK_STOCK_GOTO_TOP, N_("_Top"),
-    NULL, N_("Goto toplevel folder"),
-    G_CALLBACK(on_action_top)
-  },
-  { "Options", GTK_STOCK_PREFERENCES, N_("_Settings..."),
-    NULL, N_("Edit settings"),
-    G_CALLBACK(on_action_preferences)
-  },
-  { "About", GTK_STOCK_PREFERENCES, N_("_About..."),
-    NULL, N_("About this program"),
-    G_CALLBACK(on_action_about)
-  },
-  { "Refresh", GTK_STOCK_REFRESH, N_("_Refresh"),
-    NULL, N_("Refresh current view"),
+      G_CALLBACK(on_action_up)
+    },
+    { "Top", GTK_STOCK_GOTO_TOP, N_("_Top"),
+      NULL, N_("Goto toplevel folder"),
+      G_CALLBACK(on_action_top)
+    },
+    { "Options", GTK_STOCK_PREFERENCES, N_("_Settings..."),
+      NULL, N_("Edit settings"),
+      G_CALLBACK(on_action_preferences)
+    },
+    { "About", GTK_STOCK_PREFERENCES, N_("_About..."),
+      NULL, N_("About this program"),
+      G_CALLBACK(on_action_about)
+    },
+    { "Refresh", GTK_STOCK_REFRESH, N_("_Refresh"),
+      NULL, N_("Refresh current view"),
     G_CALLBACK(on_action_refresh)
-  },
+    },
 };
 
 static const char* MenuDescription =
-  "<ui>\n"
-  "  <menubar action=\"MainMenu\">\n"
-  "    <menu action=\"FileMenu\">\n"
-  "      <menuitem action=\"Open\"/>\n"
-  "      <separator/>\n"
-  "      <menuitem action=\"Options\"/>\n"
-  "      <separator/>\n"
-  "      <menuitem action=\"Quit\"/>\n"
-  "    </menu>\n"
-  "    <menu action=\"ViewMenu\">\n"
-  "      <menuitem action=\"Back\"/>\n"
-  "      <menuitem action=\"Forward\"/>\n"
-  "      <menuitem action=\"Up\"/>\n"
-  "      <menuitem action=\"Top\"/>\n"
-  "      <separator/>\n"
-  "      <menuitem action=\"Refresh\"/>\n"
-  "    </menu>\n"
-  "    <menu action=\"HelpMenu\">\n"
-  "      <menuitem action=\"About\"/>\n"
-  "    </menu>\n"
-  "  </menubar>\n"
-  "  <toolbar action=\"ToolBar\">\n"
-  "    <toolitem action=\"Open\"/>\n"
-  "    <separator/>\n"
-  "    <toolitem action=\"Back\"/>\n"
-  "    <toolitem action=\"Forward\"/>\n"
-  "    <toolitem action=\"Up\"/>\n"
-  "    <toolitem action=\"Top\"/>\n"
-  "    <separator/>\n"
-  "    <toolitem action=\"Refresh\"/>\n"
-  "    <separator/>\n"
-  "    <toolitem action=\"Options\"/>\n"
-  "  </toolbar>\n"
-  "</ui>\n";
+    "<ui>\n"
+    "  <menubar action=\"MainMenu\">\n"
+    "    <menu action=\"FileMenu\">\n"
+    "      <menuitem action=\"Open\"/>\n"
+    "      <separator/>\n"
+    "      <menuitem action=\"Options\"/>\n"
+    "      <separator/>\n"
+    "      <menuitem action=\"Quit\"/>\n"
+    "    </menu>\n"
+    "    <menu action=\"ViewMenu\">\n"
+    "      <menuitem action=\"Back\"/>\n"
+    "      <menuitem action=\"Forward\"/>\n"
+    "      <menuitem action=\"Up\"/>\n"
+    "      <menuitem action=\"Top\"/>\n"
+    "      <separator/>\n"
+    "      <menuitem action=\"Refresh\"/>\n"
+    "    </menu>\n"
+    "    <menu action=\"HelpMenu\">\n"
+    "      <menuitem action=\"About\"/>\n"
+    "    </menu>\n"
+    "  </menubar>\n"
+    "  <toolbar action=\"ToolBar\">\n"
+    "    <toolitem action=\"Open\"/>\n"
+    "    <separator/>\n"
+    "    <toolitem action=\"Back\"/>\n"
+    "    <toolitem action=\"Forward\"/>\n"
+    "    <toolitem action=\"Up\"/>\n"
+    "    <toolitem action=\"Top\"/>\n"
+    "    <separator/>\n"
+    "    <toolitem action=\"Refresh\"/>\n"
+    "    <separator/>\n"
+    "    <toolitem action=\"Options\"/>\n"
+    "  </toolbar>\n"
+    "</ui>\n";
 
 static void gui_tree_display(tree_info_t* info, gboolean destroy_old, gboolean new_history);
 static tree_t* gui_tree_load(const char* folder, unsigned depth);
 
 
 // HISTORY
-static void history_clear() {
-  g_list_free(History);
-  History = NULL;
-  HistoryPos = NULL;
+static void history_clear()
+{
+    g_list_free(History);
+    History = NULL;
+    HistoryPos = NULL;
 }
 
-static void history_back() {
-  if (!HistoryPos) return;
-  if (!HistoryPos->prev) return;
-  
-  HistoryPos = HistoryPos->prev;
-  
-  gui_tree_display(HistoryPos->data, FALSE, FALSE);
+static void history_back()
+{
+    if (!HistoryPos) return;
+    if (!HistoryPos->prev) return;
+    
+    HistoryPos = HistoryPos->prev;
+    
+    gui_tree_display(HistoryPos->data, FALSE, FALSE);
 }
 
-static void history_forward() {
-  if (!History) return;
-  if (HistoryPos) {
-    if (!HistoryPos->next) return;
-    HistoryPos = HistoryPos->next;
-  } else {
-    HistoryPos = History;
-  }
-  gui_tree_display(HistoryPos->data, FALSE, FALSE);
+static void history_forward()
+{
+    if (!History) return;
+    if (HistoryPos)
+    {
+        if (!HistoryPos->next) return;
+        HistoryPos = HistoryPos->next;
+    }
+    else
+    {
+        HistoryPos = History;
+    }
+    gui_tree_display(HistoryPos->data, FALSE, FALSE);
 }
 
-static void history_append(tree_info_t* info) {
-  if (HistoryPos) {
-    while (HistoryPos->next)
-      History = g_list_delete_link(History, HistoryPos->next);
-  }
-  History = g_list_append(History, info);
-  HistoryPos = g_list_last(History);
+static void history_append(tree_info_t* info)
+{
+    if (HistoryPos)
+    {
+        while (HistoryPos->next)
+            History = g_list_delete_link(History, HistoryPos->next);
+    }
+    History = g_list_append(History, info);
+    HistoryPos = g_list_last(History);
 }
 
 
 
 // TREE INFO
-static void tree_info_destroy(tree_info_t* info) {
-  g_list_foreach(info->children, (GFunc)tree_info_destroy, NULL);
-  g_list_free(info->children);
-  g_free(info);
+static void tree_info_destroy(tree_info_t* info)
+{
+    g_list_foreach(info->children, (GFunc)tree_info_destroy, NULL);
+    g_list_free(info->children);
+    g_free(info);
 }
 
-static tree_info_t* tree_info_search(tree_info_t* info, int x, int y) {
-  GList* dlist;
-  unsigned depth = LMaxDepth;
-
-  if (depth != 0 && depth < info->node->depth) return NULL;
-
+static tree_info_t* tree_info_search(tree_info_t* info, int x, int y)
+{
+    GList* dlist;
+    unsigned depth = LMaxDepth;
+    
+    if (depth != 0 && depth < info->node->depth) return NULL;
+    
   if (x < info->geo[0][0] || x >= info->geo[0][1] ||
       y < info->geo[1][0] || y >= info->geo[1][1])
+      return NULL;
+
+  for (dlist = info->children; dlist; dlist = dlist->next)
+  {
+      tree_info_t* sinfo = dlist->data;
+      sinfo = tree_info_search(sinfo, x, y);
+      if (sinfo) return sinfo;
+  }
+  return info;
+}
+
+static tree_info_t* tree_info_find_path(tree_info_t* root, tree_info_t* child)
+{
+    tree_info_t* temp;
+    
+    for (temp = child; temp; temp = temp->parent)
+    {
+        if (temp->parent == root) return temp;
+    }
     return NULL;
-
-  for (dlist = info->children; dlist; dlist = dlist->next) {
-    tree_info_t* sinfo = dlist->data;
-    sinfo = tree_info_search(sinfo, x, y);
-    if (sinfo) return sinfo;
-  }
-  return info;
-}
-
-static tree_info_t* tree_info_find_path(tree_info_t* root, tree_info_t* child) {
-  tree_info_t* temp;
-
-  for (temp = child; temp; temp = temp->parent) {
-    if (temp->parent == root) return temp;
-  }
-  return NULL;
 }
 
 
-
-
-
-static tree_info_t* tree_info_create(tree_t* tree) {
-  tree_info_t* info = g_malloc0(sizeof(*info));
-  GList* dlist;
-
-  info->node = tree;
-  for (dlist = tree->entries; dlist; dlist = dlist->next) {
-    tree_t* child = dlist->data;
-    tree_info_t* sub = tree_info_create(child);
-    sub->parent = info;
-    info->children = g_list_append(info->children, sub);
-  }
-  return info;
+static tree_info_t* tree_info_create(tree_t* tree)
+{
+    tree_info_t* info = g_malloc0(sizeof(*info));
+    GList* dlist;
+    
+    info->node = tree;
+    for (dlist = tree->entries; dlist; dlist = dlist->next)
+    {
+        tree_t* child = dlist->data;
+        tree_info_t* sub = tree_info_create(child);
+        sub->parent = info;
+        info->children = g_list_append(info->children, sub);
+    }
+    return info;
 }
 
-static void on_action_exit() {
-  gtk_main_quit();
+static void on_action_exit()
+{
+    gtk_main_quit();
 }
 
-static void on_action_preferences() {
-  gui_show_preferences();
+static void on_action_preferences()
+{
+    gui_show_preferences();
 }
 
-static void on_action_about() {
-  gui_show_about();
+static void on_action_about()
+{
+    gui_show_about();
 }
 
 static gint comp_func(gconstpointer p1, gconstpointer p2) {
@@ -513,9 +531,9 @@ static gboolean on_area_expose(GtkWidget* area) {
 }
 
 static void gui_tree_mark1(tree_info_t* info) {
-  color_t* color = color_search(".color1");
+  GdkGC* gc = color_get_gc_by_type(COLOR_MARK1);
 
-  gdk_draw_rectangle(Area->window, color->gc, 0,
+  gdk_draw_rectangle(Area->window, gc, 0,
                      info->geo[0][0],info->geo[1][0],
                      info->geo[0][1]-info->geo[0][0]-1,
                      info->geo[1][1]-info->geo[1][0]-1);
@@ -544,8 +562,9 @@ static void gui_tree_mark1(tree_info_t* info) {
 }
 
 static void gui_tree_unmark1(tree_info_t* info) {
-  color_t* color = color_search(".color1");
-  gdk_draw_rectangle(Area->window, color->gc, 0,
+  GdkGC* gc = color_get_gc_by_type(COLOR_MARK1);
+
+  gdk_draw_rectangle(Area->window, gc, 0,
                      info->geo[0][0],info->geo[1][0],
                      info->geo[0][1]-info->geo[0][0]-1,
                      info->geo[1][1]-info->geo[1][0]-1);
@@ -553,8 +572,9 @@ static void gui_tree_unmark1(tree_info_t* info) {
 }
 
 static void gui_tree_unmark2(tree_info_t* info) {
-  color_t* color = color_search(".color2");
-  gdk_draw_rectangle(Area->window, color->gc, 0,
+  GdkGC* gc = color_get_gc_by_type(COLOR_MARK2);
+
+  gdk_draw_rectangle(Area->window, gc, 0,
                      info->geo[0][0]-1, info->geo[1][0]-1,
                      info->geo[0][1]-info->geo[0][0]+1,
                      info->geo[1][1]-info->geo[1][0]+1);
@@ -562,8 +582,9 @@ static void gui_tree_unmark2(tree_info_t* info) {
 }
 
 static void gui_tree_mark2(tree_info_t* info) {
-  color_t* color = color_search(".color2");
-  gdk_draw_rectangle(Area->window, color->gc, 0,
+  GdkGC* gc = color_get_gc_by_type(COLOR_MARK2);
+
+  gdk_draw_rectangle(Area->window, gc, 0,
                      info->geo[0][0]-1, info->geo[1][0]-1,
                      info->geo[0][1]-info->geo[0][0]+1,
                      info->geo[1][1]-info->geo[1][0]+1);
@@ -709,29 +730,44 @@ static gboolean on_main_win_delete_event() {
   return TRUE;
 }
 
-static void gui_setup_actions(GtkWidget* win) {
-  GError* error = NULL;
+static void gui_setup_actions(GtkWidget* win)
+{
+    GError* error = NULL;
+    
+    UIManager = gtk_ui_manager_new();
+    ActionGroup = gtk_action_group_new("Actions");
+    gtk_action_group_set_translation_domain(ActionGroup, GETTEXT_PACKAGE);
+    gtk_action_group_add_actions(ActionGroup, Actions, G_N_ELEMENTS(Actions), win);
+    gtk_action_group_set_sensitive(ActionGroup, TRUE);
 
-  UIManager = gtk_ui_manager_new();
-  ActionGroup = gtk_action_group_new("Actions");
-  gtk_action_group_set_translation_domain(ActionGroup, GETTEXT_PACKAGE);
-  gtk_action_group_add_actions(ActionGroup, Actions, G_N_ELEMENTS(Actions), win);
-  gtk_action_group_set_sensitive(ActionGroup, TRUE);
-
-  gtk_ui_manager_insert_action_group(UIManager, ActionGroup, 0);
-  if (!gtk_ui_manager_add_ui_from_string(UIManager, MenuDescription, -1, &error)) {
-		g_warning("building menus failed: %s", error->message);
-		g_error_free(error);
-	}
-
+    gtk_ui_manager_insert_action_group(UIManager, ActionGroup, 0);
+    if (!gtk_ui_manager_add_ui_from_string(UIManager, MenuDescription, -1, &error))
+    {
+        g_warning("building menus failed: %s", error->message);
+        g_error_free(error);
+    }
 }
 
-static void gui_tree_redraw(void) {
-  LUseColors = pref_get_use_colors();
-  LMaxDepth = pref_get_max_depth();
-  LDisplayMode = pref_get_display_mode();
+static gboolean on_redraw(tree_info_t* item)
+{
+    gui_tree_display(item, FALSE, FALSE);
+    if (RedrawTimer) g_source_remove(RedrawTimer);
+    RedrawTimer = 0;
+    return TRUE;
+}
 
-  if (CurrentItem) gui_tree_display(CurrentItem, FALSE, FALSE);
+static void gui_tree_redraw(void)
+{
+    LUseColors = pref_get_use_colors();
+    LMaxDepth = pref_get_max_depth();
+    LDisplayMode = pref_get_display_mode();
+    LUseAverage = pref_get_use_average();
+    
+    if (CurrentItem) 
+    {
+        if (RedrawTimer) g_source_remove(RedrawTimer);
+        RedrawTimer = g_timeout_add(300, (GSourceFunc)on_redraw, CurrentItem);
+    }
 }
 
 static GdkPixbuf* create_pixbuf(const gchar *filename) {
@@ -808,19 +844,39 @@ GtkWidget* gui_get_main_win() {
   return MainWin;
 }
 
+static void _get_average_color_rec(tree_t* tree, int* r, int* g, int* b) {
 
-static void extract_rgb(const char* color, int* red, int* green, int* blue) {
-  char str[5] = "0x00";
+  if (tree->entries) {
+    GList* dlist;
+    double dr=0, dg=0, db=0;
+    for (dlist = tree->entries; dlist; dlist = dlist->next) {
+      tree_t* sub = dlist->data;
+      int lr=0, lg=0, lb=0;
+      _get_average_color_rec(sub, &lr, &lg, &lb);
+      dr += lr/(double)tree->size*(double)sub->size;
+      dg += lg/(double)tree->size*(double)sub->size;
+      db += lb/(double)tree->size*(double)sub->size;
+    }
+    *r += dr;
+    *g += dg;
+    *b += db;
+  } else {
+    const GdkColor* color = color_get_by_file(tree->name);
+    *r += color->red;
+    *g += color->green;
+    *b += color->blue;
+  }
+}
 
-  str[2] = color[1];
-  str[3] = color[2];
-  *red = strtoul(str, NULL, 16);
-  str[2] = color[3];
-  str[3] = color[4];
-  *green = strtoul(str, NULL, 16);
-  str[2] = color[5];
-  str[3] = color[6];
-  *blue = strtoul(str, NULL, 16);
+static const GdkColor* _get_average_color(tree_t* tree) {
+  static GdkColor res;
+  int r=0, g=0, b=0;
+
+  _get_average_color_rec(tree, &r, &g, &b);
+  res.red = r;
+  res.green = g;
+  res.blue = b;
+  return &res;
 }
 
 static void gui_tree_show_item(tree_info_t* info) {
@@ -832,8 +888,7 @@ static void gui_tree_show_item(tree_info_t* info) {
   int ix, iy;
   double nx, ny, cosa, val;
   long pos;
-  int red, green, blue;
-  color_t* color;
+  const GdkColor* color;
 
   int x1 = info->geo[0][0];
   int y1 = info->geo[1][0];
@@ -844,13 +899,16 @@ static void gui_tree_show_item(tree_info_t* info) {
   if (y1 >= y2) return;
 
   if (LUseColors) {
-    if (info->node->entries) color = color_search(".dir");
-    else color = color_search(info->node->name);
+/*     if (info->node->entries) color = color_get_by_type(COLOR_FOLDER); */
+    if (info->node->entries) {
+      if (LUseAverage) color = _get_average_color(info->node); 
+      else color = color_get_by_type(COLOR_FOLDER);
+    } else {
+      color = color_get_by_file(info->node->name);
+    }
   } else {
-    color = color_search("Default");
+    color = color_get_by_type(COLOR_DEFAULT);
   }
-  
-  extract_rgb(color->color, &red, &green, &blue);
   
 /*   printf("paiting [%d,%d][%d,%d] with %d %d %d\n", x1,y1,x2,y2, */
 /*          red, green, blue); */
@@ -864,9 +922,9 @@ static void gui_tree_show_item(tree_info_t* info) {
       ny = -(2*info->s[1][1]*(iy+0.5)+info->s[1][0]);
       cosa = (nx*Lx + ny*Ly + Lz)/sqrt(nx*nx + ny*ny +1.0);
       val = (Ia+MAX(0, Is*cosa));
-      Buffer[pos++] = (int)(red*val/255.);
-      Buffer[pos++] = (int)(green*val/255.);
-      Buffer[pos++] = (int)(blue*val/255.);
+      Buffer[pos++] = (int)(color->red   * val/65535.);
+      Buffer[pos++] = (int)(color->green * val/65535.);
+      Buffer[pos++] = (int)(color->blue  * val/65535.);
     }
     pos -= (x2-x1)*3;  // cr
     pos += Width*3;    // lf
@@ -975,135 +1033,129 @@ static gint64 _find_next_size(GList* children, gint64 rsize,
   return best_size;
 }
 
-static void gui_tree_evaluate_childs2(tree_info_t* info, double h, double f) {
-  tree_t* tree = info->node;
-  GList* children = info->children;
-  gint64 rsize, size;
-  int d;
-  int geo[2][2];
-  double s[2][2];
-
-  memcpy(geo, info->geo, sizeof(geo));
-  rsize = tree->size;
-
-/*   g_message("%d evaluate '%s' with %u children", tree->depth, tree->name, */
-/*             g_list_length(tree->entries)); */
-  while (children) {
-    int width, height;
-    int dx, pos;
-    gint64 ssize;
-
-/*     g_message("+ layout in (%d,%d)(%d,%d)", geo[0][0], geo[1][0], geo[0][1], geo[1][1]); */
-    if (geo[0][1]-geo[0][0] < geo[1][1]-geo[1][0]) d = 1;
-    else d = 0;
-
-    width = geo[d][1]-geo[d][0];
-    height = geo[1-d][1]-geo[1-d][0];
-
-    size = _find_next_size(children, rsize, width, height);
-
-/*     g_message(" -display %ld bytes of %ld", size, rsize); */
+static void gui_tree_evaluate_childs2(tree_info_t* info, double h, double f)
+{
+    tree_t* tree = info->node;
+    GList* children = info->children;
+    gint64 rsize, size;
+    int d;
+    int geo[2][2];
+    double s[2][2];
     
-/*   printf("  s: [%.1f,%.1f][%.1f,%.1f]\n", */
-/*          info->s[0][0],info->s[0][1],info->s[1][0],info->s[1][1]); */
-
-    if (rsize) dx = (gint64)width * size / rsize;
-    else dx = 0;
-
-/*     g_message(" -using %d width", dx); */
-
-    ssize = 0;
-    pos = geo[1-d][0];
+    memcpy(geo, info->geo, sizeof(geo));
+    rsize = tree->size;
     
-    memcpy(s, info->s, sizeof(s));
-    AddRidge(geo[d][0], geo[d][0]+dx, h, &s[d][0], &s[d][1]);
-
-    for ( ; children; children = children->next) {
-      tree_info_t* sinfo = children->data;
-      tree_t* sub = sinfo->node;
-      int end_pos;
-      
-      sinfo->geo[0][0] = sinfo->geo[0][1] = 0;
-      sinfo->geo[1][0] = sinfo->geo[1][1] = 0;
-      
-      if (sub->size <= 0) {
-/*         g_message("  -skip %s", sub->name); */
-        continue;
-      }
-      ssize += sub->size;
-      if (ssize > size) {
-/*         g_message("   -stop %ld/%ld", ssize, size); */
-        break;
-      }
-/*       g_message("  -child %s, bytes %ld", sub->name, ssize); */
-
-      end_pos = geo[1-d][0] + ssize*height/size;
-      
-      if (end_pos > pos+1 || (ssize == size && end_pos > pos)) {
-        sinfo->geo[1-d][0] = pos;
-        sinfo->geo[1-d][1] = end_pos;
-        sinfo->geo[d][0] = geo[d][0];
-        sinfo->geo[d][1] = geo[d][0]+dx;
-/*         g_message("  +geo (%d,%d)(%d,%d)", sinfo->geo[0][0], sinfo->geo[1][0], */
-/*                   sinfo->geo[0][1], sinfo->geo[1][1]); */
+    while (children)
+    {
+        int width, height;
+        int dx, pos;
+        gint64 ssize;
         
-        memcpy(sinfo->s, s, sizeof(sinfo->s));
-        AddRidge(sinfo->geo[1-d][0], sinfo->geo[1-d][1], h,
-                 &sinfo->s[1-d][0], &sinfo->s[1-d][1]);
-
-        pos = end_pos;
-        if (sub->entries) gui_tree_evaluate_childs2(sinfo, h*f, f);
-      }
+        if (geo[0][1]-geo[0][0] < geo[1][1]-geo[1][0]) d = 1;
+        else d = 0;
+        
+        width = geo[d][1]-geo[d][0];
+        height = geo[1-d][1]-geo[1-d][0];
+        
+        size = _find_next_size(children, rsize, width, height);
+        
+        if (rsize) dx = (gint64)width * size / rsize;
+        else dx = 0;
+        
+        ssize = 0;
+        pos = geo[1-d][0];
+        
+        memcpy(s, info->s, sizeof(s));
+        AddRidge(geo[d][0], geo[d][0]+dx, h, &s[d][0], &s[d][1]);
+        
+        for ( ; children; children = children->next)
+        {
+            tree_info_t* sinfo = children->data;
+            tree_t* sub = sinfo->node;
+            int end_pos;
+            
+            sinfo->geo[0][0] = sinfo->geo[0][1] = 0;
+            sinfo->geo[1][0] = sinfo->geo[1][1] = 0;
+            
+            if (sub->size <= 0) continue;
+            ssize += sub->size;
+            if (ssize > size) break;
+            
+            end_pos = geo[1-d][0] + ssize*height/size;
+            
+            if (end_pos > pos+1 || (ssize == size && end_pos > pos))
+            {
+                sinfo->geo[1-d][0] = pos;
+                sinfo->geo[1-d][1] = end_pos;
+                sinfo->geo[d][0] = geo[d][0];
+                sinfo->geo[d][1] = geo[d][0]+dx;
+                
+                memcpy(sinfo->s, s, sizeof(sinfo->s));
+                AddRidge(sinfo->geo[1-d][0], sinfo->geo[1-d][1], h,
+                         &sinfo->s[1-d][0], &sinfo->s[1-d][1]);
+                
+                pos = end_pos;
+                if (sub->entries) gui_tree_evaluate_childs2(sinfo, h*f, f);
+            }
+        }
+        geo[d][0] += dx;
+        rsize -= size;
     }
-    geo[d][0] += dx;
-    rsize -= size;
-  }
-
 }
   
   
-static tree_info_t* gui_tree_evaluate(tree_info_t* info) {
-  int Border = 1;
-
-  info->geo[0][0] = Border;
-  info->geo[0][1] = Width-Border;
-  info->geo[1][0] = Border;
-  info->geo[1][1] = Height-Border;
-  info->s[0][0] = .0;
-  info->s[0][1] = .0;
-  info->s[1][0] = .0;
-  info->s[1][1] = .0;
-  
-  if (LDisplayMode == DISPLAY_STANDARD_CUSHION) {
-    gui_tree_evaluate_childs1(info, pref_get_h(), pref_get_f());
-  } else {
-    gui_tree_evaluate_childs2(info, pref_get_h(), pref_get_f());
-  }
-  
-  return info;
-}
-
-static void gui_tree_show(tree_info_t* info) {
-  unsigned depth = LMaxDepth;
-
-  if (info->geo[0][0] >= info->geo[0][1]) return;
-  if (info->geo[1][0] >= info->geo[1][1]) return;
-
-  if (info->children && (depth == 0 || info->node->depth < depth)) {
-    GList* dlist;
-    for (dlist = info->children; dlist; dlist = dlist->next) {
-      tree_info_t* sub = dlist->data;
-      gui_tree_show(sub);
+static tree_info_t* gui_tree_evaluate(tree_info_t* info)
+{
+    int Border = 1;
+    
+    info->geo[0][0] = Border;
+    info->geo[0][1] = Width-Border;
+    info->geo[1][0] = Border;
+    info->geo[1][1] = Height-Border;
+    info->s[0][0] = .0;
+    info->s[0][1] = .0;
+    info->s[1][0] = .0;
+    info->s[1][1] = .0;
+    
+    if (LDisplayMode == DISPLAY_STANDARD_CUSHION)
+    {
+        gui_tree_evaluate_childs1(info, pref_get_h(), pref_get_f());
     }
-  } else {
-    gui_tree_show_item(info);
-  }
+    else
+    {
+        gui_tree_evaluate_childs2(info, pref_get_h(), pref_get_f());
+    }
+  
+    return info;
 }
 
-static void on_path_toggled(GtkToggleButton* button, tree_info_t* info) {
-  if (gtk_toggle_button_get_active(button)) {
-    gui_tree_display(info, FALSE, TRUE/*FALSE*/);
-  }
+static void gui_tree_show(tree_info_t* info)
+{
+    unsigned depth = LMaxDepth;
+    
+    if (info->geo[0][0] >= info->geo[0][1]) return;
+    if (info->geo[1][0] >= info->geo[1][1]) return;
+    
+    if (info->children && (depth == 0 || info->node->depth < depth))
+    {
+        GList* dlist;
+        for (dlist = info->children; dlist; dlist = dlist->next) {
+            tree_info_t* sub = dlist->data;
+            gui_tree_show(sub);
+        }
+    }
+    else
+    {
+        gui_tree_show_item(info);
+    }
+}
+
+static void on_path_toggled(GtkToggleButton* button, tree_info_t* info)
+{
+    if (gtk_toggle_button_get_active(button))
+    {
+        gui_tree_display(info, FALSE, TRUE/*FALSE*/);
+    }
 }
 
 static void gui_paths_update() {

@@ -18,6 +18,16 @@
 #include "colors.h"
 #include "preferences.h"
 
+#define NL "\n"
+
+static const char* GtkResource =
+  "style \"event\" {"NL
+  "  fg[NORMAL] = { 0, 0.5, 1.0 }"NL
+  "  fg[PRELIGHT] = { 0.8, 0.6, 0.4 }"NL
+  "}"NL
+  ""NL
+  "widget \"*EventLabel*\" style \"event\""NL;
+
 static const char* Folder = NULL;
 static GOptionEntry Options[] = {
   { "folder", 'f', 0, G_OPTION_ARG_STRING, &Folder, "Inspect folder", "dir" },
@@ -49,6 +59,8 @@ int main (int argc, char *argv[]) {
   
   gtk_set_locale();
   gtk_init(&argc, &argv);
+  
+  gtk_rc_parse_string(GtkResource);
   
   gui_create_main_win();
 

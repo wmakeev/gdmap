@@ -12,12 +12,18 @@
 
 #include <glib.h>
 
+typedef gint64 file_size_t;
+
 #define DIR_SEP G_DIR_SEPARATOR
 #define FF "%"G_GINT64_FORMAT  // format string for filesizes
 
 char* arg(char* data, int last);
-char* print_filesize(gint64 bytes);
+char* print_filesize(file_size_t bytes);
 int create_dir(const char* dir);
 char* to_utf8(const char* str);
+char* make_string_from_list(GList* glist, const char* sep);
+
+const char* print_bytes_exact(file_size_t bytes);
+file_size_t extract_bytes(const char* string);
 
 #endif
