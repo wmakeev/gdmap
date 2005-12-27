@@ -1,3 +1,9 @@
+2005-12-27 [0.7.5]	Sgop	(sgop at users.sourceforge.net)
+	* added bulgarian translation
+	* added color editor
+	* added few more color features
+	* delayed canvas redraw to allow smoother settings editing on slow CPU
+	
 2005-10-26 [0.7.0]	Sgop	(sgop at users.sourceforge.net)
 	* added max depth setting
 	* now saving/loading preferences
