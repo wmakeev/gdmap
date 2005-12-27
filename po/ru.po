@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GdMap 0.7.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-26 21:19+0200\n"
+"POT-Creation-Date: 2005-12-27 15:28+0100\n"
 "PO-Revision-Date: 2005-10-23 16:54+0200\n"
 "Last-Translator: Misha Bukin <misha.bukin@gmail.com>\n"
 "Language-Team: Russian\n"
@@ -23,95 +23,95 @@ msgstr "Показать место на диске пользующеся др�
 msgid "Graphical Disk Map"
 msgstr "Графическая карта диска"
 
-#: ../src/gui_main.c:88
+#: ../src/gui_main.c:91
 msgid "_File"
 msgstr "_Файл"
 
-#: ../src/gui_main.c:89
+#: ../src/gui_main.c:92
 msgid "_View"
 msgstr "_Вид"
 
-#: ../src/gui_main.c:90
+#: ../src/gui_main.c:93
 msgid "_Help"
 msgstr "_Помощь"
 
-#: ../src/gui_main.c:91
+#: ../src/gui_main.c:94
 msgid "_Open..."
 msgstr "_Открыть..."
 
-#: ../src/gui_main.c:92
+#: ../src/gui_main.c:95
 msgid "Open a folder"
 msgstr "Открыть папку"
 
-#: ../src/gui_main.c:95
+#: ../src/gui_main.c:98
 msgid "_Quit"
 msgstr "_Выйти"
 
-#: ../src/gui_main.c:96
+#: ../src/gui_main.c:99
 msgid "Exit program"
 msgstr "Выйти из программы"
 
-#: ../src/gui_main.c:99
+#: ../src/gui_main.c:102
 msgid "_Back"
 msgstr "_Назад"
 
-#: ../src/gui_main.c:100
+#: ../src/gui_main.c:103
 msgid "Go back one step"
 msgstr "Иди назад на один шаг"
 
-#: ../src/gui_main.c:103
+#: ../src/gui_main.c:106
 msgid "_Forward"
 msgstr "_Вперед"
 
-#: ../src/gui_main.c:104
+#: ../src/gui_main.c:107
 msgid "Go forward one step"
 msgstr "Иди вперед на один шаг"
 
-#: ../src/gui_main.c:107
+#: ../src/gui_main.c:110
 msgid "_Up"
 msgstr "_Верх"
 
-#: ../src/gui_main.c:108
+#: ../src/gui_main.c:111
 msgid "Go up one level"
 msgstr "Перейти на один уровень высше"
 
-#: ../src/gui_main.c:111
+#: ../src/gui_main.c:114
 msgid "_Top"
 msgstr "_Высший"
 
-#: ../src/gui_main.c:112
+#: ../src/gui_main.c:115
 msgid "Goto toplevel folder"
 msgstr "Перейти на папку высшого уровеня"
 
-#: ../src/gui_main.c:115
+#: ../src/gui_main.c:118
 msgid "_Settings..."
 msgstr "_Настройки..."
 
-#: ../src/gui_main.c:116
+#: ../src/gui_main.c:119
 msgid "Edit settings"
 msgstr "Редактировать настройки"
 
-#: ../src/gui_main.c:119
+#: ../src/gui_main.c:122
 msgid "_About..."
 msgstr "_О..."
 
-#: ../src/gui_main.c:120
+#: ../src/gui_main.c:123
 msgid "About this program"
 msgstr "О этой программе"
 
-#: ../src/gui_main.c:123
+#: ../src/gui_main.c:126
 msgid "_Refresh"
 msgstr "_Обновить"
 
-#: ../src/gui_main.c:124
+#: ../src/gui_main.c:127
 msgid "Refresh current view"
 msgstr "Обновить текущий вид"
 
-#: ../src/gui_main.c:369
+#: ../src/gui_main.c:387
 msgid "scanning..."
 msgstr "Сканирование..."
 
-#: ../src/gui_main.c:407
+#: ../src/gui_main.c:425
 msgid "Choose folder"
 msgstr "Выберите папку"
 
@@ -123,50 +123,103 @@ msgstr "GdMap это инструмент позволяющий графиче�
 msgid "translator-credits"
 msgstr "Misha Bukin <misha_bomb@yahoo.com>"
 
-#: ../src/preferences.c:166
+#: ../src/preferences.c:222
+msgid "Default color"
+msgstr ""
+
+#: ../src/preferences.c:226
+msgid "Color for file position"
+msgstr ""
+
+#: ../src/preferences.c:230
+msgid "Color for folder position"
+msgstr ""
+
+#: ../src/preferences.c:234
+#, fuzzy
+msgid "Color for folders"
+msgstr "Выберите папку"
+
+#: ../src/preferences.c:240 ../src/preferences.c:243
+msgid "Enter file extensions here"
+msgstr ""
+
+#: ../src/preferences.c:275
+msgid "Delete"
+msgstr ""
+
+#: ../src/preferences.c:314
+#, fuzzy
+msgid "Basic colors"
+msgstr "Разрешонные цвета"
+
+#: ../src/preferences.c:330
+#, fuzzy
+msgid "File colors"
+msgstr "Разрешонные цвета"
+
+#: ../src/preferences.c:354
+msgid "add new color"
+msgstr ""
+
+#: ../src/preferences.c:599
 msgid "Preferences"
 msgstr "Предпочтения"
 
-#: ../src/preferences.c:177
+#: ../src/preferences.c:610
 msgid "Display type"
 msgstr "Тип дисплея"
 
-#: ../src/preferences.c:183
+#: ../src/preferences.c:616
 msgid "Standard cushioned treemaps"
 msgstr "Заглушенные в стандартные древовидные схемы "
 
-#: ../src/preferences.c:187
+#: ../src/preferences.c:620
 msgid "Squarified cushioned treemaps"
 msgstr "Заглушенные в квадрате  древовидные схемы "
 
-#: ../src/preferences.c:201
+#: ../src/preferences.c:634
 msgid "Cushion settings"
 msgstr "Настройка заглушки"
 
-#: ../src/preferences.c:209
+#: ../src/preferences.c:642
 msgid "Height factor:"
 msgstr "Фактор высоты:"
 
-#: ../src/preferences.c:221
+#: ../src/preferences.c:654
 msgid "Decreasing height:"
 msgstr "Убывающая высота:"
 
-#: ../src/preferences.c:234
-msgid "Color settings"
-msgstr "Настройка цвета"
-
-#: ../src/preferences.c:242
-msgid "Enabled colors"
-msgstr "Разрешонные цвета"
-
-#: ../src/preferences.c:249
+#: ../src/preferences.c:667
 msgid "General display"
 msgstr "Основной дисплей"
 
-#: ../src/preferences.c:257
+#: ../src/preferences.c:675
 msgid "Maximum depth:"
 msgstr "Максимальная глубина:"
 
-#: ../src/preferences.c:269
+#. pre instance
+#: ../src/preferences.c:681
+msgid "Use average color of children for folders"
+msgstr ""
+
+#: ../src/preferences.c:690
 msgid "(0=unlimited)"
 msgstr "(0=неограниченный)"
+
+#: ../src/preferences.c:696
+msgid "Color settings"
+msgstr "Настройка цвета"
+
+#: ../src/preferences.c:705
+#, fuzzy
+msgid "Enable colors"
+msgstr "Разрешонные цвета"
+
+#: ../src/preferences.c:712
+msgid "Color profile..."
+msgstr ""
+
+#, fuzzy
+#~ msgid "Folder color"
+#~ msgstr "Разрешонные цвета"

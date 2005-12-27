@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-26 21:19+0200\n"
+"POT-Creation-Date: 2005-12-27 15:28+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,95 +24,95 @@ msgstr ""
 msgid "Graphical Disk Map"
 msgstr ""
 
-#: ../src/gui_main.c:88
+#: ../src/gui_main.c:91
 msgid "_File"
 msgstr ""
 
-#: ../src/gui_main.c:89
+#: ../src/gui_main.c:92
 msgid "_View"
 msgstr ""
 
-#: ../src/gui_main.c:90
+#: ../src/gui_main.c:93
 msgid "_Help"
 msgstr ""
 
-#: ../src/gui_main.c:91
+#: ../src/gui_main.c:94
 msgid "_Open..."
 msgstr ""
 
-#: ../src/gui_main.c:92
+#: ../src/gui_main.c:95
 msgid "Open a folder"
 msgstr ""
 
-#: ../src/gui_main.c:95
+#: ../src/gui_main.c:98
 msgid "_Quit"
 msgstr ""
 
-#: ../src/gui_main.c:96
+#: ../src/gui_main.c:99
 msgid "Exit program"
 msgstr ""
 
-#: ../src/gui_main.c:99
+#: ../src/gui_main.c:102
 msgid "_Back"
 msgstr ""
 
-#: ../src/gui_main.c:100
+#: ../src/gui_main.c:103
 msgid "Go back one step"
 msgstr ""
 
-#: ../src/gui_main.c:103
+#: ../src/gui_main.c:106
 msgid "_Forward"
 msgstr ""
 
-#: ../src/gui_main.c:104
+#: ../src/gui_main.c:107
 msgid "Go forward one step"
 msgstr ""
 
-#: ../src/gui_main.c:107
+#: ../src/gui_main.c:110
 msgid "_Up"
 msgstr ""
 
-#: ../src/gui_main.c:108
+#: ../src/gui_main.c:111
 msgid "Go up one level"
 msgstr ""
 
-#: ../src/gui_main.c:111
+#: ../src/gui_main.c:114
 msgid "_Top"
 msgstr ""
 
-#: ../src/gui_main.c:112
+#: ../src/gui_main.c:115
 msgid "Goto toplevel folder"
 msgstr ""
 
-#: ../src/gui_main.c:115
+#: ../src/gui_main.c:118
 msgid "_Settings..."
 msgstr ""
 
-#: ../src/gui_main.c:116
+#: ../src/gui_main.c:119
 msgid "Edit settings"
 msgstr ""
 
-#: ../src/gui_main.c:119
+#: ../src/gui_main.c:122
 msgid "_About..."
 msgstr ""
 
-#: ../src/gui_main.c:120
+#: ../src/gui_main.c:123
 msgid "About this program"
 msgstr ""
 
-#: ../src/gui_main.c:123
+#: ../src/gui_main.c:126
 msgid "_Refresh"
 msgstr ""
 
-#: ../src/gui_main.c:124
+#: ../src/gui_main.c:127
 msgid "Refresh current view"
 msgstr ""
 
-#: ../src/gui_main.c:369
+#: ../src/gui_main.c:387
 msgid "scanning..."
 msgstr ""
 
-#: ../src/gui_main.c:407
+#: ../src/gui_main.c:425
 msgid "Choose folder"
 msgstr ""
 
@@ -124,50 +124,95 @@ msgstr ""
 msgid "translator-credits"
 msgstr ""
 
-#: ../src/preferences.c:166
-msgid "Preferences"
+#: ../src/preferences.c:222
+msgid "Default color"
 msgstr ""
 
-#: ../src/preferences.c:177
-msgid "Display type"
+#: ../src/preferences.c:226
+msgid "Color for file position"
 msgstr ""
 
-#: ../src/preferences.c:183
-msgid "Standard cushioned treemaps"
-msgstr ""
-
-#: ../src/preferences.c:187
-msgid "Squarified cushioned treemaps"
-msgstr ""
-
-#: ../src/preferences.c:201
-msgid "Cushion settings"
-msgstr ""
-
-#: ../src/preferences.c:209
-msgid "Height factor:"
-msgstr ""
-
-#: ../src/preferences.c:221
-msgid "Decreasing height:"
+#: ../src/preferences.c:230
+msgid "Color for folder position"
 msgstr ""
 
 #: ../src/preferences.c:234
-msgid "Color settings"
+msgid "Color for folders"
 msgstr ""
 
-#: ../src/preferences.c:242
-msgid "Enabled colors"
+#: ../src/preferences.c:240 ../src/preferences.c:243
+msgid "Enter file extensions here"
 msgstr ""
 
-#: ../src/preferences.c:249
+#: ../src/preferences.c:275
+msgid "Delete"
+msgstr ""
+
+#: ../src/preferences.c:314
+msgid "Basic colors"
+msgstr ""
+
+#: ../src/preferences.c:330
+msgid "File colors"
+msgstr ""
+
+#: ../src/preferences.c:354
+msgid "add new color"
+msgstr ""
+
+#: ../src/preferences.c:599
+msgid "Preferences"
+msgstr ""
+
+#: ../src/preferences.c:610
+msgid "Display type"
+msgstr ""
+
+#: ../src/preferences.c:616
+msgid "Standard cushioned treemaps"
+msgstr ""
+
+#: ../src/preferences.c:620
+msgid "Squarified cushioned treemaps"
+msgstr ""
+
+#: ../src/preferences.c:634
+msgid "Cushion settings"
+msgstr ""
+
+#: ../src/preferences.c:642
+msgid "Height factor:"
+msgstr ""
+
+#: ../src/preferences.c:654
+msgid "Decreasing height:"
+msgstr ""
+
+#: ../src/preferences.c:667
 msgid "General display"
 msgstr ""
 
-#: ../src/preferences.c:257
+#: ../src/preferences.c:675
 msgid "Maximum depth:"
 msgstr ""
 
-#: ../src/preferences.c:269
+#. pre instance
+#: ../src/preferences.c:681
+msgid "Use average color of children for folders"
+msgstr ""
+
+#: ../src/preferences.c:690
 msgid "(0=unlimited)"
+msgstr ""
+
+#: ../src/preferences.c:696
+msgid "Color settings"
+msgstr ""
+
+#: ../src/preferences.c:705
+msgid "Enable colors"
+msgstr ""
+
+#: ../src/preferences.c:712
+msgid "Color profile..."
 msgstr ""
