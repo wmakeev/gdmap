@@ -16,7 +16,7 @@
 
 typedef struct _tree_t tree_t;
 
-typedef gboolean (*ProgressFunc)(double percentage, void* data);
+typedef gboolean (*ProgressFunc)(void* data);
 
 struct _tree_t {
   char* name;

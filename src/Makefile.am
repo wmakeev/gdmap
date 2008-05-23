@@ -8,7 +8,6 @@ gdmap_SOURCES = \
 	gui_support.c gui_support.h \
 	gui_main.c gui_main.h \
 	colors.c colors.h \
-	filter.c filter.h \
 	preferences.c preferences.h \
 	about.c about.h \
 	tree.c tree.h

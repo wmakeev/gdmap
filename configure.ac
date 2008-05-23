@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([GdMap], [0.7.5], [http://sourceforge.net/tracker/?atid=373401&group_id=21965])
+AC_INIT([GdMap], [0.8.0-pre], [http://sourceforge.net/tracker/?atid=373401&group_id=21965])
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
 
@@ -16,10 +16,11 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 dnl AC_PROG_LIBTOOL
 
+AM_PROG_CC_C_O
 AM_MAINTAINER_MODE
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(unistd.h)
+AC_CHECK_HEADERS(string.h sys/time.h stdlib.h)
 
 AC_C_CONST
 AC_TYPE_OFF_T
@@ -33,7 +34,7 @@ PKG_CHECK_MODULES(LIBXML, [$pkg_modules])
 AC_SUBST(LIBXML_CFLAGS)
 AC_SUBST(LIBXML_LIBS)
 
-ALL_LINGUAS="de hr tr ru he fr bg"
+ALL_LINGUAS="de hr tr ru he fr bg sv"
 AM_GLIB_GNU_GETTEXT
 AC_PROG_INTLTOOL
 
@@ -41,6 +42,8 @@ GETTEXT_PACKAGE=GdMap
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Name of the package])
 
+# Make sure we use 64-bit versions of various file stuff.
+AC_SYS_LARGEFILE
 
 dnl Use -Wall if we have gcc.
 if test "x$GCC" = "xyes"; then

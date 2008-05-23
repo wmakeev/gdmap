@@ -15,6 +15,9 @@
 
 typedef void (*RedrawFunc)(void);
 
+/* extern gboolean LeaveDevice; */
+/* extern gboolean UseReportedSize; */
+
 void pref_set_redraw_callback(RedrawFunc func);
 void pref_init();
 
@@ -24,8 +27,10 @@ double pref_get_f(void);
 unsigned pref_get_max_depth(void);
 gboolean pref_get_use_colors(void);
 gboolean pref_get_use_average(void);
+gboolean pref_get_leave_device(void);
+gboolean pref_get_use_reported_size(void);
 
-void gui_show_preferences(void);
+void gui_show_preferences(GtkWindow* parent);
 
 
 #endif

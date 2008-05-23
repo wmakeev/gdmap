@@ -1,6 +1,6 @@
-/* Copyright (C) 2005 sgop@users.sourceforge.net This is free software
- * distributed under the terms of the GNU Public License.  See the
- * file COPYING for details.
+/* Copyright (C) 2005-2006 sgop@users.sourceforge.net
+ * This is free software distributed under the terms of the
+ * GNU Public License.  See the file COPYING for details.
  */
 /* $Revision$
  * $Date$
@@ -29,8 +29,11 @@ static const char* GtkResource =
   "widget \"*EventLabel*\" style \"event\""NL;
 
 static const char* Folder = NULL;
+
 static GOptionEntry Options[] = {
   { "folder", 'f', 0, G_OPTION_ARG_STRING, &Folder, "Inspect folder", "dir" },
+/*   { "mount", 'm', 0, G_OPTION_ARG_NONE, &AllowLeaveDevice, "Descend directories on other filesystems", NULL }, */
+/*   { "reportedsize", 'r', 0, G_OPTION_ARG_NONE, &ReportedSize, "Don't show disk size of files but reported size", NULL }, */
   { NULL, 0, 0, 0, NULL, NULL, NULL }
 };
 

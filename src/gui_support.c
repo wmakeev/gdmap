@@ -32,7 +32,6 @@ GtkWidget* ui_create_section(const char* header, const char* help,
   GtkWidget* box;
   GtkWidget* label;
   GtkWidget* hbox2;
-  static GtkTooltips* tips = NULL;
   char* temp;
 
   box = gtk_vbox_new(FALSE, 5);
@@ -59,8 +58,13 @@ GtkWidget* ui_create_section(const char* header, const char* help,
     gtk_widget_show(pixmap);
     gtk_container_add(GTK_CONTAINER(ebox), pixmap);
     gtk_box_pack_start(GTK_BOX(hbox2), ebox, FALSE, FALSE, 0);
+#if GTK_CHECK_VERSION(2,12,0)
+    gtk_widget_set_tooltip_text(ebox, help);
+#else
+    static GtkTooltips* tips = NULL;
     if (!tips) tips = gtk_tooltips_new();
     gtk_tooltips_set_tip(tips, ebox, help, NULL);
+#endif
   }
   if (header_hbox) *header_hbox = hbox2;
 

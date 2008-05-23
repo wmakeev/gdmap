@@ -24,152 +24,218 @@ static double FValue = 0.8;
 static unsigned MaxDepth = 0;
 static gboolean UseColors = TRUE;
 static gboolean UseAverage = FALSE;
-/* static gboolean UseFilter = FALSE; */
+static gboolean LeaveDevice = FALSE;
+static gboolean UseReportedSize = TRUE;
+
 static GtkWidget* AddLabel = NULL;
 static GtkBox* ColorBox = NULL;
 static GList* Boxes = NULL;
 
-static void pref_save() {
-  GKeyFile* file = g_key_file_new();
 
-  g_key_file_set_integer(file, "Display", "Mode", DisplayMode);
-  g_key_file_set_integer(file, "Display", "MaxDepth", MaxDepth);
-  g_key_file_set_integer(file, "Display", "HValue", (int)(HValue*100));
-  g_key_file_set_integer(file, "Display", "FValue", (int)(FValue*100));
-  g_key_file_set_boolean(file, "Display", "UseColors", UseColors);
-  g_key_file_set_boolean(file, "Display", "UseAverage", UseAverage);
-/*   g_key_file_set_boolean(file, "Display", "UseFilter", UseFilter); */
-
-  {
-    const char* home = g_get_home_dir();
-    char* filename = g_strdup_printf("%s/.gdmap/settings.ini", home);
-    gsize len;
-    char* temp = g_key_file_to_data(file, &len, NULL);
-
-    if (temp) {
-      FILE* fd;
-      create_dir(filename);
-      fd = fopen(filename, "w");
-      if (fd) {
-        fwrite(temp, len, 1, fd);
-        fclose(fd);
-      }
+static void pref_save()
+{
+    GKeyFile* file = g_key_file_new();
+    
+    g_key_file_set_integer(file, "Display", "Mode", DisplayMode);
+    g_key_file_set_integer(file, "Display", "MaxDepth", MaxDepth);
+    g_key_file_set_integer(file, "Display", "HValue", (int)(HValue*100));
+    g_key_file_set_integer(file, "Display", "FValue", (int)(FValue*100));
+    g_key_file_set_boolean(file, "Display", "UseColors", UseColors);
+    g_key_file_set_boolean(file, "Display", "UseAverage", UseAverage);
+    g_key_file_set_boolean(file, "Scan", "UseReportedSize", UseReportedSize);
+    g_key_file_set_boolean(file, "Scan", "LeaveDevice", LeaveDevice);
+    
+    {
+        const char* home = g_get_home_dir();
+        char* filename = g_strdup_printf("%s/.gdmap/settings.ini", home);
+        gsize len;
+        char* temp = g_key_file_to_data(file, &len, NULL);
+        
+        if (temp)
+        {
+            FILE* fd;
+            create_dir(filename);
+            fd = fopen(filename, "w");
+            if (fd)
+            {
+                fwrite(temp, len, 1, fd);
+                fclose(fd);
+            }
+        }
+        g_free(temp);
+        g_free(filename);
     }
-    g_free(temp);
-    g_free(filename);
-  }
-  
-  g_key_file_free(file);
-
+    
+    g_key_file_free(file);
 }
 
 
-void pref_set_redraw_callback(RedrawFunc func) {
-  RedrawCallback = func;
+void pref_set_redraw_callback(RedrawFunc func)
+{
+    RedrawCallback = func;
 }
 
-unsigned pref_get_display_mode(void) {
-  return DisplayMode;
+unsigned pref_get_display_mode(void)
+{
+    return DisplayMode;
 }
-double pref_get_h(void) {
-  return HValue;
+
+double pref_get_h(void)
+{
+    return HValue;
 }
-double pref_get_f(void) {
-  return FValue;
+
+double pref_get_f(void)
+{
+    return FValue;
 }
-unsigned pref_get_max_depth(void) {
-  return MaxDepth;
+
+unsigned pref_get_max_depth(void)
+{
+    return MaxDepth;
 }
-gboolean pref_get_use_colors(void) {
-  return UseColors;
+
+gboolean pref_get_use_colors(void)
+{
+    return UseColors;
 }
-gboolean pref_get_use_average(void) {
-  return UseAverage;
+
+gboolean pref_get_use_average(void)
+{
+    return UseAverage;
 }
-/* gboolean pref_get_use_filter(void) { */
-/*   return UseFilter; */
-/* } */
+
+gboolean pref_get_leave_device(void)
+{
+    return LeaveDevice;
+}
+
+gboolean pref_get_use_reported_size(void)
+{
+    return UseReportedSize;
+}
 
 
-static void pref_set_display_mode(unsigned mode) {
-  if (mode == DISPLAY_STANDARD_CUSHION || mode == DISPLAY_SQUARE_CUSHION) {
-    DisplayMode = mode;
+
+static void pref_set_display_mode(unsigned mode)
+{
+    if (mode == DISPLAY_STANDARD_CUSHION || mode == DISPLAY_SQUARE_CUSHION)
+    {
+        DisplayMode = mode;
+        if (RedrawCallback) RedrawCallback();
+        pref_save();
+    }
+}
+
+static void pref_set_h(double value)
+{
+    HValue = value;
     if (RedrawCallback) RedrawCallback();
     pref_save();
-  }
-}
-static void pref_set_h(double value) {
-  HValue = value;
-  if (RedrawCallback) RedrawCallback();
-  pref_save();
-}
-static void pref_set_f(double value) {
-  FValue = value;
-  if (RedrawCallback) RedrawCallback();
-  pref_save();
-}
-static void pref_set_max_depth(unsigned value) {
-  MaxDepth = value;
-  if (RedrawCallback) RedrawCallback();
-  pref_save();
-}
-static void pref_set_use_colors(gboolean value) {
-  UseColors = value;
-  if (RedrawCallback) RedrawCallback();
-  pref_save();
-}
-static void pref_set_use_average(gboolean value) {
-  UseAverage = value;
-  if (RedrawCallback) RedrawCallback();
-  pref_save();
-}
-/* static void pref_set_use_filter(gboolean value) { */
-/*   UseFilter = value; */
-/*   if (RedrawCallback) RedrawCallback(); */
-/*   pref_save(); */
-/* } */
-
-static void on_display_mode(GtkToggleButton* button, void* data) {
-  unsigned mode = GPOINTER_TO_INT(data);
-  if (gtk_toggle_button_get_active(button))
-    pref_set_display_mode(mode);
 }
 
-static void on_h_changed(GtkSpinButton* button) {
-  pref_set_h(gtk_spin_button_get_value(button));
-}
-static void on_f_changed(GtkSpinButton* button) {
-  pref_set_f(gtk_spin_button_get_value(button));
-}
-static void on_depth_changed(GtkSpinButton* button, GtkWidget* other) {
-  pref_set_max_depth(gtk_spin_button_get_value_as_int(button));
-  gtk_widget_set_sensitive(other, pref_get_use_colors() && pref_get_max_depth() != 0);
-}
-static void on_use_colors(GtkToggleButton* button, GtkWidget* other) {
-  pref_set_use_colors(gtk_toggle_button_get_active(button));
-  gtk_widget_set_sensitive(other, pref_get_use_colors() && pref_get_max_depth() != 0);
-}
-static void on_use_average(GtkToggleButton* button) {
-  pref_set_use_average(gtk_toggle_button_get_active(button));
+static void pref_set_f(double value)
+{
+    FValue = value;
+    if (RedrawCallback) RedrawCallback();
+    pref_save();
 }
 
-static void on_box_destroyed(GtkWidget* box) {
-  Boxes = g_list_remove(Boxes, box);
+static void pref_set_max_depth(unsigned value)
+{
+    MaxDepth = value;
+    if (RedrawCallback) RedrawCallback();
+    pref_save();
 }
 
-static void on_add_cancel(GtkWidget* hbox) {
-  gtk_widget_hide(hbox);
-  ui_event_label_set_sensitive(AddLabel, TRUE);
+static void pref_set_use_colors(gboolean value)
+{
+    UseColors = value;
+    if (RedrawCallback) RedrawCallback();
+    pref_save();
 }
 
-static void on_add_new(GtkWidget* hbox) {
-  gtk_widget_show(hbox);
-  ui_event_label_set_sensitive(AddLabel, FALSE);
+static void pref_set_use_average(gboolean value)
+{
+    UseAverage = value;
+    if (RedrawCallback) RedrawCallback();
+    pref_save();
 }
 
-/* static void on_use_filter(GtkToggleButton* button) { */
-/*   pref_set_use_filter(gtk_toggle_button_get_active(button)); */
-/* } */
+static void pref_set_leave_device(gboolean value)
+{
+    LeaveDevice = value;
+    pref_save();
+}
+
+static void pref_set_use_reported_size(gboolean value)
+{
+    UseReportedSize = value;
+    pref_save();
+}
+
+
+static void on_display_mode(GtkToggleButton* button, void* data)
+{
+    unsigned mode = GPOINTER_TO_INT(data);
+    if (gtk_toggle_button_get_active(button))
+        pref_set_display_mode(mode);
+}
+
+static void on_h_changed(GtkSpinButton* button)
+{
+    pref_set_h(gtk_spin_button_get_value(button));
+}
+
+static void on_f_changed(GtkSpinButton* button)
+{
+    pref_set_f(gtk_spin_button_get_value(button));
+}
+
+static void on_depth_changed(GtkSpinButton* button, GtkWidget* other)
+{
+    pref_set_max_depth(gtk_spin_button_get_value_as_int(button));
+    gtk_widget_set_sensitive(other, pref_get_use_colors() && pref_get_max_depth() != 0);
+}
+
+static void on_use_colors(GtkToggleButton* button, GtkWidget* other)
+{
+    pref_set_use_colors(gtk_toggle_button_get_active(button));
+    gtk_widget_set_sensitive(other, pref_get_use_colors() && pref_get_max_depth() != 0);
+}
+
+static void on_use_average(GtkToggleButton* button)
+{
+    pref_set_use_average(gtk_toggle_button_get_active(button));
+}
+
+static void on_leave_device(GtkToggleButton* button)
+{
+    pref_set_leave_device(gtk_toggle_button_get_active(button));
+}
+
+static void on_use_reported(GtkToggleButton* button)
+{
+    pref_set_use_reported_size(!gtk_toggle_button_get_active(button));
+}
+
+static void on_box_destroyed(GtkWidget* box)
+{
+    Boxes = g_list_remove(Boxes, box);
+}
+
+static void on_add_cancel(GtkWidget* hbox)
+{
+    gtk_widget_hide(hbox);
+    ui_event_label_set_sensitive(AddLabel, TRUE);
+}
+
+static void on_add_new(GtkWidget* hbox)
+{
+    gtk_widget_show(hbox);
+    ui_event_label_set_sensitive(AddLabel, FALSE);
+}
+
 
 static GtkWidget* _gui_create_color_box(color_t* color);
 static void on_add_ok(GtkWidget* hbox) {
@@ -399,187 +465,7 @@ static void on_setup_colors(GtkWindow* parent) {
   gtk_widget_destroy(dialog);
 }
 
-/* static void on_selection_changed(GtkTreeSelection* selection, GtkWidget* tv) { */
-/*   GtkWidget* remove = g_object_get_data(G_OBJECT(tv), "remove"); */
-/*   gtk_widget_set_sensitive(remove, gtk_tree_selection_count_selected_rows(selection)>0); */
-/* } */
-
-/* static GtkWidget* ui_filter_view() { */
-/*   GtkListStore* store; */
-/*   GtkWidget* tv; */
-/*   GtkCellRenderer* renderer; */
-/*   GtkTreeViewColumn* column; */
-/*   GtkTreeSelection* select; */
-
-/*   store = gtk_list_store_new(1, G_TYPE_STRING); */
-
-/*   tv = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store)); */
-/*   gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tv), FALSE); */
-  
-/*   select = gtk_tree_view_get_selection(GTK_TREE_VIEW(tv)); */
-/*   gtk_tree_selection_set_mode(select, GTK_SELECTION_MULTIPLE); */
-/*   g_signal_connect(G_OBJECT(select), "changed",  */
-/*                    G_CALLBACK(on_selection_changed), tv); */
-
-/*   renderer = gtk_cell_renderer_text_new(); */
-/*   column = gtk_tree_view_column_new_with_attributes("", renderer, "text", 0, NULL); */
-/*   gtk_tree_view_append_column(GTK_TREE_VIEW (tv), column); */
-
-/*   return tv; */
-/* } */
-
-/* static void on_add_filter(GtkWidget* tv) { */
-/*   GtkEntry* entry = g_object_get_data(G_OBJECT(tv), "entry"); */
-/*   GtkListStore* store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tv))); */
-/*   const char* text = gtk_entry_get_text(entry); */
-/*   GtkTreeIter iter; */
-
-/*   if (!text || *text == 0) return; */
-
-/*   gtk_list_store_append(store, &iter); */
-/*   gtk_list_store_set(store, &iter, 0, text, -1); */
-/*   gtk_entry_set_text(entry, ""); */
-/* } */
-
-/* static void on_remove_filter(GtkWidget* tv) { */
-/*   GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(tv)); */
-/*   GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tv)); */
-/*   GList* sel = gtk_tree_selection_get_selected_rows(selection, &model); */
-/*   GList* dlist; */
-
-/*   for (dlist = sel; dlist; dlist = dlist->next) { */
-/*     GtkTreePath* path = dlist->data; */
-/*     GtkTreeIter* iter = g_malloc(sizeof(*iter)); */
-
-/*     if (gtk_tree_model_get_iter(model, iter, path)) { */
-/*       dlist->data = iter; */
-/*     } else { */
-/*       dlist->data = NULL; */
-/*       g_free(iter); */
-/*     } */
-/*     gtk_tree_path_free(path); */
-/*   } */
-/*   for (dlist = sel; dlist; dlist = dlist->next) { */
-/*     GtkTreeIter* iter = dlist->data; */
-/*     if (iter) gtk_list_store_remove(GTK_LIST_STORE(model), iter); */
-/*   } */
-
-/*   g_list_foreach(sel, (GFunc)g_free, NULL); */
-/*   g_list_free(sel); */
-/* } */
-
-/* static void on_setup_filter(GtkWindow* parent) { */
-/*   GtkWidget* dialog; */
-
-/*   dialog = gtk_dialog_new_with_buttons */
-/*     ("Filter settings", parent, GTK_DIALOG_MODAL|GTK_DIALOG_DESTROY_WITH_PARENT, */
-/*      GTK_STOCK_CANCEL, GTK_RESPONSE_NONE, */
-/*      GTK_STOCK_OK,     GTK_RESPONSE_OK, */
-/*      NULL); */
-/*   gtk_window_set_default_size(GTK_WINDOW(dialog), 400, 400); */
-
-/*   { */
-/*     GtkWidget* top; */
-/*     GtkWidget* section; */
-/*     GtkWidget* hbox0; */
-/*     GtkWidget* vbox; */
-/*     GtkWidget* hbox; */
-/*     GtkWidget* item; */
-/*     GtkWidget* sw; */
-/*     GtkWidget* tv; */
-/*     GtkRequisition req; */
-/*     GtkListStore* store; */
-/*     GtkTreeIter iter; */
-/*     file_size_t size; */
-
-/*     top = gtk_vbox_new(FALSE, 10); */
-/*     gtk_container_set_border_width(GTK_CONTAINER(top), 6); */
-    
-/*     section = ui_create_section(_("Filter by size"), NULL, &hbox0, NULL); */
-/*     gtk_box_pack_start(GTK_BOX(top), section, FALSE, FALSE, 0); */
-
-/*     item = gtk_label_new(_("minimum:")); */
-/*     gtk_box_pack_start(GTK_BOX(hbox0), item, FALSE, FALSE, 0); */
-    
-/*     store = gtk_list_store_new(1, G_TYPE_STRING); */
-/*     gtk_list_store_append(store, &iter); */
-/*     gtk_list_store_set(store, &iter, 0, "", -1); */
-/*     size = 1024; */
-/*     while (size < ((file_size_t)1) << 40) { */
-/*       const char* str = print_bytes_exact(size); */
-/*       gtk_list_store_append(store, &iter); */
-/*       gtk_list_store_set(store, &iter, 0, str, -1); */
-/*       size <<= 2; */
-/*     } */
-
-/*     item = gtk_combo_box_entry_new_with_model(GTK_TREE_MODEL(store), 0); */
-/*     gtk_widget_set_size_request(item, 120, -1); */
-/*     gtk_box_pack_start(GTK_BOX(hbox0), item, TRUE, TRUE, 5); */
-    
-/*     item = gtk_label_new(_("maximum:")); */
-/*     gtk_box_pack_start(GTK_BOX(hbox0), item, FALSE, FALSE, 5); */
-
-/*     item = gtk_combo_box_entry_new_with_model(GTK_TREE_MODEL(store), 0); */
-/*     gtk_widget_set_size_request(item, 120, -1); */
-/*     gtk_box_pack_start(GTK_BOX(hbox0), item, TRUE, TRUE, 0); */
-
-
-
-/*     section = ui_create_section(_("Filter by name (wildcards allowed)"), NULL, &hbox0, NULL); */
-/*     gtk_box_pack_start(GTK_BOX(top), section, TRUE, TRUE, 0); */
-
-/*     vbox = gtk_vbox_new(FALSE, 0); */
-/*     gtk_box_pack_start(GTK_BOX(hbox0), vbox, TRUE, TRUE, 0); */
-
-/*     sw = gtk_scrolled_window_new(NULL, NULL); */
-/*     gtk_box_pack_start(GTK_BOX(vbox), sw, TRUE, TRUE, 0); */
-/*     gtk_scrolled_window_set_policy */
-/*       (GTK_SCROLLED_WINDOW(sw), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC); */
-/*     gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(sw), GTK_SHADOW_IN); */
-
-/*     tv = ui_filter_view(); */
-/*     gtk_container_add(GTK_CONTAINER(sw), tv); */
-
-/*     hbox = gtk_hbox_new(FALSE, 5); */
-/*     gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0); */
-    
-/*     item = gtk_entry_new(); */
-/*     gtk_box_pack_start(GTK_BOX(hbox), item, FALSE, FALSE, 0); */
-/*     gtk_widget_size_request(item, &req); */
-/*     g_signal_connect_swapped(G_OBJECT(item), "activate", */
-/*                              G_CALLBACK(on_add_filter), tv); */
-/*     g_object_set_data(G_OBJECT(tv), "entry", item); */
-    
-/*     item = gtk_button_new_from_stock(GTK_STOCK_ADD); */
-/*     gtk_widget_set_size_request(item, -1, req.height); */
-/*     gtk_box_pack_start(GTK_BOX(hbox), item, FALSE, FALSE, 0); */
-/*     g_signal_connect_swapped(G_OBJECT(item), "clicked", */
-/*                              G_CALLBACK(on_add_filter), tv); */
-    
-/*     item = gtk_button_new_from_stock(GTK_STOCK_REMOVE); */
-/*     gtk_widget_set_size_request(item, -1, req.height); */
-/*     gtk_widget_set_sensitive(item, FALSE); */
-/*     gtk_box_pack_end(GTK_BOX(hbox), item, FALSE, FALSE, 0); */
-/*     g_signal_connect_swapped(G_OBJECT(item), "clicked", */
-/*                              G_CALLBACK(on_remove_filter), tv); */
-/*     g_object_set_data(G_OBJECT(tv), "remove", item); */
-    
-/*     gtk_widget_show_all(top); */
-/*     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), top, TRUE, TRUE, 0); */
-/*   } */
-    
-
-/*   switch (gtk_dialog_run(GTK_DIALOG(dialog))) { */
-/*   case GTK_RESPONSE_OK: */
-/*     break; */
-/*   default: */
-/*     break; */
-/*   } */
-/*   gtk_widget_destroy(dialog); */
-/* } */
-
-
-void gui_show_preferences(void) {
+void gui_show_preferences(GtkWindow* parent) {
   GtkWidget* win;
   GtkWidget* section;
   GtkWidget* table;
@@ -667,7 +553,7 @@ void gui_show_preferences(void) {
   section = ui_create_section(_("General display"), NULL, &hbox, NULL);
   gtk_box_pack_start(GTK_BOX(vbox0), section, FALSE, FALSE, 0);
   
-  table = gtk_table_new(3, 1, FALSE);
+  table = gtk_table_new(3, 2, FALSE);
   gtk_box_pack_start(GTK_BOX(hbox), table, TRUE, TRUE, 0);
   gtk_table_set_col_spacings(GTK_TABLE(table), 10);
   gtk_table_set_row_spacings(GTK_TABLE(table), 2);
@@ -700,7 +586,7 @@ void gui_show_preferences(void) {
   gtk_box_pack_start(GTK_BOX(hbox), table, TRUE, TRUE, 0);
   gtk_table_set_col_spacings(GTK_TABLE(table), 10);
   gtk_table_set_row_spacings(GTK_TABLE(table), 2);
-  gtk_table_set_homogeneous(GTK_TABLE(table), TRUE);
+/*   gtk_table_set_homogeneous(GTK_TABLE(table), TRUE); */
 
   item = gtk_check_button_new_with_label(_("Enable colors"));
   gtk_button_set_alignment(GTK_BUTTON(item), 0, 0.5);
@@ -724,29 +610,22 @@ void gui_show_preferences(void) {
   g_signal_connect(G_OBJECT(item), "toggled", G_CALLBACK(on_use_average), NULL);
 
 
-/*   section = ui_create_section(_("Filter (changes requires rescan)"), NULL, &hbox, NULL); */
-/*   gtk_box_pack_start(GTK_BOX(vbox0), section, FALSE, FALSE, 0); */
+  section = ui_create_section(_("Scanning options (requires re-scan)"), NULL, &hbox, NULL);
+  gtk_box_pack_start(GTK_BOX(vbox0), section, FALSE, FALSE, 0);
+
+  vbox = gtk_vbox_new(FALSE, 2);
+  gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 0);
+
+  item = gtk_check_button_new_with_label(_("Descend directories on other filesystems"));
+  gtk_box_pack_start(GTK_BOX(vbox), item, FALSE, FALSE, 0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item), pref_get_leave_device());
+  g_signal_connect(G_OBJECT(item), "toggled", G_CALLBACK(on_leave_device), item2);
+
+  item = gtk_check_button_new_with_label(_("Use allocated disk size of files"));
+  gtk_box_pack_start(GTK_BOX(vbox), item, FALSE, FALSE, 0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item), !pref_get_use_reported_size());
+  g_signal_connect(G_OBJECT(item), "toggled", G_CALLBACK(on_use_reported), item2);
   
-/*   table = gtk_table_new(1, 2, FALSE); */
-/*   gtk_box_pack_start(GTK_BOX(hbox), table, TRUE, TRUE, 0); */
-/*   gtk_table_set_col_spacings(GTK_TABLE(table), 10); */
-/*   gtk_table_set_row_spacings(GTK_TABLE(table), 2); */
-/*   gtk_table_set_homogeneous(GTK_TABLE(table), TRUE); */
-
-/*   // pre instance */
-/*   item = gtk_check_button_new_with_label(_("Enable filter")); */
-/*   gtk_button_set_alignment(GTK_BUTTON(item), 0, 0.5); */
-/*   gtk_table_attach(GTK_TABLE(table), item, 0, 1, 0, 1, */
-/*                    GTK_FILL|GTK_EXPAND, GTK_FILL, 0, 0); */
-/*   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item), pref_get_use_filter()); */
-/*   g_signal_connect(G_OBJECT(item), "toggled", G_CALLBACK(on_use_filter), NULL); */
-
-/*   item = gtk_button_new_with_label(_("Setup filter...")); */
-/*   gtk_table_attach(GTK_TABLE(table), item, 1, 2, 0, 1, */
-/*                    GTK_FILL, GTK_FILL, 0, 0); */
-/*   g_signal_connect_swapped(G_OBJECT(item), "clicked", */
-/*                            G_CALLBACK(on_setup_filter), PrefWin); */
-
 
   // buttons
   item = gtk_hseparator_new();
@@ -762,55 +641,76 @@ void gui_show_preferences(void) {
   g_signal_connect_swapped(G_OBJECT(item), "clicked",
                            G_CALLBACK(gtk_widget_destroy), win);
 
+  if (parent)
+  {
+      gtk_window_set_transient_for(GTK_WINDOW(win), parent);
+      gtk_window_set_destroy_with_parent(GTK_WINDOW(win), TRUE);
+  }
+
   gtk_widget_show_all(win);
 }
 
 
-static void pref_load(const char* filename) {
-  GKeyFile* file = g_key_file_new();
-  GError* error = NULL;
+static void pref_load(const char* filename)
+{
+    GKeyFile* file = g_key_file_new();
+    GError* error = NULL;
 
-  if (!g_key_file_load_from_file(file, filename, 0, &error)) {
-    g_message(error->message);
-    g_error_free(error);
-    return;
-  }
+    if (!g_key_file_load_from_file(file, filename, 0, &error))
+    {
+        g_message(error->message);
+        g_error_free(error);
+        return;
+    }
   
-  if (g_key_file_has_key(file, "Display", "Mode", NULL)) {
-    int val = g_key_file_get_integer(file, "Display", "Mode", NULL);
-    pref_set_display_mode(val);
-  }
+    if (g_key_file_has_key(file, "Display", "Mode", NULL))
+    {
+        int val = g_key_file_get_integer(file, "Display", "Mode", NULL);
+        pref_set_display_mode(val);
+    }
   
-  if (g_key_file_has_key(file, "Display", "MaxDepth", NULL)) {
-    int val = g_key_file_get_integer(file, "Display", "MaxDepth", NULL);
-    pref_set_max_depth(val);
-  }
+    if (g_key_file_has_key(file, "Display", "MaxDepth", NULL))
+    {
+        int val = g_key_file_get_integer(file, "Display", "MaxDepth", NULL);
+        pref_set_max_depth(val);
+    }
   
-  if (g_key_file_has_key(file, "Display", "HValue", NULL)) {
-    int val = g_key_file_get_integer(file, "Display", "HValue", NULL);
-    pref_set_h((double)val/100.);
-  }
+    if (g_key_file_has_key(file, "Display", "HValue", NULL))
+    {
+        int val = g_key_file_get_integer(file, "Display", "HValue", NULL);
+        pref_set_h((double)val/100.);
+    }
   
-  if (g_key_file_has_key(file, "Display", "FValue", NULL)) {
-    int val = g_key_file_get_integer(file, "Display", "FValue", NULL);
-    pref_set_f((double)val/100.);
-  }
+    if (g_key_file_has_key(file, "Display", "FValue", NULL))
+    {
+        int val = g_key_file_get_integer(file, "Display", "FValue", NULL);
+        pref_set_f((double)val/100.);
+    }
   
-  if (g_key_file_has_key(file, "Display", "UseAverage", NULL)) {
-    gboolean val = g_key_file_get_boolean(file, "Display", "UseAverage", NULL);
-    pref_set_use_average(val);
-  }
+    if (g_key_file_has_key(file, "Display", "UseAverage", NULL))
+    {
+        gboolean val = g_key_file_get_boolean(file, "Display", "UseAverage", NULL);
+        pref_set_use_average(val);
+    }
   
-/*   if (g_key_file_has_key(file, "Display", "UseFilter", NULL)) { */
-/*     gboolean val = g_key_file_get_boolean(file, "Display", "UseFilter", NULL); */
-/*     pref_set_use_filter(val); */
-/*   } */
+    if (g_key_file_has_key(file, "Scan", "LeaveDevice", NULL))
+    {
+        gboolean val = g_key_file_get_boolean(file, "Scan", "LeaveDevice", NULL);
+        pref_set_leave_device(val);
+    }
   
-  g_key_file_free(file);
+    if (g_key_file_has_key(file, "Scan", "UseReportedSize", NULL))
+    {
+        gboolean val = g_key_file_get_boolean(file, "Display", "UseReportedSize", NULL);
+        pref_set_use_reported_size(val);
+    }
+  
+    g_key_file_free(file);
 }
 
-void pref_init() {
-  const char* home = g_get_home_dir();
-  char* filename = g_strdup_printf("%s/.gdmap/settings.ini", home);
-  pref_load(filename);
+void pref_init()
+{
+    const char* home = g_get_home_dir();
+    char* filename = g_strdup_printf("%s/.gdmap/settings.ini", home);
+    pref_load(filename);
 }
