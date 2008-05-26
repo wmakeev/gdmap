@@ -1,13 +1,13 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# Stoyan Bonkov <stafex@gmail.com>, 2005.
+# Stoyan Bonkov <stafex@gmail.com>, 2008.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: GdMap 0.7.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-23 16:02+0200\n"
+"POT-Creation-Date: 2008-05-26 22:20+0200\n"
 "PO-Revision-Date: 2005-11-07 18:54+0200\n"
 "Last-Translator: Stoyan Bonkov <stafex@gmail.com>\n"
 "Language-Team: Bulgarian\n"
@@ -29,7 +29,7 @@ msgstr "_Файл"
 
 #: ../src/gui_main.c:95
 msgid "_View"
-msgstr "_Виж"
+msgstr "_Преглед"
 
 #: ../src/gui_main.c:96
 msgid "_Help"
@@ -125,116 +125,121 @@ msgstr ""
 msgid "translator-credits"
 msgstr "Стоян Бонков <stafex@gmail.com>"
 
-#: ../src/preferences.c:278
+#: ../src/preferences.c:288
 msgid "Default color"
-msgstr ""
+msgstr "Цвят по подразбиране"
 
-#: ../src/preferences.c:282
+#: ../src/preferences.c:292
 msgid "Color for file position"
-msgstr ""
+msgstr "Цвят за файл позиция"
 
-#: ../src/preferences.c:286
+#: ../src/preferences.c:296
 msgid "Color for folder position"
-msgstr ""
+msgstr "Цвят за папка позиция"
 
-#: ../src/preferences.c:290
+#: ../src/preferences.c:300
 #, fuzzy
 msgid "Color for folders"
-msgstr "Изберете папка"
+msgstr "Цвят за папки"
 
-#: ../src/preferences.c:296 ../src/preferences.c:299
+#: ../src/preferences.c:306 ../src/preferences.c:309
 msgid "Enter file extensions here"
-msgstr ""
+msgstr "Въведете разширението на файла тук"
 
-#: ../src/preferences.c:331
+#: ../src/preferences.c:341
 msgid "Delete"
-msgstr ""
+msgstr "Изтрий"
 
-#: ../src/preferences.c:370
+#: ../src/preferences.c:360
+#, fuzzy
+msgid "Color profile"
+msgstr "Цветови профил"
+
+#: ../src/preferences.c:380
 #, fuzzy
 msgid "Basic colors"
-msgstr "Разреши Цветове"
+msgstr "Основни цветове"
 
-#: ../src/preferences.c:386
+#: ../src/preferences.c:396
 #, fuzzy
 msgid "File colors"
-msgstr "Разреши Цветове"
+msgstr "Цветове за файлове"
 
-#: ../src/preferences.c:410
+#: ../src/preferences.c:420
 msgid "add new color"
-msgstr ""
+msgstr "добави нов цвят"
 
-#: ../src/preferences.c:475
+#: ../src/preferences.c:485
 msgid "Preferences"
 msgstr "Опции"
 
-#: ../src/preferences.c:486
+#: ../src/preferences.c:496
 msgid "Display type"
 msgstr "Стил на преглед"
 
-#: ../src/preferences.c:492
+#: ../src/preferences.c:502
 msgid "Standard cushioned treemaps"
 msgstr "Стандартен"
 
-#: ../src/preferences.c:496
+#: ../src/preferences.c:506
 msgid "Squarified cushioned treemaps"
 msgstr "Правоъгален"
 
-#: ../src/preferences.c:510
+#: ../src/preferences.c:520
 #, fuzzy
 msgid "Cushion settings"
-msgstr "Цветове-настройки"
+msgstr "Настройки за преглед"
 
-#: ../src/preferences.c:518
+#: ../src/preferences.c:528
 msgid "Height factor:"
 msgstr "Ръстов фактор:"
 
-#: ../src/preferences.c:530
+#: ../src/preferences.c:540
 msgid "Decreasing height:"
 msgstr "Указан ръст:"
 
-#: ../src/preferences.c:543
+#: ../src/preferences.c:553
 msgid "General display"
 msgstr "Общи настройки на екран"
 
-#: ../src/preferences.c:551
+#: ../src/preferences.c:561
 msgid "Maximum depth:"
 msgstr "Максимум дълбочина :"
 
 #. pre instance
-#: ../src/preferences.c:557
+#: ../src/preferences.c:567
 msgid "Use average color of children for folders"
-msgstr ""
+msgstr "Един цвят за папките"
 
-#: ../src/preferences.c:566
+#: ../src/preferences.c:576
 msgid "(0=unlimited)"
 msgstr "(0=неограничен)"
 
-#: ../src/preferences.c:572
+#: ../src/preferences.c:582
 msgid "Color settings"
 msgstr "Цветове-настройки"
 
 #. gtk_table_set_homogeneous(GTK_TABLE(table), TRUE);
-#: ../src/preferences.c:581
+#: ../src/preferences.c:591
 #, fuzzy
 msgid "Enable colors"
 msgstr "Разреши Цветове"
 
-#: ../src/preferences.c:588
+#: ../src/preferences.c:598
 msgid "Color profile..."
-msgstr ""
-
-#: ../src/preferences.c:603
-msgid "Scanning options (requires re-scan)"
-msgstr ""
-
-#: ../src/preferences.c:609
-msgid "Descend directories on other filesystems"
-msgstr ""
+msgstr "Цветови профил"
 
 #: ../src/preferences.c:613
+msgid "Scanning options (requires re-scan)"
+msgstr "Опции за сканиране (изисква ре-сканиране)"
+
+#: ../src/preferences.c:619
+msgid "Descend directories on other filesystems"
+msgstr "Покажи директориите на други файлови системи"
+
+#: ../src/preferences.c:624
 msgid "Use allocated disk size of files"
-msgstr ""
+msgstr "Използвай определена големина на файловете "
 
 #, fuzzy
 #~ msgid "Folder color"

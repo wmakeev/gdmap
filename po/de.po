@@ -1,19 +1,18 @@
 # GdMap.
-# Markus Lausser <sgop@users.sourceforge.net>
-# 2005-2008
-# 
-# 
+# Copyright (C) 2005-2008, Markus Lausser <sgop@users.sourceforge.net>
+# This file is distributed under the same license as the GdMap package.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: GdMap 0.8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-23 16:02+0200\n"
+"POT-Creation-Date: 2008-05-26 22:20+0200\n"
 "PO-Revision-Date: 2008-05-23 16:05+0200\n"
 "Last-Translator: Markus Lausser <sgop@users.sourceforge.net>\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit"
+"Content-Transfer-Encoding: 8bit\n"
 
 #: ../data/gdmap.desktop.in.h:1
 msgid "Display disk space using tree maps"
@@ -125,109 +124,112 @@ msgstr ""
 msgid "translator-credits"
 msgstr "Markus Lausser <sgop@users.sourceforge.net>"
 
-#: ../src/preferences.c:278
+#: ../src/preferences.c:288
 msgid "Default color"
 msgstr "Standardfarbe"
 
-#: ../src/preferences.c:282
+#: ../src/preferences.c:292
 msgid "Color for file position"
 msgstr "Farbe für Dateiposition"
 
-#: ../src/preferences.c:286
+#: ../src/preferences.c:296
 msgid "Color for folder position"
 msgstr "Farbe für Verzeichnisposition"
 
-#: ../src/preferences.c:290
+#: ../src/preferences.c:300
 msgid "Color for folders"
 msgstr "Farbe für Verzeichnisse"
 
-#: ../src/preferences.c:296 ../src/preferences.c:299
+#: ../src/preferences.c:306 ../src/preferences.c:309
 msgid "Enter file extensions here"
 msgstr "Dateiendungen hier eingeben"
 
-#: ../src/preferences.c:331
+#: ../src/preferences.c:341
 msgid "Delete"
 msgstr "Löschen"
 
-#: ../src/preferences.c:370
+#: ../src/preferences.c:360
+msgid "Color profile"
+msgstr "Farbschema"
+
+#: ../src/preferences.c:380
 msgid "Basic colors"
 msgstr "Basisfarben"
 
-#: ../src/preferences.c:386
+#: ../src/preferences.c:396
 msgid "File colors"
 msgstr "Dateifarben"
 
-#: ../src/preferences.c:410
+#: ../src/preferences.c:420
 msgid "add new color"
 msgstr "neue Farbe hinzufügen"
 
-#: ../src/preferences.c:475
+#: ../src/preferences.c:485
 msgid "Preferences"
 msgstr "Einstellungen"
 
-#: ../src/preferences.c:486
+#: ../src/preferences.c:496
 msgid "Display type"
 msgstr "Ansicht"
 
-#: ../src/preferences.c:492
+#: ../src/preferences.c:502
 msgid "Standard cushioned treemaps"
 msgstr "Normale Kissenansicht"
 
-#: ../src/preferences.c:496
+#: ../src/preferences.c:506
 msgid "Squarified cushioned treemaps"
 msgstr "Quadratische Kissenansicht"
 
-#: ../src/preferences.c:510
+#: ../src/preferences.c:520
 msgid "Cushion settings"
 msgstr "Optionen für die Kissendarstellung"
 
-#: ../src/preferences.c:518
+#: ../src/preferences.c:528
 msgid "Height factor:"
 msgstr "Faktor für die Höhe:"
 
-#: ../src/preferences.c:530
+#: ../src/preferences.c:540
 msgid "Decreasing height:"
 msgstr "Höhenabnahme pro Tiefe"
 
-#: ../src/preferences.c:543
+#: ../src/preferences.c:553
 msgid "General display"
 msgstr "Allgemeine Ansicht"
 
-#: ../src/preferences.c:551
+#: ../src/preferences.c:561
 msgid "Maximum depth:"
 msgstr "Maximale Tiefe"
 
 #. pre instance
-#: ../src/preferences.c:557
+#: ../src/preferences.c:567
 msgid "Use average color of children for folders"
 msgstr "Für Verzeichnisse die Durchschnittsfarbe des Inhalts verwenden"
 
-#: ../src/preferences.c:566
+#: ../src/preferences.c:576
 msgid "(0=unlimited)"
 msgstr "(0=kein Limit)"
 
-#: ../src/preferences.c:572
+#: ../src/preferences.c:582
 msgid "Color settings"
 msgstr "Farbeinstellungen"
 
 #. gtk_table_set_homogeneous(GTK_TABLE(table), TRUE);
-#: ../src/preferences.c:581
+#: ../src/preferences.c:591
 msgid "Enable colors"
 msgstr "Farben benutzen"
 
-#: ../src/preferences.c:588
+#: ../src/preferences.c:598
 msgid "Color profile..."
 msgstr "Farbschema..."
 
-#: ../src/preferences.c:603
+#: ../src/preferences.c:613
 msgid "Scanning options (requires re-scan)"
 msgstr "Plattenscan-Optionen (erfordert neuen Scan)"
 
-#: ../src/preferences.c:609
+#: ../src/preferences.c:619
 msgid "Descend directories on other filesystems"
 msgstr "Verzeichnisse auf anderen Dateisystemen verfolgen"
 
-#: ../src/preferences.c:613
+#: ../src/preferences.c:624
 msgid "Use allocated disk size of files"
 msgstr "Wirklichen Plattenspeicher der Dateien verwenden"
-

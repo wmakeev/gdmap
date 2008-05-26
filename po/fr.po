@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GdMap\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-23 16:02+0200\n"
-"PO-Revision-Date: 2005-10-25 16:30-0700\n"
+"POT-Creation-Date: 2008-05-26 22:20+0200\n"
+"PO-Revision-Date: 2008-05-25 09:56-0500\n"
 "Last-Translator: Catherine Beauchemin <cbeau@users.sourceforge.net>\n"
 "Language-Team: French <cbeau@users.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -128,115 +128,115 @@ msgstr ""
 msgid "translator-credits"
 msgstr "Catherine Beauchemin <cbeau@users.sourceforge.net>"
 
-#: ../src/preferences.c:278
+#: ../src/preferences.c:288
 msgid "Default color"
-msgstr ""
+msgstr "Couleur par défaut"
 
-#: ../src/preferences.c:282
+#: ../src/preferences.c:292
 msgid "Color for file position"
-msgstr ""
+msgstr "Couleur pour l'emplacement du fichier"
 
-#: ../src/preferences.c:286
+#: ../src/preferences.c:296
 msgid "Color for folder position"
-msgstr ""
+msgstr "Couleur pour l'emplacement du dossier"
 
-#: ../src/preferences.c:290
-#, fuzzy
+#: ../src/preferences.c:300
 msgid "Color for folders"
-msgstr "Choisir un dossier"
+msgstr "Couleur des dossiers"
 
-#: ../src/preferences.c:296 ../src/preferences.c:299
+#: ../src/preferences.c:306 ../src/preferences.c:309
 msgid "Enter file extensions here"
-msgstr ""
+msgstr "Entrer les extensions de fichier ici"
 
-#: ../src/preferences.c:331
+#: ../src/preferences.c:341
 msgid "Delete"
-msgstr ""
+msgstr "Effacer"
 
-#: ../src/preferences.c:370
-#, fuzzy
+#: ../src/preferences.c:360
+msgid "Color profile"
+msgstr "Profil de couleur"
+
+#: ../src/preferences.c:380
 msgid "Basic colors"
-msgstr "Couleurs activées"
+msgstr "Couleurs de base"
 
-#: ../src/preferences.c:386
-#, fuzzy
+#: ../src/preferences.c:396
 msgid "File colors"
-msgstr "Couleurs activées"
+msgstr "Couleurs des fichiers"
 
-#: ../src/preferences.c:410
+#: ../src/preferences.c:420
 msgid "add new color"
-msgstr ""
+msgstr "Ajouter une nouvelle couleur"
 
-#: ../src/preferences.c:475
+#: ../src/preferences.c:485
 msgid "Preferences"
 msgstr "Préférences"
 
-#: ../src/preferences.c:486
+#: ../src/preferences.c:496
 msgid "Display type"
 msgstr "Type d'affichage"
 
-#: ../src/preferences.c:492
+#: ../src/preferences.c:502
 msgid "Standard cushioned treemaps"
 msgstr "Arborescence classique à coussins."
 
-#: ../src/preferences.c:496
+#: ../src/preferences.c:506
 msgid "Squarified cushioned treemaps"
 msgstr "Arborescence à coussins rectangulaires."
 
-#: ../src/preferences.c:510
+#: ../src/preferences.c:520
 msgid "Cushion settings"
 msgstr "Paramètres de coussin"
 
-#: ../src/preferences.c:518
+#: ../src/preferences.c:528
 msgid "Height factor:"
 msgstr "Niveau de hauteur:"
 
-#: ../src/preferences.c:530
+#: ../src/preferences.c:540
 msgid "Decreasing height:"
 msgstr "Taille décroissante:"
 
-#: ../src/preferences.c:543
+#: ../src/preferences.c:553
 msgid "General display"
 msgstr "Affichage général"
 
-#: ../src/preferences.c:551
+#: ../src/preferences.c:561
 msgid "Maximum depth:"
 msgstr "Profondeur maximale:"
 
 #. pre instance
-#: ../src/preferences.c:557
+#: ../src/preferences.c:567
 msgid "Use average color of children for folders"
-msgstr ""
+msgstr "Utiliser la couleur moyenne des enfants pour les dossiers"
 
-#: ../src/preferences.c:566
+#: ../src/preferences.c:576
 msgid "(0=unlimited)"
 msgstr "(0=illimitée)"
 
-#: ../src/preferences.c:572
+#: ../src/preferences.c:582
 msgid "Color settings"
 msgstr "Paramètres couleur"
 
 #. gtk_table_set_homogeneous(GTK_TABLE(table), TRUE);
-#: ../src/preferences.c:581
-#, fuzzy
+#: ../src/preferences.c:591
 msgid "Enable colors"
-msgstr "Couleurs activées"
+msgstr "Activer les couleurs"
 
-#: ../src/preferences.c:588
+#: ../src/preferences.c:598
 msgid "Color profile..."
-msgstr ""
-
-#: ../src/preferences.c:603
-msgid "Scanning options (requires re-scan)"
-msgstr ""
-
-#: ../src/preferences.c:609
-msgid "Descend directories on other filesystems"
-msgstr ""
+msgstr "Profil de couleur..."
 
 #: ../src/preferences.c:613
+msgid "Scanning options (requires re-scan)"
+msgstr "Options de balayage (requiert un re-balayage)"
+
+#: ../src/preferences.c:619
+msgid "Descend directories on other filesystems"
+msgstr "Descendre dans les dossiers d'autres systèmes de fichiers"
+
+#: ../src/preferences.c:624
 msgid "Use allocated disk size of files"
-msgstr ""
+msgstr "Utiliser la taille allouée des fichiers"
 
 #, fuzzy
 #~ msgid "Folder color"

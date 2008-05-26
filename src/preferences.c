@@ -357,10 +357,10 @@ static void on_setup_colors(GtkWindow* parent) {
   GList* dlist;
 
   dialog = gtk_dialog_new_with_buttons
-    ("Color profile", parent, GTK_DIALOG_MODAL|GTK_DIALOG_DESTROY_WITH_PARENT,
-     GTK_STOCK_CANCEL, GTK_RESPONSE_NONE,
-     GTK_STOCK_OK,     GTK_RESPONSE_OK,
-     NULL);
+      (_("Color profile"), parent, GTK_DIALOG_MODAL|GTK_DIALOG_DESTROY_WITH_PARENT,
+       GTK_STOCK_CANCEL, GTK_RESPONSE_NONE,
+       GTK_STOCK_OK,     GTK_RESPONSE_OK,
+       NULL);
   gtk_window_set_default_size(GTK_WINDOW(dialog), 500, 500);
 
   {
