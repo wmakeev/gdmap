@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GdMap 0.7.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-26 22:20+0200\n"
+"POT-Creation-Date: 2008-06-15 15:51+0200\n"
 "PO-Revision-Date: 2005-11-07 18:54+0200\n"
 "Last-Translator: Stoyan Bonkov <stafex@gmail.com>\n"
 "Language-Team: Bulgarian\n"
@@ -151,7 +151,6 @@ msgid "Delete"
 msgstr "Изтрий"
 
 #: ../src/preferences.c:360
-#, fuzzy
 msgid "Color profile"
 msgstr "Цветови профил"
 
@@ -204,7 +203,7 @@ msgstr "Общи настройки на екран"
 
 #: ../src/preferences.c:561
 msgid "Maximum depth:"
-msgstr "Максимум дълбочина :"
+msgstr "Максимум дълбочина:"
 
 #. pre instance
 #: ../src/preferences.c:567
@@ -227,7 +226,7 @@ msgstr "Разреши Цветове"
 
 #: ../src/preferences.c:598
 msgid "Color profile..."
-msgstr "Цветови профил"
+msgstr "Цветови профил..."
 
 #: ../src/preferences.c:613
 msgid "Scanning options (requires re-scan)"

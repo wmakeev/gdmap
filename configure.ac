@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([GdMap], [0.8.0], [http://sourceforge.net/tracker/?atid=373401&group_id=21965])
+AC_INIT([GdMap], [0.8.1], [http://sourceforge.net/tracker/?atid=373401&group_id=21965])
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
 
@@ -34,7 +34,8 @@ PKG_CHECK_MODULES(LIBXML, [$pkg_modules])
 AC_SUBST(LIBXML_CFLAGS)
 AC_SUBST(LIBXML_LIBS)
 
-ALL_LINGUAS="bg de dk fr he hr nb no ru sv tr"
+ALL_LINGUAS="bg de dk es fr he hr it nb no ru sv tr"
+
 AM_GLIB_GNU_GETTEXT
 AC_PROG_INTLTOOL
 
