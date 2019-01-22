@@ -102,8 +102,7 @@ static tree_t* tree_new(const char* sname, gint64 size, unsigned depth)
         diff = (t.tv_sec - last_t.tv_sec) * 1000 +
             (t.tv_usec - last_t.tv_usec) / 1000;
 
-        if (t.tv_sec - last_t.tv_sec > 1 ||
-            (t.tv_sec - last_t.tv_sec) * 1000 + (t.tv_usec - last_t.tv_usec) / 1000 > 100)
+        if (diff > 100)
         {
             if (!TheProgressFunc(TheProgressData)) Aborted = TRUE;
             last_t = t;

@@ -60,7 +60,6 @@ int main (int argc, char *argv[]) {
   }
   g_option_context_free(context);
   
-  gtk_set_locale();
   gtk_init(&argc, &argv);
   
   gtk_rc_parse_string(GtkResource);

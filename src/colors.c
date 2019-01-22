@@ -199,37 +199,34 @@ static void xml_color_get(xmlDocPtr xfile, xmlNodePtr xnode)
     }
 
     attr = xmlGetProp(xnode, "r");
-    if (attr && !strncmp(attr, "0x", 2))
+    if (attr)
     {
-        r = strtoul(attr+2, NULL, 16);
+        if (!strncmp(attr, "0x", 2))
+            r = strtoul(attr+2, NULL, 16);
+        else
+            r = atoi(attr);
+        xmlFree(attr);
     }
-    else
-    {
-        r = atoi(attr);
-    }
-    if (attr) xmlFree(attr);
 
     attr = xmlGetProp(xnode, "g");
-    if (attr && !strncmp(attr, "0x", 2))
+    if (attr)
     {
-        g = strtoul(attr+2, NULL, 16);
+        if (!strncmp(attr, "0x", 2))
+            g = strtoul(attr+2, NULL, 16);
+        else
+            g = atoi(attr);
+        xmlFree(attr);
     }
-    else
-    {
-        g = atoi(attr);
-    }
-    if (attr) xmlFree(attr);
 
     attr = xmlGetProp(xnode, "b");
-    if (attr && !strncmp(attr, "0x", 2))
+    if (attr)
     {
-        b = strtoul(attr+2, NULL, 16);
+        if (!strncmp(attr, "0x", 2))
+            b = strtoul(attr+2, NULL, 16);
+        else
+            b = atoi(attr);
+        xmlFree(attr);
     }
-    else
-    {
-        b = atoi(attr);
-    }
-    if (attr) xmlFree(attr);
 
     color = color_new(r, g, b, type);
 
