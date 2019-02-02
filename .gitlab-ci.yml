@@ -1,0 +1,8 @@
+image: registry.gitlab.com/sjohannes/docker-gdmap-test-deps
+
+build:
+  script:
+    - meson build
+    - cd build
+    - ninja
+    - desktop-file-validate data/gdmap.desktop
