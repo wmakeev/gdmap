@@ -99,7 +99,7 @@ on_ebox_enter(GtkWidget* box, GdkEventCrossing* event, GtkLabel* label) {
     gtk_widget_set_state(GTK_WIDGET(label), GTK_STATE_PRELIGHT);
 
     if (!Cursor) Cursor = gdk_cursor_new(GDK_HAND2);
-    gdk_window_set_cursor(box->window, Cursor);
+    gdk_window_set_cursor(gtk_widget_get_window(box), Cursor);
   }
   return TRUE;
 }
@@ -116,7 +116,7 @@ on_ebox_leave(GtkWidget* box, GdkEventCrossing* event, GtkLabel* label) {
     gtk_label_set_markup(label, temp);
     g_free(temp);
     gtk_widget_set_state(GTK_WIDGET(label), GTK_STATE_NORMAL);
-    gdk_window_set_cursor(box->window, NULL);
+    gdk_window_set_cursor(gtk_widget_get_window(box), NULL);
 /*   } */
   return TRUE;
 }
@@ -132,7 +132,7 @@ static void on_clear_label(GtkWidget* widget) {
  */
 void ui_event_label_set_sensitive(GtkWidget* ebox, gboolean set) {
   gpointer callback = g_object_get_data(G_OBJECT(ebox), "callback");
-  GtkWidget* child = GTK_BIN(ebox)->child;
+  GtkWidget* child = gtk_bin_get_child(GTK_BIN(ebox));
 #if GTK_CHECK_VERSION(2,20,0)
   if (gtk_widget_get_sensitive(child) == set) return;
 #else

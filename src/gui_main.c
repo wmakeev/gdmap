@@ -17,6 +17,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <cairo.h>
 #include <gtk/gtk.h>
 
 #include "gui_main.h"
@@ -48,7 +49,7 @@ typedef struct
 
 static GtkWidget* MainWin = NULL;
 
-static char* Buffer = NULL;
+static cairo_surface_t* Surface = NULL;
 static int Width = 0;
 static int Height = 0;
 static tree_info_t* Mark1 = NULL;
@@ -532,46 +533,56 @@ static GtkWidget* gui_create_path_box()
 static gboolean on_drawingarea_configure(GtkWidget* area)
 {
 
-    if (Buffer) g_free(Buffer);
+    if (Surface) cairo_surface_destroy(Surface);
   
-    Width = area->allocation.width;
-    Height = area->allocation.height;
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(area, &allocation);
+    Width = allocation.width;
+    Height = allocation.height;
 
-    Buffer = g_malloc0(sizeof(unsigned int)*Width*Height*3);
+    Surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, Width, Height);
     if (CurrentItem) gui_tree_display(CurrentItem, FALSE, FALSE);
 
     return TRUE;
 }
 
-static void gui_show_pix(GtkWidget* area)
+static void gui_show_pix(GtkWidget* area, cairo_t* cr)
 {
-    if (Buffer)
+    if (Surface)
     {
-        gdk_draw_rgb_image(area->window,
-                           area->style->white_gc,
-                           0, 0, Width, Height,
-                           GDK_RGB_DITHER_NONE,
-                           Buffer, Width*3);
-        Mark1 = NULL;
-        Mark2 = NULL;
+        cairo_set_source_surface(cr, Surface, 0, 0);
+        cairo_paint(cr);
+    }
+
+    cairo_set_line_width(cr, 1);
+    const GdkColor* color;
+
+    if (Mark1) {
+        color = color_get_by_type(COLOR_MARK1);
+        cairo_set_source_rgb(cr, color->red / 255.0, color->green / 255.0, color->blue / 255.0);
+        cairo_rectangle(cr,
+            Mark1->geo[0][0], Mark1->geo[1][0],
+            Mark1->geo[0][1]-Mark1->geo[0][0]-1, Mark1->geo[1][1]-Mark1->geo[1][0]-1);
+        cairo_stroke(cr);
+    }
+    if (Mark2) {
+        color = color_get_by_type(COLOR_MARK2);
+        cairo_set_source_rgb(cr, color->red / 255.0, color->green / 255.0, color->blue / 255.0);
+        cairo_rectangle(cr,
+            Mark2->geo[0][0], Mark2->geo[1][0],
+            Mark2->geo[0][1]-Mark2->geo[0][0]-1, Mark2->geo[1][1]-Mark2->geo[1][0]-1);
+        cairo_stroke(cr);
     }
 }
 
-static gboolean on_area_expose(GtkWidget* area)
+static gboolean on_area_draw(GtkWidget* area, cairo_t* cr)
 {
-    gui_show_pix(area);
+    gui_show_pix(area, cr);
     return TRUE;
 }
 
 static void gui_tree_mark1(tree_info_t* info)
 {
-    GdkGC* gc = color_get_gc_by_type(COLOR_MARK1);
-
-    gdk_draw_rectangle(Area->window, gc, 0,
-                       info->geo[0][0],info->geo[1][0],
-                       info->geo[0][1]-info->geo[0][0]-1,
-                       info->geo[1][1]-info->geo[1][0]-1);
-  
     if (info != Mark1)
     {
         char* temp;
@@ -599,35 +610,16 @@ static void gui_tree_mark1(tree_info_t* info)
 
 static void gui_tree_unmark1(tree_info_t* info)
 {
-    GdkGC* gc = color_get_gc_by_type(COLOR_MARK1);
-
-    gdk_draw_rectangle(Area->window, gc, 0,
-                       info->geo[0][0],info->geo[1][0],
-                       info->geo[0][1]-info->geo[0][0]-1,
-                       info->geo[1][1]-info->geo[1][0]-1);
     Mark1 = NULL;
 }
 
 static void gui_tree_unmark2(tree_info_t* info)
 {
-    GdkGC* gc = color_get_gc_by_type(COLOR_MARK2);
-
-    gdk_draw_rectangle(Area->window, gc, 0,
-                       info->geo[0][0]-1, info->geo[1][0]-1,
-                       info->geo[0][1]-info->geo[0][0]+1,
-                       info->geo[1][1]-info->geo[1][0]+1);
     Mark2 = NULL;
 }
 
 static void gui_tree_mark2(tree_info_t* info)
 {
-    GdkGC* gc = color_get_gc_by_type(COLOR_MARK2);
-
-    gdk_draw_rectangle(Area->window, gc, 0,
-                       info->geo[0][0]-1, info->geo[1][0]-1,
-                       info->geo[0][1]-info->geo[0][0]+1,
-                       info->geo[1][1]-info->geo[1][0]+1);
-
     if (info != Mark2)
     {
         Mark2 = info;
@@ -677,7 +669,10 @@ static gboolean on_area_motion(GtkWidget* widget, GdkEventMotion* event)
     if (!CurrentItem) return FALSE;
 
     info = tree_info_search(CurrentItem, (int)(event->x), (int)(event->y));
-    if (info) gui_tree_mark(info);
+    if (info) {
+        gui_tree_mark(info);
+        gtk_widget_queue_draw(Area);
+    }
     return TRUE;
 }
 
@@ -721,8 +716,8 @@ static GtkWidget* gui_create_display_box()
 
     g_signal_connect(G_OBJECT(da), "configure_event",
                      G_CALLBACK(on_drawingarea_configure), NULL);
-    g_signal_connect(G_OBJECT(da), "expose_event",
-                     G_CALLBACK(on_area_expose), NULL);
+    g_signal_connect(G_OBJECT(da), "draw",
+                     G_CALLBACK(on_area_draw), NULL);
     g_signal_connect(G_OBJECT(da), "motion_notify_event",
                      G_CALLBACK(on_area_motion), NULL);
     g_signal_connect(G_OBJECT(da), "button_press_event",
@@ -975,7 +970,8 @@ static void gui_tree_show_item(tree_info_t* info)
         color = color_get_by_type(COLOR_DEFAULT);
     }
   
-    pos = (y1*Width+x1)*3;
+    unsigned char* buffer = cairo_image_surface_get_data(Surface);
+    pos = (y1*Width+x1)*4;
     for (iy = y1; iy < y2; iy++)
     {
         for (ix = x1; ix < x2; ix++)
@@ -984,12 +980,13 @@ static void gui_tree_show_item(tree_info_t* info)
             ny = -(2*info->s[1][1]*(iy+0.5)+info->s[1][0]);
             cosa = (nx*Lx + ny*Ly + Lz)/sqrt(nx*nx + ny*ny +1.0);
             val = (Ia+MAX(0, Is*cosa));
-            Buffer[pos++] = (int)(color->red   * val/65535.);
-            Buffer[pos++] = (int)(color->green * val/65535.);
-            Buffer[pos++] = (int)(color->blue  * val/65535.);
+            buffer[pos++] = (unsigned char)(color->blue  * val/65535.);
+            buffer[pos++] = (unsigned char)(color->green * val/65535.);
+            buffer[pos++] = (unsigned char)(color->red   * val/65535.);
+            pos++;
         }
-        pos -= (x2-x1)*3;  // cr
-        pos += Width*3;    // lf
+        pos -= (x2-x1)*4;  // cr
+        pos += Width*4;    // lf
     }
 }
 
@@ -1336,7 +1333,9 @@ static void gui_tree_display(tree_info_t* info, gboolean destroy_old, gboolean n
 
     gui_tree_evaluate(info);
     gui_tree_show(info);
-    gui_show_pix(Area);
+    Mark1 = NULL;
+    Mark2 = NULL;
+    gtk_widget_queue_draw(Area);
 
     gui_buttons_update();
   

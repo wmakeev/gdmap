@@ -29,14 +29,12 @@ static int Saver = 0;
 static void color_destroy(color_t* color)
 {
     g_list_foreach(color->ext, (GFunc)g_free, NULL);
-    if (color->gc) g_object_unref(G_OBJECT(color->gc));
     g_free(color);
 }
 
 static void color_init(color_t* color, int r, int g, int b, ColorType type)
 {
     color->ext = NULL;
-    color->gc = NULL;
     color->c.red = r;
     color->c.green = g;
     color->c.blue = b;
@@ -316,20 +314,6 @@ static void colors_create_default()
 
 }
 
-static GdkGC* color_get_gc(color_t* color)
-{
-    if (!color->gc)
-    {
-        GtkWidget* win = gui_get_main_win();
-        color->gc = gdk_gc_new(win->window);
-        gdk_colormap_alloc_color(gdk_rgb_get_cmap(), &color->c, FALSE, FALSE);
-        gdk_gc_set_foreground(color->gc, &color->c);
-        if (color->type == COLOR_MARK1 || color->type == COLOR_MARK2)
-            gdk_gc_set_function(color->gc, GDK_XOR);
-    }
-    return color->gc;
-}
-
 static gboolean color_has_ext(color_t* color, const char* ext)
 {
     GList* dlist;
@@ -364,13 +348,6 @@ static color_t* color_find_by_ext(const char* ext)
         if (color_has_ext(color, ext)) return color;
     }
     return NULL;
-}
-
-GdkGC* color_get_gc_by_type(ColorType type)
-{
-    color_t* color = color_find_by_type(type);
-    g_assert(color);
-    return color_get_gc(color);
 }
 
 const GdkColor* color_get_by_type(ColorType type)

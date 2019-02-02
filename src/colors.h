@@ -26,12 +26,10 @@ typedef struct {
   ColorType type;
   GList* ext;
   GdkColor c;
-  GdkGC* gc;
 } color_t;
 
 void colors_init();
 
-GdkGC* color_get_gc_by_type(ColorType type);
 const GdkColor* color_get_by_type(ColorType type);
 const GdkColor* color_get_by_ext(const char* ext);
 const GdkColor* color_get_by_file(const char* filename);

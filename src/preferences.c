@@ -250,7 +250,6 @@ static void on_add_ok(GtkWidget* hbox) {
   color.type = COLOR_EXTENSION;
   color.ext = NULL;
   gtk_color_button_get_color(button, &color.c);
-  color.gc = NULL;
 
   on_add_cancel(hbox);
 
@@ -433,7 +432,7 @@ static void on_setup_colors(GtkWindow* parent) {
    
     gtk_widget_show_all(vbox0);
     gtk_widget_hide(nbox);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), vbox0, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), vbox0, TRUE, TRUE, 0);
   }
 
 

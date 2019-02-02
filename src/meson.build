@@ -15,7 +15,7 @@ cflags = cc.get_supported_arguments('-Wno-deprecated-declarations', '-Wno-pointe
 
 deps = [
   dependency('cairo'),
-  dependency('gtk+-2.0', version: '>=2.6.0'),
+  dependency('gtk+-3.0'),
   cc.find_library('m'),
   dependency('libxml-2.0'),
 ]
