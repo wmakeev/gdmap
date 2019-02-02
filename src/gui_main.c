@@ -11,7 +11,6 @@
 #  include <config.h>
 #endif
 
-#include <sys/vfs.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
