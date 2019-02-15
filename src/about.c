@@ -47,11 +47,7 @@ void gui_show_about(GtkWindow* parent)
     }
     win = gtk_about_dialog_new();
     AboutWin = GTK_ABOUT_DIALOG(win);
-#if GTK_CHECK_VERSION(2,12,0)
     gtk_about_dialog_set_program_name(AboutWin, PACKAGE_NAME);
-#else
-    gtk_about_dialog_set_name(AboutWin, PACKAGE_NAME);
-#endif
     gtk_about_dialog_set_version(AboutWin, PACKAGE_VERSION);
     gtk_about_dialog_set_copyright(AboutWin, "Copyright \302\251 2005-2008 Markus Lausser");
     gtk_about_dialog_set_license(AboutWin, "GPL (GNU General Public License)\n\nsee http://www.gnu.org/licenses/gpl.html");
