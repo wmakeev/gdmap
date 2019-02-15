@@ -242,7 +242,7 @@ static void on_add_ok(GtkWidget* hbox) {
   GtkEntry* entry = g_object_get_data(G_OBJECT(hbox), "entry");
   GtkColorButton* button = g_object_get_data(G_OBJECT(hbox), "button");
   color_t color;
-  const char* text = ui_default_entry_get_text(entry);
+  const char* text = gtk_entry_get_text(entry);
   GtkEntry* entry2;
 
   if (!text || *text == 0) return;
@@ -300,12 +300,12 @@ static GtkWidget* _gui_create_color_box(color_t* color) {
     gtk_misc_set_alignment(GTK_MISC(item), 0, 0.5);
     break;
   case COLOR_EXTENSION:
+    item = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(item), _("Enter file extensions here"));
     if (color) {
       char* temp = make_string_from_list(color->ext, " ");
-      item = ui_default_entry_new(temp, _("Enter file extensions here"));
+      gtk_entry_set_text(GTK_ENTRY(item), temp);
       g_free(temp);
-    } else {
-      item = ui_default_entry_new(NULL, _("Enter file extensions here"));
     }
     g_object_set_data(G_OBJECT(hbox), "entry", item);
     break;
@@ -448,7 +448,7 @@ static void on_setup_colors(GtkWindow* parent) {
 
       gtk_color_button_get_color(button, &color);
       if (type == COLOR_EXTENSION) {
-        color_add(color_new_exts(&color, ui_default_entry_get_text(entry)));
+        color_add(color_new_exts(&color, gtk_entry_get_text(entry)));
       } else {
         color_add(color_new(color.red, color.green, color.blue, type));
       }
