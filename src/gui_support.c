@@ -58,13 +58,7 @@ GtkWidget* ui_create_section(const char* header, const char* help,
     gtk_widget_show(pixmap);
     gtk_container_add(GTK_CONTAINER(ebox), pixmap);
     gtk_box_pack_start(GTK_BOX(hbox2), ebox, FALSE, FALSE, 0);
-#if GTK_CHECK_VERSION(2,12,0)
     gtk_widget_set_tooltip_text(ebox, help);
-#else
-    static GtkTooltips* tips = NULL;
-    if (!tips) tips = gtk_tooltips_new();
-    gtk_tooltips_set_tip(tips, ebox, help, NULL);
-#endif
   }
   if (header_hbox) *header_hbox = hbox2;
 
@@ -85,11 +79,7 @@ on_ebox_enter(GtkWidget* box, GdkEventCrossing* event, GtkLabel* label) {
   const char* text;
 
   (void)event;
-#if GTK_CHECK_VERSION(2,20,0)
   if (gtk_widget_get_sensitive(GTK_WIDGET(label))) {
-#else
-  if (GTK_WIDGET_SENSITIVE(label)) {
-#endif
     char* temp;
 
     text = g_object_get_data(G_OBJECT(label), "label");
@@ -133,11 +123,7 @@ static void on_clear_label(GtkWidget* widget) {
 void ui_event_label_set_sensitive(GtkWidget* ebox, gboolean set) {
   gpointer callback = g_object_get_data(G_OBJECT(ebox), "callback");
   GtkWidget* child = gtk_bin_get_child(GTK_BIN(ebox));
-#if GTK_CHECK_VERSION(2,20,0)
   if (gtk_widget_get_sensitive(child) == set) return;
-#else
-  if (GTK_WIDGET_SENSITIVE(child) == set) return;
-#endif
 
   if (set && !callback) return;
   gtk_widget_set_sensitive(child, set);
@@ -172,11 +158,7 @@ GtkWidget* ui_create_event_label(const char* text, GCallback callback,
                         // GDK_FOCUS_CHANGE_MASK |
                         GDK_ENTER_NOTIFY_MASK |
                         GDK_LEAVE_NOTIFY_MASK);
-#if GTK_CHECK_VERSION(2,22,0)
   gtk_widget_set_can_focus(ebox, TRUE);
-#else
-  GTK_WIDGET_SET_FLAGS(ebox, GTK_CAN_FOCUS);
-#endif
   gtk_widget_show(ebox);
 
   temp = g_strdup_printf(EVENT_FMT, text);
