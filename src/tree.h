@@ -14,6 +14,8 @@
 #  include <config.h>
 #endif
 
+#include <glib.h>
+
 typedef struct _tree_t tree_t;
 
 typedef gboolean (*ProgressFunc)(void* data);
