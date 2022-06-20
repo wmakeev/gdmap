@@ -1,5 +1,5 @@
 project('GdMap', 'c',
-  license: 'GPL2+',
+  license: 'GPL-2.0-only',
   version: '0.8.1',
 )
 
