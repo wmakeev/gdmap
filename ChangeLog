@@ -1,3 +1,7 @@
+2022-06-20 [1.0.0]	Johannes Sasongko	(sasongko at gmail.com)
+	* upgraded to GTK 3
+	* fixed Danish translation file name
+
 2008-06-15 [0.8.1]	Sgop	(sgop at users.sourceforge.net)
 	* added new languages (it, es)
 
