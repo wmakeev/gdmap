@@ -657,7 +657,7 @@ static void pref_load(const char* filename)
 
     if (!g_key_file_load_from_file(file, filename, 0, &error))
     {
-        g_message(error->message);
+        g_message("%s", error->message);
         g_error_free(error);
         return;
     }

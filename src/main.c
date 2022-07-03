@@ -54,7 +54,7 @@ int main (int argc, char *argv[]) {
   g_option_context_set_help_enabled(context, TRUE);
   g_option_context_add_main_entries(context, Options, NULL);
   if (!g_option_context_parse(context, &argc, &argv, &error)) {
-    g_warning(error->message);
+    g_warning("%s", error->message);
     g_option_context_free(context);
     return 0;
   }
