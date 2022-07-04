@@ -1,4 +1,10 @@
-2022-07-04 [1.0.1]	Johannes Sasongko	(sasongko at gmail.com)
+2022-07-04 [1.1.0]	Johannes Sasongko	(sasongko at gmail.com)
+	* long filenames in the statusbar are now ellipsized
+	* set single line mode on statusbar labels
+	* replaced some deprecated GTK code
+	* Windows support
+
+2022-07-03 [1.0.1]	Johannes Sasongko	(sasongko at gmail.com)
 	* fixed compilation when -Werror=format-security is set
 
 2022-06-20 [1.0.0]	Johannes Sasongko	(sasongko at gmail.com)

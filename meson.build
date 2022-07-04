@@ -1,6 +1,6 @@
 project('GdMap', 'c',
   license: 'GPL-2.0-only',
-  version: '0.8.1',
+  version: '1.1.0',
 )
 
 i18n = import('i18n')
