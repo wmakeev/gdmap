@@ -37,7 +37,7 @@ static GOptionEntry Options[] = {
   { NULL, 0, 0, 0, NULL, NULL, NULL }
 };
 
-static gboolean on_load() {
+static gboolean on_load(G_GNUC_UNUSED gpointer unused) {
   if (Folder) gui_tree_load_and_display(Folder);
   return FALSE;
 }
@@ -69,7 +69,7 @@ int main (int argc, char *argv[]) {
   colors_init();
   pref_init();
 
-  g_idle_add((GSourceFunc)on_load, NULL);
+  g_idle_add(on_load, NULL);
   
   gtk_main();
 

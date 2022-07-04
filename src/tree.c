@@ -43,6 +43,7 @@ static dev_t RootDevice = 0;
     ( S_ISCHR(mode) || S_ISBLK(mode) || S_ISFIFO(mode) || S_ISSOCK(mode) )
 
 
+G_GNUC_UNUSED
 static void tree_print(tree_t* tree)
 {
     GList* dlist;

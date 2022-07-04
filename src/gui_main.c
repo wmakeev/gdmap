@@ -173,14 +173,14 @@ static tree_t* gui_tree_load(const char* folder, unsigned depth);
 
 
 // HISTORY
-static void history_clear()
+static void history_clear(void)
 {
     g_list_free(History);
     History = NULL;
     HistoryPos = NULL;
 }
 
-static void history_back()
+static void history_back(void)
 {
     if (!HistoryPos) return;
     if (!HistoryPos->prev) return;
@@ -190,7 +190,7 @@ static void history_back()
     gui_tree_display(HistoryPos->data, FALSE, FALSE);
 }
 
-static void history_forward()
+static void history_forward(void)
 {
     if (!History) return;
     if (HistoryPos)
@@ -273,17 +273,17 @@ static tree_info_t* tree_info_create(tree_t* tree)
     return info;
 }
 
-static void on_action_exit()
+static void on_action_exit(void)
 {
     gtk_main_quit();
 }
 
-static void on_action_preferences()
+static void on_action_preferences(void)
 {
     gui_show_preferences(GTK_WINDOW(MainWin));
 }
 
-static void on_action_about()
+static void on_action_about(void)
 {
     gui_show_about(GTK_WINDOW(MainWin));
 }
@@ -308,7 +308,7 @@ static gint comp_func2(gconstpointer p1, gconstpointer p2)
     return 0;
 }
 
-static void gui_refresh_current()
+static void gui_refresh_current(void)
 {
     char* folder;
     tree_t* new_tree;
@@ -358,7 +358,7 @@ static void gui_refresh_current()
     g_free(folder);
 }
 
-static void on_action_refresh()
+static void on_action_refresh(void)
 {
     gui_refresh_current();
 }
@@ -431,7 +431,7 @@ void gui_tree_load_and_display(const char* folder)
 }
 
 
-static void on_action_open()
+static void on_action_open(void)
 {
     GtkWidget* dialog;
     char* res;
@@ -460,7 +460,7 @@ static void on_action_open()
     }
 }
 
-static void gui_buttons_update()
+static void gui_buttons_update(void)
 {
     gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Back"),
                              HistoryPos && HistoryPos->prev);
@@ -474,7 +474,7 @@ static void gui_buttons_update()
                              CurrentItem != NULL && !Loading);
 }
 
-static void on_action_top()
+static void on_action_top(void)
 {
     tree_info_t* info = CurrentItem;
 
@@ -483,7 +483,7 @@ static void on_action_top()
     gui_tree_display(info, FALSE, TRUE);
 }
 
-static void on_action_up()
+static void on_action_up(void)
 {
     tree_info_t* info = CurrentItem;
 
@@ -491,12 +491,12 @@ static void on_action_up()
     gui_tree_display(info->parent, FALSE, TRUE);
 }
 
-static void on_action_back()
+static void on_action_back(void)
 {
     history_back();
 }
 
-static void on_action_forward()
+static void on_action_forward(void)
 {
     history_forward();
 }
@@ -511,7 +511,7 @@ static void on_action_forward()
 /*   } */
 /* } */
 
-static GtkWidget* gui_create_path_box()
+static GtkWidget* gui_create_path_box(void)
 {
     GtkWidget* hbox;
     GtkWidget* label;
@@ -544,7 +544,7 @@ static gboolean on_drawingarea_configure(GtkWidget* area)
     return TRUE;
 }
 
-static void gui_show_pix(GtkWidget* area, cairo_t* cr)
+static void gui_show_pix(G_GNUC_UNUSED GtkWidget* area, cairo_t* cr)
 {
     if (Surface)
     {
@@ -606,12 +606,12 @@ static void gui_tree_mark1(tree_info_t* info)
 
 }
 
-static void gui_tree_unmark1(tree_info_t* info)
+static void gui_tree_unmark1(G_GNUC_UNUSED tree_info_t* info)
 {
     Mark1 = NULL;
 }
 
-static void gui_tree_unmark2(tree_info_t* info)
+static void gui_tree_unmark2(G_GNUC_UNUSED tree_info_t* info)
 {
     Mark2 = NULL;
 }
@@ -701,7 +701,7 @@ static gboolean on_area_button_press(GtkWidget* widget, GdkEventButton* event)
     return FALSE;
 }
 
-static GtkWidget* gui_create_display_box()
+static GtkWidget* gui_create_display_box(void)
 {
     GtkWidget* da;
 
@@ -723,7 +723,7 @@ static GtkWidget* gui_create_display_box()
     return da;
 }
 
-static GtkWidget* gui_create_status_bar()
+static GtkWidget* gui_create_status_bar(void)
 {
     GtkWidget* bar;
     GtkWidget* grid;
@@ -769,7 +769,7 @@ static GtkWidget* gui_create_status_bar()
     return bar;
 }
 
-static gboolean on_main_win_delete_event()
+static gboolean on_main_win_delete_event(void)
 {
     gtk_main_quit();
     return TRUE;
@@ -885,7 +885,7 @@ GtkWidget* gui_create_main_win(void)
 
 
 
-GtkWidget* gui_get_main_win()
+GtkWidget* gui_get_main_win(void)
 {
     return MainWin;
 }
@@ -1226,7 +1226,7 @@ static void on_path_toggled(GtkToggleButton* button, tree_info_t* info)
     }
 }
 
-static void gui_paths_update()
+static void gui_paths_update(void)
 {
     static GList* Paths = NULL;
     static GSList* Group = NULL;

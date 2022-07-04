@@ -154,7 +154,7 @@ static void colors_save_real(const char* filename)
 }
 
 
-static gboolean colors_save_delayed()
+static gboolean colors_save_delayed(G_GNUC_UNUSED gpointer unused)
 {
     const char* home = g_get_home_dir();
     char* filename = g_strdup_printf("%s/.gdmap/colors.xml", home);
@@ -165,10 +165,10 @@ static gboolean colors_save_delayed()
     return FALSE;
 }
 
-static void colors_save()
+static void colors_save(void)
 {
     if (Saver) return;
-    Saver = g_timeout_add(100, (GSourceFunc)colors_save_delayed, NULL);
+    Saver = g_timeout_add(100, colors_save_delayed, NULL);
 }
 
 
@@ -293,7 +293,7 @@ static gboolean colors_load(const char* filename)
     return TRUE;
 }
 
-static void colors_create_default()
+static void colors_create_default(void)
 {
 
     Colors = g_list_append(Colors, color_new(0xcccc, 0xcccc, 0xcccc, COLOR_DEFAULT));
@@ -372,7 +372,7 @@ const GdkColor* color_get_by_file(const char* filename)
 }
 
 
-static void colors_assure_defaults()
+static void colors_assure_defaults(void)
 {
 
     if (!color_find_by_type(COLOR_FOLDER))
@@ -389,12 +389,12 @@ static void colors_assure_defaults()
 
 }
 
-GList* colors_get_list()
+GList* colors_get_list(void)
 {
     return Colors;
 }
 
-void colors_clear()
+void colors_clear(void)
 {
     g_list_free_full(Colors, (GDestroyNotify)color_destroy);
     Colors = NULL;
@@ -407,7 +407,7 @@ void color_add(color_t* color)
     colors_save();
 }
 
-void colors_init()
+void colors_init(void)
 {
     const char* home = g_get_home_dir();
     char* filename = g_strdup_printf("%s/.gdmap/colors.xml", home);

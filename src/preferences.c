@@ -32,7 +32,7 @@ static GtkBox* ColorBox = NULL;
 static GList* Boxes = NULL;
 
 
-static void pref_save()
+static void pref_save(void)
 {
     GKeyFile* file = g_key_file_new();
     
@@ -707,7 +707,7 @@ static void pref_load(const char* filename)
     g_key_file_free(file);
 }
 
-void pref_init()
+void pref_init(void)
 {
     const char* home = g_get_home_dir();
     char* filename = g_strdup_printf("%s/.gdmap/settings.ini", home);

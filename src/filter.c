@@ -13,15 +13,15 @@ static GList* FilterName = NULL;
 static file_size_t FilterMin = 0;
 static file_size_t FilterMax = 0;
 
-void filters_init() {
+void filters_init(void) {
   //FIXME: load filter.
 }
 
-void filter_clear() {
+void filter_clear(void) {
   //FIXME:
 }
 
-static void filters_save() {
+static void filters_save(void) {
   //FIXME:
 }
 
