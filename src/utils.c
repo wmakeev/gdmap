@@ -63,7 +63,7 @@ char* print_filesize(file_size_t bytes) {
   double size = bytes;
   if (size < 1024) return g_strdup_printf("%.0f B", size);
   size /= 1024.;
-  if (size < 1024) return g_strdup_printf("%.2f KiB", size);
+  if (size < 128) return g_strdup_printf("%.2f KiB", size);
   if (size < 1024) return g_strdup_printf("%.1f KiB", size);
   size /= 1024.;
   if (size < 128) return g_strdup_printf("%.2f MiB", size);
@@ -78,7 +78,8 @@ char* print_filesize(file_size_t bytes) {
   if (size < 128) return g_strdup_printf("%.2f PiB", size);
   if (size < 1024) return g_strdup_printf("%.1f PiB", size);
   size /= 1024.;
-  return g_strdup_printf("%.2f EiB", size);
+  if (size < 128) return g_strdup_printf("%.2f EiB", size);
+  return g_strdup_printf("%.1f EiB", size);
 }
 
 static int directory_exists(char* dir) {
