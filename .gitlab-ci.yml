@@ -4,5 +4,12 @@ build:
   script:
     - meson -D warning_level=2 -D c_args=-Werror=format-security build
     - cd build
+
+    # Check that the version in Meson matches Git tag
+    - tagver="$(echo "$CI_COMMIT_TAG" | sed -En 's/^v(\d+\.\d+\.\d+)/\1/p')"
+    - mesonver="$(meson introspect --projectinfo | sed -E 's/.*"version":\s*"([^"]*).*/\1/')"
+    - echo "$mesonver" "$tagver"
+    - test -z "$tagver" -o "$tagver" = "$mesonver"
+
     - ninja
     - desktop-file-validate data/gdmap.desktop
