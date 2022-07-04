@@ -11,6 +11,10 @@
 #  include <config.h>
 #endif
 
+#ifdef _WIN32
+# include <windows.h>
+#endif
+
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
@@ -39,6 +43,9 @@ static void* TheProgressData = NULL;
 static gboolean Aborted = FALSE;
 static dev_t RootDevice = 0;
 
+#ifndef S_ISSOCK
+# define S_ISSOCK(mode) 0
+#endif
 #define SPECIAL_FILE(mode)                                              \
     ( S_ISCHR(mode) || S_ISBLK(mode) || S_ISFIFO(mode) || S_ISSOCK(mode) )
 
@@ -131,7 +138,12 @@ static tree_t* tree_scan_rec(const char* dirname, const char* shortname, int dep
     GDir* dir;
     GError* error = NULL;
 
+#ifdef _WIN32
+    if (GetFileAttributesA(dirname) & FILE_ATTRIBUTE_REPARSE_POINT) return NULL;
+    if (stat(dirname, &buf) < 0) return NULL;
+#else
     if (lstat(dirname, &buf) < 0) return NULL;
+#endif
     if (!RootDevice) RootDevice = buf.st_dev;
     
     if ( SPECIAL_FILE(buf.st_mode) )
@@ -184,7 +196,11 @@ static tree_t* tree_scan_rec(const char* dirname, const char* shortname, int dep
     else
     {
         gint64 rsize = buf.st_size;
+#ifdef _WIN32
+        gint64 ssize = 0;
+#else
         gint64 ssize = buf.st_blocks * 512;
+#endif
 
         if (S_ISREG(buf.st_mode) && ssize && ssize < rsize)
         {

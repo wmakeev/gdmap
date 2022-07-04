@@ -108,7 +108,12 @@ int create_dir(const char *dir) {
   while ((pos = strchr(slash + 1, DIR_SEP)) != NULL) {
     *pos = 0;
     if (!directory_exists(ddir)) {
-      if (mkdir(ddir, 7 * 64 + 5 * 8 + 5)) {
+#ifdef _WIN32
+      int err = mkdir(ddir);
+#else
+      int err = mkdir(ddir, 7 * 64 + 5 * 8 + 5);
+#endif
+      if (err) {
         g_warning("Could not create folder '%s'", ddir);
         *pos = DIR_SEP;
         return 0;
