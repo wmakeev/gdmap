@@ -727,44 +727,45 @@ static GtkWidget* gui_create_display_box()
 static GtkWidget* gui_create_status_bar()
 {
     GtkWidget* bar;
-    GtkWidget* table;
+    GtkWidget* grid;
     GtkWidget* label;
 
     bar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_show(bar);
     StatusBar = GTK_BOX(bar);
 
-    table = gtk_table_new(2,2, FALSE);
-/*   gtk_table_set_col_spacings(GTK_TABLE(table), 10); */
-/*   gtk_table_set_row_spacings(GTK_TABLE(table), 0); */
-    gtk_widget_show(table);
-    gtk_box_pack_start(GTK_BOX(bar), table, TRUE, TRUE, 0);
+    grid = gtk_grid_new();
+    gtk_widget_show(grid);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_widget_set_margin_start(grid, 5);
+    gtk_widget_set_margin_end(grid, 5);
+    gtk_box_pack_start(GTK_BOX(bar), grid, TRUE, TRUE, 0);
 
     label = gtk_label_new("");
     gtk_widget_show(label);
     SubSizeLabel = GTK_LABEL(label);
     gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-    gtk_table_attach(GTK_TABLE(table), label, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 5, 0);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
 
     label = gtk_label_new("");
     gtk_widget_show(label);
     SubLabel = GTK_LABEL(label);
 /*   gtk_widget_set_size_request(label, 50, -1); */
     gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-    gtk_table_attach(GTK_TABLE(table), label, 1, 2, 0, 1, GTK_FILL, GTK_FILL, 5, 0);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 0, 1, 1);
 
     label = gtk_label_new("");
     gtk_widget_show(label);
     FileSizeLabel = GTK_LABEL(label);
     gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-    gtk_table_attach(GTK_TABLE(table), label, 0, 1, 1, 2, GTK_FILL, GTK_FILL, 5, 0);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 1, 1);
 
     label = gtk_label_new("");
     gtk_widget_show(label);
     FileLabel = GTK_LABEL(label);
     gtk_widget_set_size_request(label, 50, -1);
     gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-    gtk_table_attach(GTK_TABLE(table), label, 1, 2, 1, 2, GTK_FILL|GTK_EXPAND, GTK_FILL|GTK_EXPAND, 5, 0);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 1, 1, 1);
 
     return bar;
 }
