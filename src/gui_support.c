@@ -21,11 +21,11 @@
  * @param help some help text, or NULL. If there is a help text, a
  * small help icon will appear next to the header. Moving the mouse
  * over it will create a tooltip containing the help text.
- * @param[out] hbox the resulting hbox for the content under the
+ * @param[out] hbox the resulting box for the content under the
  * header. This box already contains an invisible item of width 20.
- * @param[out] header_hbox the resulting hbox of the header which can be
+ * @param[out] header_hbox the resulting box of the header which can be
  * used to add additional stuff there, or NULL
- * @return the GtkVBox containing all the things
+ * @return the GtkBox containing all the things
  */
 GtkWidget* ui_create_section(const char* header, const char* help,
                              GtkWidget** hbox, GtkWidget** header_hbox) {
@@ -34,9 +34,9 @@ GtkWidget* ui_create_section(const char* header, const char* help,
   GtkWidget* hbox2;
   char* temp;
 
-  box = gtk_vbox_new(FALSE, 5);
+  box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
   
-  hbox2 = gtk_hbox_new(FALSE, 5);
+  hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_widget_show(hbox2);
   gtk_box_pack_start(GTK_BOX(box), hbox2, FALSE, FALSE, 0);
   
@@ -62,7 +62,7 @@ GtkWidget* ui_create_section(const char* header, const char* help,
   }
   if (header_hbox) *header_hbox = hbox2;
 
-  *hbox = gtk_hbox_new(FALSE, 0);
+  *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   gtk_widget_show(*hbox);
   gtk_box_pack_start(GTK_BOX(box), *hbox, TRUE, TRUE, 0);
   label = gtk_label_new("");

@@ -270,7 +270,7 @@ static GtkWidget* _gui_create_color_box(color_t* color) {
   GtkWidget* item;
   ColorType type = color?color->type:COLOR_EXTENSION;
 
-  hbox = gtk_hbox_new(FALSE, 5);
+  hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 
   if (color) {
     item = gtk_color_button_new_with_color(&color->c);
@@ -333,7 +333,7 @@ static GtkWidget* _gui_create_color_box(color_t* color) {
     GtkWidget* vbox2;
     GtkRequisition req;
 
-    vbox2 = gtk_vbox_new(FALSE, 0);
+    vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_size_request(item, &req);
     gtk_box_pack_start(GTK_BOX(hbox), vbox2, FALSE, FALSE, 0);
     
@@ -373,13 +373,13 @@ static void on_setup_colors(GtkWindow* parent) {
     GtkWidget* item;
     GtkWidget* sw;
     
-    vbox0 = gtk_vbox_new(FALSE, 10);
+    vbox0 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_container_set_border_width(GTK_CONTAINER(vbox0), 6);
     
     section = ui_create_section(_("Basic colors"), NULL, &hbox0, NULL);
     gtk_box_pack_start(GTK_BOX(vbox0), section, FALSE, FALSE, 0);
 
-    vbox = gtk_vbox_new(FALSE, 0);
+    vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_box_pack_start(GTK_BOX(hbox0), vbox, TRUE, TRUE, 0);
 
     for (dlist = colors_get_list(); dlist; dlist = dlist->next) {
@@ -396,7 +396,7 @@ static void on_setup_colors(GtkWindow* parent) {
     gtk_box_pack_start(GTK_BOX(vbox0), section, TRUE, TRUE, 0);
     
     // vbox which contains hbox for new color and scrolled area for existing colors
-    vbox1 = gtk_vbox_new(FALSE, 0);
+    vbox1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_box_pack_start(GTK_BOX(hbox0), vbox1, TRUE, TRUE, 0);
     nbox = _gui_create_color_box(NULL);
     gtk_box_pack_start(GTK_BOX(vbox1), nbox, FALSE, FALSE, 6);
@@ -408,7 +408,7 @@ static void on_setup_colors(GtkWindow* parent) {
       (GTK_SCROLLED_WINDOW(sw), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
     gtk_box_pack_start(GTK_BOX(vbox1), sw, TRUE, TRUE, 0);
     
-    vbox = gtk_vbox_new(FALSE, 0);
+    vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     ColorBox = GTK_BOX(vbox);
 
     gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(sw), vbox);
@@ -488,14 +488,14 @@ void gui_show_preferences(GtkWindow* parent) {
 
   g_object_add_weak_pointer(G_OBJECT(PrefWin), (void*)&PrefWin);
   
-  vbox0 = gtk_vbox_new(FALSE, 12);
+  vbox0 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
   gtk_container_set_border_width(GTK_CONTAINER(vbox0), 12);
   gtk_container_add(GTK_CONTAINER(win), vbox0);
 
   section = ui_create_section(_("Display type"), NULL, &hbox, NULL);
   gtk_box_pack_start(GTK_BOX(vbox0), section, FALSE, FALSE, 0);
   
-  vbox = gtk_vbox_new(FALSE, 2);
+  vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
   gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 0);
 
   item = gtk_radio_button_new_with_label(Group, _("Standard cushioned treemaps"));
@@ -612,7 +612,7 @@ void gui_show_preferences(GtkWindow* parent) {
   section = ui_create_section(_("Scanning options (requires re-scan)"), NULL, &hbox, NULL);
   gtk_box_pack_start(GTK_BOX(vbox0), section, FALSE, FALSE, 0);
 
-  vbox = gtk_vbox_new(FALSE, 2);
+  vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
   gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 0);
 
   item = gtk_check_button_new_with_label(_("Descend directories on other filesystems"));

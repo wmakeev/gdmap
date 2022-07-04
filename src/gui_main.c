@@ -517,7 +517,7 @@ static GtkWidget* gui_create_path_box()
     GtkWidget* hbox;
     GtkWidget* label;
 
-    hbox = gtk_hbox_new(FALSE, 0);
+    hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     PathBox = GTK_BOX(hbox);
     gtk_widget_show(hbox);
 
@@ -730,7 +730,7 @@ static GtkWidget* gui_create_status_bar()
     GtkWidget* table;
     GtkWidget* label;
 
-    bar = gtk_hbox_new(FALSE, 5);
+    bar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     gtk_widget_show(bar);
     StatusBar = GTK_BOX(bar);
 
@@ -846,7 +846,7 @@ GtkWidget* gui_create_main_win(void)
     g_object_add_weak_pointer(G_OBJECT(win), (void*)&MainWin);
 
 
-    vbox = gtk_vbox_new(FALSE, 0);
+    vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_show(vbox);
     gtk_container_add(GTK_CONTAINER(win), vbox);
 /*   gtk_container_set_border_width(GTK_CONTAINER (vbox), 0); */
