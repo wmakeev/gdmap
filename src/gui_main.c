@@ -221,8 +221,7 @@ static void history_append(tree_info_t* info)
 // TREE INFO
 static void tree_info_destroy(tree_info_t* info)
 {
-    g_list_foreach(info->children, (GFunc)tree_info_destroy, NULL);
-    g_list_free(info->children);
+    g_list_free_full(info->children, (GDestroyNotify)tree_info_destroy);
     g_free(info);
 }
 

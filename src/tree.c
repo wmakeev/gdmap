@@ -74,8 +74,7 @@ char* tree_full_name(tree_t* tree)
 
 void tree_destroy(tree_t* tree)
 {
-    g_list_foreach(tree->entries, (GFunc)tree_destroy, NULL);
-    g_list_free(tree->entries);
+    g_list_free_full(tree->entries, (GDestroyNotify)tree_destroy);
     g_free(tree->name);
     g_free(tree);
 }

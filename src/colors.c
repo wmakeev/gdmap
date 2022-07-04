@@ -396,8 +396,7 @@ GList* colors_get_list()
 
 void colors_clear()
 {
-    g_list_foreach(Colors, (GFunc)color_destroy, NULL);
-    g_list_free(Colors);
+    g_list_free_full(Colors, (GDestroyNotify)color_destroy);
     Colors = NULL;
     colors_save();
 }
