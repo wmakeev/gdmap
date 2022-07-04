@@ -28,7 +28,7 @@ static int Saver = 0;
 
 static void color_destroy(color_t* color)
 {
-    g_list_foreach(color->ext, (GFunc)g_free, NULL);
+    g_list_free_full(color->ext, g_free);
     g_free(color);
 }
 
