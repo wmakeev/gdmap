@@ -743,12 +743,15 @@ static GtkWidget* gui_create_status_bar(void)
     label = gtk_label_new("");
     gtk_widget_show(label);
     SubSizeLabel = GTK_LABEL(label);
+    gtk_label_set_single_line_mode(GTK_LABEL(label), TRUE);
     gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
 
     label = gtk_label_new("");
     gtk_widget_show(label);
     SubLabel = GTK_LABEL(label);
+    gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_MIDDLE);
+    gtk_label_set_single_line_mode(GTK_LABEL(label), TRUE);
 /*   gtk_widget_set_size_request(label, 50, -1); */
     gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
     gtk_grid_attach(GTK_GRID(grid), label, 1, 0, 1, 1);
@@ -756,12 +759,15 @@ static GtkWidget* gui_create_status_bar(void)
     label = gtk_label_new("");
     gtk_widget_show(label);
     FileSizeLabel = GTK_LABEL(label);
+    gtk_label_set_single_line_mode(GTK_LABEL(label), TRUE);
     gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 1, 1);
 
     label = gtk_label_new("");
     gtk_widget_show(label);
     FileLabel = GTK_LABEL(label);
+    gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_MIDDLE);
+    gtk_label_set_single_line_mode(GTK_LABEL(label), TRUE);
     gtk_widget_set_size_request(label, 50, -1);
     gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
     gtk_grid_attach(GTK_GRID(grid), label, 1, 1, 1, 1);
