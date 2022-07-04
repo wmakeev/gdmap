@@ -2,7 +2,7 @@ image: registry.gitlab.com/sjohannes/docker-gdmap-test-deps
 
 build:
   script:
-    - meson build
+    - meson -D warning_level=2 -D c_args=-Werror=format-security build
     - cd build
     - ninja
     - desktop-file-validate data/gdmap.desktop
