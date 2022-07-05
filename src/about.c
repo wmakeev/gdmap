@@ -36,7 +36,8 @@ void gui_show_about(GtkWindow* parent)
 {
     GtkWidget* win;
     const char* authors[] = {
-        "Markus Lausser <sgop@users.sourceforge.net>",
+        "Johannes Sasongko <sasongko@gmail.com> (GTK 3 port maintainer)",
+        "Markus Lausser <sgop@users.sourceforge.net> (original author)",
         NULL
     };
     
@@ -49,7 +50,7 @@ void gui_show_about(GtkWindow* parent)
     AboutWin = GTK_ABOUT_DIALOG(win);
     gtk_about_dialog_set_program_name(AboutWin, PACKAGE_NAME);
     gtk_about_dialog_set_version(AboutWin, PACKAGE_VERSION);
-    gtk_about_dialog_set_copyright(AboutWin, "Copyright \302\251 2005-2008 Markus Lausser");
+    gtk_about_dialog_set_copyright(AboutWin, "Copyright \302\251 2005-2008 Markus Lausser, 2021-2022 Johannes Sasongko");
     gtk_about_dialog_set_license(AboutWin, "GPL (GNU General Public License)\n\nsee http://www.gnu.org/licenses/gpl.html");
     gtk_about_dialog_set_website(AboutWin, "http://gdmap.sourceforge.net");
     gtk_about_dialog_set_authors(AboutWin, authors);
