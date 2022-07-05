@@ -513,16 +513,33 @@ static void on_action_forward(void)
 
 static GtkWidget* gui_create_path_box(void)
 {
+    GtkWidget* scroll;
     GtkWidget* hbox;
+    GtkWidget* hbox2;
     GtkWidget* label;
 
     hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    PathBox = GTK_BOX(hbox);
     gtk_widget_show(hbox);
+
+    scroll = gtk_scrolled_window_new(NULL, NULL);
+    gtk_widget_show(scroll);
+    gtk_container_add(GTK_CONTAINER(hbox), scroll);
+    gtk_scrolled_window_set_overlay_scrolling(GTK_SCROLLED_WINDOW(scroll), TRUE);
+    // We use "external" (scrollable but the scrollbar is never shown) because
+    // otherwise the widget would expand vertically to make room for the
+    // scrollbar
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
+        GTK_POLICY_EXTERNAL, GTK_POLICY_NEVER);
+    gtk_widget_set_hexpand(scroll, TRUE);
+
+    hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    PathBox = GTK_BOX(hbox2);
+    gtk_widget_show(hbox2);
+    gtk_container_add(GTK_CONTAINER(scroll), hbox2);
 
     label = gtk_label_new("");
     gtk_widget_show(label);
-    gtk_box_pack_end(PathBox, label, FALSE, FALSE, 5);
+    gtk_box_pack_end(GTK_BOX(hbox), label, FALSE, FALSE, 5);
     SizeLabel = GTK_LABEL(label);
 
     return hbox;
