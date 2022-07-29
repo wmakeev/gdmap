@@ -511,6 +511,40 @@ static void on_action_forward(void)
 /*   } */
 /* } */
 
+static gboolean on_pathbox_scroll(GtkWidget* scroll, GdkEventScroll event, G_GNUC_UNUSED gpointer user_data) {
+    if (event.state || event.direction == GDK_SCROLL_LEFT || event.direction == GDK_SCROLL_RIGHT || event.delta_x)
+        return FALSE;
+    GtkAdjustment* adj = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(scroll));
+    // See https://gitlab.gnome.org/GNOME/gtk/blob/gtk-3-24/gtk/gtkscrolledwindow.c
+#ifdef GDK_WINDOWING_QUARTZ
+    gdouble unit = 1;
+#else
+    gdouble page = gtk_adjustment_get_page_size(adj);
+    gdouble unit = fmin(page / 2, pow(page, 2.0 / 3));
+#endif
+    gdouble value = gtk_adjustment_get_value(adj);
+    double delta_y;
+    switch (event.direction) {
+        case GDK_SCROLL_SMOOTH:
+            delta_y = event.delta_y * unit;
+            break;
+        case GDK_SCROLL_UP:
+            delta_y = -unit;
+            break;
+        case GDK_SCROLL_DOWN:
+            delta_y = unit;
+            break;
+        default: // Unreachable
+            delta_y = 0;
+    }
+    value += delta_y;
+    gdouble lower = gtk_adjustment_get_lower(adj);
+    gdouble upper = gtk_adjustment_get_upper(adj);
+    value = fmin(fmax(value, lower), upper);
+    gtk_adjustment_set_value(adj, value);
+    return TRUE;
+}
+
 static GtkWidget* gui_create_path_box(void)
 {
     GtkWidget* scroll;
@@ -531,6 +565,7 @@ static GtkWidget* gui_create_path_box(void)
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
         GTK_POLICY_EXTERNAL, GTK_POLICY_NEVER);
     gtk_widget_set_hexpand(scroll, TRUE);
+    g_signal_connect(scroll, "scroll-event", G_CALLBACK(on_pathbox_scroll), NULL);
 
     hbox2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     PathBox = GTK_BOX(hbox2);
