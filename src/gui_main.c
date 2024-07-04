@@ -94,39 +94,39 @@ static GtkActionEntry Actions[] =
     { "FileMenu", NULL, N_("_File"), 0,0,0 },
     { "ViewMenu", NULL, N_("_View"), 0,0,0 },
     { "HelpMenu", NULL, N_("_Help"), 0,0,0 },
-    { "Open", GTK_STOCK_OPEN, N_("_Open..."),
+    { "Open", "folder-open", N_("_Open..."),
       "<control>O", N_("Open a folder"),
       G_CALLBACK(on_action_open)
     },
-    { "Quit", GTK_STOCK_QUIT, N_("_Quit"),
+    { "Quit", "application-exit", N_("_Quit"),
       "<control>Q", N_("Exit program"),
       G_CALLBACK(on_action_exit)
     },
-    { "Back", GTK_STOCK_GO_BACK, N_("_Back"),
+    { "Back", "go-previous", N_("_Back"),
       NULL, N_("Go back one step"),
       G_CALLBACK(on_action_back)
     },
-    { "Forward", GTK_STOCK_GO_FORWARD, N_("_Forward"),
+    { "Forward", "go-next", N_("_Forward"),
       NULL, N_("Go forward one step"),
       G_CALLBACK(on_action_forward)
     },
-    { "Up", GTK_STOCK_GO_UP, N_("_Up"),
+    { "Up", "go-up", N_("_Up"),
       NULL, N_("Go up one level"),
       G_CALLBACK(on_action_up)
     },
-    { "Top", GTK_STOCK_GOTO_TOP, N_("_Top"),
+    { "Top", "go-top", N_("_Top"),
       NULL, N_("Goto toplevel folder"),
       G_CALLBACK(on_action_top)
     },
-    { "Options", GTK_STOCK_PREFERENCES, N_("_Settings..."),
+    { "Options", "preferences-system", N_("_Settings..."),
       NULL, N_("Edit settings"),
       G_CALLBACK(on_action_preferences)
     },
-    { "About", GTK_STOCK_PREFERENCES, N_("_About..."),
+    { "About", "help-about", N_("_About..."),
       NULL, N_("About this program"),
       G_CALLBACK(on_action_about)
     },
-    { "Refresh", GTK_STOCK_REFRESH, N_("_Refresh"),
+    { "Refresh", "view-refresh", N_("_Refresh"),
       NULL, N_("Refresh current view"),
       G_CALLBACK(on_action_refresh)
     },
