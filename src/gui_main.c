@@ -268,8 +268,13 @@ static tree_info_t* tree_info_create(tree_t* tree)
         tree_t* child = dlist->data;
         tree_info_t* sub = tree_info_create(child);
         sub->parent = info;
-        info->children = g_list_append(info->children, sub);
+        // Prepend instead of appending here, so that the time complexity is
+        // O(n) instead of O(n^2).
+        // The order will be the wrong way around, but we can fix that with a
+        // g_list_reverse() at the end.
+        info->children = g_list_prepend(info->children, sub);
     }
+    info->children = g_list_reverse(info->children);
     return info;
 }
 
