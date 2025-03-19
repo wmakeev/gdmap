@@ -185,12 +185,13 @@ static tree_t* tree_scan_rec(const char* dirname, const char* shortname, int dep
             {
                 tree->parent = result;
                 result->size += tree->size;
-                result->entries = g_list_insert_sorted(result->entries, tree, comp_func);
+                result->entries = g_list_prepend(result->entries, tree);
             }
             g_free(nname);
         }
         g_dir_close(dir);
-        
+
+        result->entries = g_list_sort(result->entries, comp_func);
         return result;
     }
     else
