@@ -7,6 +7,7 @@
  * $Author$
  */
 
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #define EVENT_FMT  "/%s"
@@ -40,7 +41,7 @@ GtkWidget* ui_create_section(const char* header, const char* help,
   gtk_widget_show(hbox2);
   gtk_box_pack_start(GTK_BOX(box), hbox2, FALSE, FALSE, 0);
   
-  temp = g_strdup_printf("<b>%s</b>", header);
+  temp = g_markup_printf_escaped("<b>%s</b>", header);
   label = gtk_label_new(temp);
   g_free(temp);
   gtk_label_set_use_markup(GTK_LABEL(label), TRUE);
@@ -83,7 +84,7 @@ on_ebox_enter(GtkWidget* box, GdkEventCrossing* event, GtkLabel* label) {
     char* temp;
 
     text = g_object_get_data(G_OBJECT(label), "label");
-    temp = g_strdup_printf(EVENT_HFMT, text);
+    temp = g_markup_printf_escaped(EVENT_HFMT, text);
     gtk_label_set_markup(label, temp);
     g_free(temp);
     gtk_widget_set_state(GTK_WIDGET(label), GTK_STATE_PRELIGHT);
@@ -102,7 +103,7 @@ on_ebox_leave(GtkWidget* box, GdkEventCrossing* event, GtkLabel* label) {
   //  if (GTK_WIDGET_HAS_FOCUS(gtk_widget_get_parent(GTK_WIDGET(label)))) return TRUE;
 /*   if (GTK_WIDGET_SENSITIVE(label)) { */
     text = g_object_get_data(G_OBJECT(label), "label");
-    temp = g_strdup_printf(EVENT_FMT, text);
+    temp = g_markup_printf_escaped(EVENT_FMT, text);
     gtk_label_set_markup(label, temp);
     g_free(temp);
     gtk_widget_set_state(GTK_WIDGET(label), GTK_STATE_NORMAL);
@@ -161,7 +162,7 @@ GtkWidget* ui_create_event_label(const char* text, GCallback callback,
   gtk_widget_set_can_focus(ebox, TRUE);
   gtk_widget_show(ebox);
 
-  temp = g_strdup_printf(EVENT_FMT, text);
+  temp = g_markup_printf_escaped(EVENT_FMT, text);
   label = gtk_label_new(temp);
   g_free(temp);
 

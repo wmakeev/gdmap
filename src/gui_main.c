@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 #include <cairo.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "gui_main.h"
@@ -655,7 +656,7 @@ static void gui_tree_mark1(tree_info_t* info)
         g_free(text);
 
         temp = print_filesize(Mark1->node->size);
-        text = g_strdup_printf("<b>%s</b>", temp);
+        text = g_markup_printf_escaped("<b>%s</b>", temp);
         gtk_label_set_markup(FileSizeLabel, text);
         g_free(temp);
         g_free(text);
@@ -686,7 +687,7 @@ static void gui_tree_mark2(tree_info_t* info)
             gtk_label_set_text(SubLabel, to_utf8(info->node->name));
       
             temp = print_filesize(Mark2->node->size);
-            text = g_strdup_printf("<b>%s</b>", temp);
+            text = g_markup_printf_escaped("<b>%s</b>", temp);
             gtk_label_set_markup(SubSizeLabel, text);
             g_free(temp);
             g_free(text);
@@ -1403,7 +1404,7 @@ static void gui_tree_display(tree_info_t* info, gboolean destroy_old, gboolean n
   
     {
         char* temp1 = print_filesize(info->node->size);
-        char* temp2 = g_strdup_printf("<b>%s</b>", temp1);
+        char* temp2 = g_markup_printf_escaped("<b>%s</b>", temp1);
         gtk_label_set_markup(SizeLabel, temp2);
         g_free(temp1);
         g_free(temp2);
