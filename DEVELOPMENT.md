@@ -8,4 +8,5 @@
 - Update `ChangeLog`.
 - Run `git tag -a "vX.Y.Z" -m "GdMap X.Y.Z"`.
 - Push the tag.
+- Make sure automated builds succeed.
 - Create a release.
