@@ -1,3 +1,4 @@
+# Modified for the GdMap fork on 2026-11-19.
 sources = [
   'about.c',
   'colors.c',
@@ -15,7 +16,7 @@ cflags = cc.get_supported_arguments('-Wno-deprecated-declarations', '-Wno-pointe
 
 deps = [
   dependency('cairo'),
-  dependency('gtk+-3.0'),
+  dependency('gtk+-3.0', version: '>=3.22'),
   cc.find_library('m', required: false),
   dependency('libxml-2.0'),
 ]

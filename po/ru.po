@@ -1,6 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
+# Modified for the GdMap fork on 2026-11-19.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
@@ -23,6 +24,27 @@ msgstr "Графическая карта диска"
 #: data/gdmap.desktop.in:4
 msgid "Display disk space using tree maps"
 msgstr "Показать место на диске пользующеся древовидными схемами"
+
+msgid "Could not open the folder"
+msgstr "Не удалось открыть папку"
+
+msgid "Could not copy the full path"
+msgstr "Не удалось скопировать полный путь"
+
+msgid "Open in File Manager"
+msgstr "Открыть в файловом менеджере"
+
+msgid "Open Containing Folder"
+msgstr "Открыть папку файла"
+
+msgid "Copy Full Path"
+msgstr "Скопировать полный путь"
+
+msgid "_Scan Root (/)"
+msgstr "_Сканировать корень (/)"
+
+msgid "Scan the filesystem root (/)"
+msgstr "Сканировать корень файловой системы (/)"
 
 #: data/gdmap.desktop.in:10
 msgid "directory;folder;gdmap;usage"

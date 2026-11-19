@@ -1,6 +1,7 @@
 /* Copyright (C) 2005-2006 sgop@users.sourceforge.net
  * This is free software distributed under the terms of the
  * GNU Public License.  See the file COPYING for details.
+ * Modified for the GdMap fork on 2026-11-19.
  */
 /* $Revision$
  * $Date$
@@ -13,17 +14,6 @@
 
 #ifdef _WIN32
 # include <windows.h>
-#endif
-
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
 #endif
 
 #include <stdlib.h>
@@ -40,6 +30,7 @@
 
 static ProgressFunc TheProgressFunc = NULL;
 static void* TheProgressData = NULL;
+static gint64 LastProgressUpdate = 0;
 static gboolean Aborted = FALSE;
 static dev_t RootDevice = 0;
 
@@ -69,7 +60,7 @@ char* tree_full_name(tree_t* tree)
     if (tree->parent)
     {
         char* p = tree_full_name(tree->parent);
-        res = g_strdup_printf("%s/%s", p, tree->name);
+        res = g_build_filename(p, tree->name, NULL);
         g_free(p);
     }
     else
@@ -100,19 +91,11 @@ static tree_t* tree_new(const char* sname, gint64 size, unsigned depth)
 
     if (TheProgressFunc)
     {
-        static struct timeval last_t = {0,0};
-        struct timeval t;
-        int diff;
-
-        gettimeofday(&t, 0);
-
-        diff = (t.tv_sec - last_t.tv_sec) * 1000 +
-            (t.tv_usec - last_t.tv_usec) / 1000;
-
-        if (diff > 100)
+        gint64 now = g_get_monotonic_time();
+        if (LastProgressUpdate == 0 || now - LastProgressUpdate >= 100 * G_TIME_SPAN_MILLISECOND)
         {
+            LastProgressUpdate = now;
             if (!TheProgressFunc(TheProgressData)) Aborted = TRUE;
-            last_t = t;
         }
     }
 
@@ -169,6 +152,7 @@ static tree_t* tree_scan_rec(const char* dirname, const char* shortname, int dep
         }
         
         result = tree_new(shortname, 0, depth);
+        result->is_directory = TRUE;
         
         while (result && !Aborted && (name = g_dir_read_name(dir)) != NULL)
         {
@@ -230,6 +214,7 @@ tree_t* tree_load(const char* folder, ProgressFunc func, void* data, unsigned de
 
     TheProgressFunc = func;
     TheProgressData = data;
+    LastProgressUpdate = 0;
     RootDevice = 0;
     Aborted = FALSE;
 

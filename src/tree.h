@@ -1,6 +1,7 @@
 /* Copyright (C) 2005 sgop@users.sourceforge.net This is free software
  * distributed under the terms of the GNU Public License.  See the
  * file COPYING for details.
+ * Modified for the GdMap fork on 2026-11-19.
  */
 /* $Revision$
  * $Date$
@@ -23,6 +24,7 @@ typedef gboolean (*ProgressFunc)(void* data);
 struct _tree_t {
   char* name;
   gint64 size;
+  gboolean is_directory;
   GList* entries;
   tree_t* parent;
   unsigned depth;

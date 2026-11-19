@@ -1,6 +1,7 @@
 /* Copyright (C) 2005 sgop@users.sourceforge.net This is free software
  * distributed under the terms of the GNU Public License.  See the
  * file COPYING for details.
+ * Modified for the GdMap fork on 2026-11-19.
  */
 /* $Revision$
  * $Date$
@@ -80,6 +81,7 @@ static unsigned LMaxDepth = 0;
 static unsigned LDisplayMode = DISPLAY_SQUARE_CUSHION;
 
 static void on_action_open();
+static void on_action_scan_root(void);
 static void on_action_back();
 static void on_action_forward();
 static void on_action_up();
@@ -98,6 +100,10 @@ static GtkActionEntry Actions[] =
     { "Open", "folder-open", N_("_Open..."),
       "<control>O", N_("Open a folder"),
       G_CALLBACK(on_action_open)
+    },
+    { "ScanRoot", "drive-harddisk", N_("_Scan Root (/)"),
+      NULL, N_("Scan the filesystem root (/)"),
+      G_CALLBACK(on_action_scan_root)
     },
     { "Quit", "application-exit", N_("_Quit"),
       "<control>Q", N_("Exit program"),
@@ -138,6 +144,7 @@ static const char* MenuDescription =
     "  <menubar action=\"MainMenu\">\n"
     "    <menu action=\"FileMenu\">\n"
     "      <menuitem action=\"Open\"/>\n"
+    "      <menuitem action=\"ScanRoot\"/>\n"
     "      <separator/>\n"
     "      <menuitem action=\"Options\"/>\n"
     "      <separator/>\n"
@@ -157,6 +164,7 @@ static const char* MenuDescription =
     "  </menubar>\n"
     "  <toolbar action=\"ToolBar\">\n"
     "    <toolitem action=\"Open\"/>\n"
+    "    <toolitem action=\"ScanRoot\"/>\n"
     "    <separator/>\n"
     "    <toolitem action=\"Back\"/>\n"
     "    <toolitem action=\"Forward\"/>\n"
@@ -171,6 +179,7 @@ static const char* MenuDescription =
 
 static void gui_tree_display(tree_info_t* info, gboolean destroy_old, gboolean new_history);
 static tree_t* gui_tree_load(const char* folder, unsigned depth);
+static void gui_buttons_update(void);
 
 
 // HISTORY
@@ -378,7 +387,7 @@ static gboolean _update_progress(void* data)
     gtk_progress_bar_pulse(pdata->bar);
     while (gtk_events_pending()) if (gtk_main_iteration()) return FALSE;
 
-    return TRUE;
+    return !pdata->cancel;
 }
 
 static void on_abort_load(progress_data_t* data)
@@ -396,8 +405,9 @@ static tree_t* gui_tree_load(const char* folder, unsigned depth)
     data->cancel = FALSE;
     Loading = TRUE;
 
-    gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Open"), FALSE);
-    gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Refresh"), FALSE);
+    gui_buttons_update();
+    gtk_widget_set_sensitive(Area, FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET(PathBox), FALSE);
 
     item1 = gtk_progress_bar_new();
     data->bar = GTK_PROGRESS_BAR(item1);
@@ -419,9 +429,10 @@ static tree_t* gui_tree_load(const char* folder, unsigned depth)
     gtk_widget_destroy(item2);
     g_free(data);
 
-    gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Open"), TRUE);
-    gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Refresh"), TRUE);
     Loading = FALSE;
+    gtk_widget_set_sensitive(Area, TRUE);
+    gtk_widget_set_sensitive(GTK_WIDGET(PathBox), TRUE);
+    gui_buttons_update();
 
     return tree;
 }
@@ -451,7 +462,7 @@ static void on_action_open(void)
 
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
     {
-        res = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(dialog));
+        res = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
     }
     else
     {
@@ -466,16 +477,23 @@ static void on_action_open(void)
     }
 }
 
+static void on_action_scan_root(void)
+{
+    gui_tree_load_and_display(G_DIR_SEPARATOR_S);
+}
+
 static void gui_buttons_update(void)
 {
+    gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Open"), !Loading);
+    gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/ScanRoot"), !Loading);
     gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Back"),
-                             HistoryPos && HistoryPos->prev);
+                             !Loading && HistoryPos && HistoryPos->prev);
     gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Forward"),
-                             HistoryPos && HistoryPos->next);
+                             !Loading && HistoryPos && HistoryPos->next);
     gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Up"),
-                             CurrentItem && CurrentItem->parent);
+                             !Loading && CurrentItem && CurrentItem->parent);
     gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Top"),
-                             CurrentItem && CurrentItem->parent);
+                             !Loading && CurrentItem && CurrentItem->parent);
     gtk_action_set_sensitive(gtk_ui_manager_get_action(UIManager, "/ToolBar/Refresh"),
                              CurrentItem != NULL && !Loading);
 }
@@ -733,27 +751,99 @@ static gboolean on_area_motion(GtkWidget* widget, GdkEventMotion* event)
 }
 
 
-static gboolean on_area_button_press(GtkWidget* widget, GdkEventButton* event)
+static void show_path_error(const char* message, const GError* error)
+{
+    GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(MainWin),
+        GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+        GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", message);
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", error->message);
+    g_signal_connect(dialog, "response", G_CALLBACK(gtk_widget_destroy), NULL);
+    gtk_widget_show(dialog);
+}
+
+static void on_open_map_folder(G_GNUC_UNUSED GtkMenuItem* item, const char* folder)
+{
+    GError* error = NULL;
+    char* uri = g_filename_to_uri(folder, NULL, &error);
+    if (uri)
+        gtk_show_uri_on_window(GTK_WINDOW(MainWin), uri, gtk_get_current_event_time(), &error);
+    if (error)
+    {
+        show_path_error(_("Could not open the folder"), error);
+        g_error_free(error);
+    }
+    g_free(uri);
+}
+
+static void on_copy_map_path(GtkMenuItem* item, const char* path)
+{
+    GError* error = NULL;
+    char* text = g_filename_to_utf8(path, -1, NULL, NULL, &error);
+    if (!text)
+    {
+        show_path_error(_("Could not copy the full path"), error);
+        g_error_free(error);
+        return;
+    }
+
+    GtkClipboard* clipboard = gtk_widget_get_clipboard(GTK_WIDGET(item), GDK_SELECTION_CLIPBOARD);
+    gtk_clipboard_set_text(clipboard, text, -1);
+    gtk_clipboard_set_can_store(clipboard, NULL, 0);
+    g_free(text);
+}
+
+static void gui_tree_show_context_menu(tree_t* node, GdkEventButton* event)
+{
+    char* path = tree_full_name(node);
+    if (!g_path_is_absolute(path))
+    {
+        char* cwd = g_get_current_dir();
+        char* absolute_path = g_build_filename(cwd, path, NULL);
+        g_free(cwd);
+        g_free(path);
+        path = absolute_path;
+    }
+    char* folder = node->is_directory ? g_strdup(path) : g_path_get_dirname(path);
+
+    GtkWidget* menu = gtk_menu_new();
+    gtk_menu_attach_to_widget(GTK_MENU(menu), Area, NULL);
+    g_object_set_data_full(G_OBJECT(menu), "path", path, g_free);
+    g_object_set_data_full(G_OBJECT(menu), "folder", folder, g_free);
+    g_signal_connect(menu, "selection-done", G_CALLBACK(gtk_widget_destroy), NULL);
+
+    GtkWidget* open = gtk_menu_item_new_with_label(node->is_directory
+        ? _("Open in File Manager") : _("Open Containing Folder"));
+    g_signal_connect(open, "activate", G_CALLBACK(on_open_map_folder), folder);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), open);
+
+    GtkWidget* copy = gtk_menu_item_new_with_label(_("Copy Full Path"));
+    g_signal_connect(copy, "activate", G_CALLBACK(on_copy_map_path), path);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), copy);
+
+    gtk_widget_show_all(menu);
+    gtk_menu_popup_at_pointer(GTK_MENU(menu), (GdkEvent*)event);
+}
+
+static gboolean on_area_button_press(G_GNUC_UNUSED GtkWidget* widget, GdkEventButton* event)
 {
     tree_info_t* info;
-/*   GtkWidget* pop; */
-
-    (void)widget;
     if (!CurrentItem) return FALSE;
 
     info = tree_info_search(CurrentItem, (int)(event->x), (int)(event->y));
+    if (!info) return FALSE;
 
-    if (info)
+    if (event->type == GDK_BUTTON_PRESS && gdk_event_triggers_context_menu((GdkEvent*)event))
     {
-        if (event->button == 1 && event->type == GDK_2BUTTON_PRESS)
-        {
-            tree_info_t* sub = tree_info_find_path(CurrentItem, info);
-            if (sub) gui_tree_display(sub, FALSE, TRUE);
-/*     } else if (event->button == 3) { */
-/*       pop = create_right_popup(sub_tree); */
-/*       gtk_menu_popup(GTK_MENU(pop), NULL, NULL, NULL, NULL, */
-/* 		     event->button, event->time); */
-        }
+        gui_tree_mark(info);
+        gtk_widget_queue_draw(Area);
+        gui_tree_show_context_menu(info->node, event);
+        return TRUE;
+    }
+
+    if (event->button == 1 && event->type == GDK_2BUTTON_PRESS)
+    {
+        tree_info_t* sub = tree_info_find_path(CurrentItem, info);
+        if (sub) gui_tree_display(sub, FALSE, TRUE);
     }
 
     return FALSE;
