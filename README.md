@@ -40,6 +40,20 @@ The tab-separated output contains the node index, parent index, kind (`directory
 
 CLI scans default to reported file sizes and stay on the root filesystem. Use `--allocated-size` to count allocated bytes when positive and smaller than the file size, or `--leave-device` to descend onto other filesystems. Symbolic links count their own size, hard links count once per name, and special files are skipped. A directory's size is the sum of accepted children; inaccessible descendants may be skipped by the scanner. These sizes do not guarantee how much space deletion would free. A root that cannot be scanned causes a nonzero exit status. The CLI neither reads nor writes the user's settings or palette and does not require a display.
 
+## Compact snapshot overview
+
+`gdmap-cli overview SNAPSHOT` lists the largest files, branches and repeated directory names. `gdmap-cli expand SNAPSHOT` lists the root's children; select a branch using its printed node number or its exact original absolute path:
+
+```sh
+./build/local/bin/gdmap-cli --limit 5 overview /tmp/src.gdmap
+./build/local/bin/gdmap-cli --limit 5 --node 1 expand /tmp/src.gdmap
+./build/local/bin/gdmap-cli --path '/original/scan/root/folder with spaces' expand /tmp/src.gdmap
+```
+
+Node numbers match `inspect` and stay valid for the same snapshot. Paths are displayed as C-escaped bytes, including UTF-8; copy the node number into `--node` to avoid decoding or shell escaping. `--path` accepts actual filename bytes, rather than the displayed escapes. Both operations use the saved tree even after the source moves and preserve the user's settings.
+
+Each node row gives bytes, regular-file count, symlink count and the largest regular file's percentage of that node's bytes (`none` for zero bytes). The default limit is 10 rows per section and per group's member list. Expansions and group member lists report the number and bytes of omitted children or members. Repeated groups combine directories with the same final path component, count only the outermost occurrence when those directories nest, and sort by total bytes. Different branches and different groups can overlap, so their rows must not be added together; omitted overlapping branches or groups report a count without an additive byte total. All sizes retain the snapshot's measurement policy.
+
 ## License
 
 The combined project and changes specific to this fork are available under the [GNU General Public License version 2.0 only](LICENSES/GPL-2.0.txt). Upstream GTK 3 port contributions are licensed under GPL-2.0-or-later unless otherwise stated.

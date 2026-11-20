@@ -6,6 +6,8 @@ This file records user-visible changes made in the fork. See [ChangeLog](ChangeL
 
 ### Added
 
+- Compact `gdmap-cli overview` and `expand` operations show large files, branch totals, repeated directory groups, file counts and largest-file shares, with bounded output and byte-safe navigation by node number or original path.
+
 - Headless `gdmap-cli scan` and `inspect` operations save and reopen a local scan with its original paths, node kinds, sizes, child order and measurement policy, without changing user preferences.
 
 - Treemap context menu for opening a folder in the file manager and copying a tile's full path. File tiles open their containing folders.

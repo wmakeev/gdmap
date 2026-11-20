@@ -29,7 +29,7 @@ executable('gdmap', sources,
   install: true,
 )
 
-cli = executable('gdmap-cli', ['cli.c', 'snapshot.c', 'tree.c'],
+cli = executable('gdmap-cli', ['cli.c', 'snapshot.c', 'overview.c', 'tree.c'],
   dependencies: dependency('glib-2.0', version: '>=2.38'),
   include_directories: [config_dir],
   install: true,
@@ -38,5 +38,10 @@ cli = executable('gdmap-cli', ['cli.c', 'snapshot.c', 'tree.c'],
 python = find_program('python3')
 test('snapshot-roundtrip', python,
   args: [files('test_snapshot.py'), cli, meson.project_source_root()],
+  timeout: 30,
+)
+
+test('snapshot-overview', python,
+  args: [files('test_overview.py'), cli, meson.project_source_root()],
   timeout: 30,
 )
