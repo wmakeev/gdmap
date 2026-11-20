@@ -58,7 +58,7 @@ static tree_t* select_id(tree_t* node, guint id)
     return NULL;
 }
 
-static void print_node(const char* label, tree_t* node)
+void map_print_node(const char* label, tree_t* node)
 {
     char* path = tree_full_name(node);
     char* escaped = g_strescape(path, NULL);
@@ -67,7 +67,7 @@ static void print_node(const char* label, tree_t* node)
     g_free(path); g_free(escaped);
 }
 
-static void hit_point(tree_info_t* info, double x, double y, int width, int height,
+void map_hit_point(tree_info_t* info, double x, double y, int width, int height,
                       int preview_width, int preview_height, unsigned depth, gboolean parent)
 {
     if(preview_width) {x=x*width/preview_width; y=y*height/preview_height;}
@@ -75,9 +75,46 @@ static void hit_point(tree_info_t* info, double x, double y, int width, int heig
     printf("# original-coordinate %.6f %.6f; original-size %d %d\n",x,y,width,height);
     if(found) {
         if(parent && found->parent) found=found->parent;
-        print_node("hit",found->node);
-        if(found->parent) print_node("parent",found->parent->node);
+        map_print_node("hit",found->node);
+        if(found->parent) map_print_node("parent",found->parent->node);
     } else puts("miss");
+}
+
+gboolean map_size_valid(int width, int height)
+{
+    return width >= 3 && height >= 3 && width <= 32767 && height <= 32767 &&
+           (guint64)width * height <= 100000000;
+}
+
+gboolean map_write_png(const char* filename, tree_info_t* info, const treemap_options* options,
+                       int width, int height, GError** error)
+{
+    cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
+    cairo_status_t status = cairo_surface_status(surface);
+    if (status == CAIRO_STATUS_SUCCESS) {
+        treemap_paint(info, surface, options);
+        cairo_surface_mark_dirty(surface);
+        status = cairo_surface_write_to_png(surface, filename);
+    }
+    cairo_surface_destroy(surface);
+    if (status == CAIRO_STATUS_SUCCESS) return TRUE;
+    g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_FAILED, "PNG: %s", cairo_status_to_string(status));
+    return FALSE;
+}
+
+void map_add_legend(GKeyFile* frame)
+{
+    guint number=0;
+    for(GList* p=colors_get_list();p;p=p->next) {
+        color_t* c=p->data;
+        if(c->type==COLOR_MARK1 || c->type==COLOR_MARK2) continue;
+        GString* legend=g_string_new(NULL);
+        g_string_append_printf(legend,"#%02x%02x%02x ",c->c.red/257,c->c.green/257,c->c.blue/257);
+        if(c->type==COLOR_EXTENSION) for(GList* e=c->ext;e;e=e->next) g_string_append_printf(legend,"%s%s",e==c->ext?"":" ",(char*)e->data);
+        else g_string_append(legend,c->type==COLOR_FOLDER ? "folder" : "default / unlisted extensions");
+        char* key=g_strdup_printf("color-%u",number++);
+        g_key_file_set_string(frame,"legend",key,legend->str); g_free(key); g_string_free(legend,TRUE);
+    }
 }
 
 int map_cli_main(int argc, char** argv)
@@ -113,7 +150,6 @@ int map_cli_main(int argc, char** argv)
     tree_info_t* info=NULL;
     GKeyFile* frame=g_key_file_new();
     char *snapshot=NULL, *frame_path=NULL, *hash=NULL;
-    cairo_surface_t* surface=NULL;
     gboolean hit=argc>1 && !strcmp(argv[1],"hit");
     if (!parsed) goto failed;
     if ((!hit && (argc!=4 || strcmp(argv[1],"render"))) || (hit && argc!=3)) {
@@ -138,7 +174,7 @@ int map_cli_main(int argc, char** argv)
         snapshot=g_canonicalize_filename(argv[2],NULL);
         hash=digest(snapshot,&error); if (!hash) goto failed;
     }
-    if (width<3 || height<3 || width>32767 || height>32767 || (guint64)width*height>100000000 || depth<0 || id < -1 ||
+    if (!map_size_valid(width,height) || depth<0 || id < -1 ||
         (path && id>=0) || !isfinite(lighting) || lighting<0 || lighting>1 ||
         (mode && strcmp(mode,"square") && strcmp(mode,"standard")) ||
         (batch && !hit) ||
@@ -163,17 +199,13 @@ int map_cli_main(int argc, char** argv)
                 char extra;
                 if(sscanf(coordinates,"%lf %lf %c",&x,&y,&extra)!=2 || !isfinite(x) || !isfinite(y))
                     puts("error expected finite X Y or parent X Y");
-                else hit_point(info,x,y,width,height,preview_width,preview_height,options.max_depth,line_parent);
+                else map_hit_point(info,x,y,width,height,preview_width,preview_height,options.max_depth,line_parent);
                 puts("end"); fflush(stdout);
             }
-        } else hit_point(info,x,y,width,height,preview_width,preview_height,options.max_depth,parent);
+        } else map_hit_point(info,x,y,width,height,preview_width,preview_height,options.max_depth,parent);
     } else {
         if(!colors_init_headless(palette)) {g_set_error_literal(&error,G_FILE_ERROR,G_FILE_ERROR_FAILED,"Unable to load explicit palette"); goto failed;}
-        surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,width,height);
-        if(cairo_surface_status(surface)!=CAIRO_STATUS_SUCCESS) {g_set_error_literal(&error,G_FILE_ERROR,G_FILE_ERROR_FAILED,"Unable to allocate image"); goto failed;}
-        treemap_paint(info,surface,&options); cairo_surface_mark_dirty(surface);
-        cairo_status_t status=cairo_surface_write_to_png(surface,argv[3]);
-        if(status!=CAIRO_STATUS_SUCCESS) {g_set_error(&error,G_FILE_ERROR,G_FILE_ERROR_FAILED,"PNG: %s",cairo_status_to_string(status)); goto failed;}
+        if (!map_write_png(argv[3], info, &options, width, height, &error)) goto failed;
         g_key_file_set_integer(frame,"frame","version",1);
         g_key_file_set_string(frame,"frame","snapshot",snapshot);
         g_key_file_set_string(frame,"frame","sha256",hash);
@@ -184,27 +216,16 @@ int map_cli_main(int argc, char** argv)
         g_key_file_set_string(frame,"frame","mode",mode ? mode : "square");
         g_key_file_set_double(frame,"frame","lighting",lighting);
         g_key_file_set_string(frame,"frame","coordinates","top-left origin; pixels; half-open rectangles; 1px outer border; scale x by original-width/preview-width and y likewise");
-        guint number=0;
-        for(GList* p=colors_get_list();p;p=p->next) {
-            color_t* c=p->data;
-            if(c->type==COLOR_MARK1 || c->type==COLOR_MARK2) continue;
-            GString* legend=g_string_new(NULL);
-            g_string_append_printf(legend,"#%02x%02x%02x ",c->c.red/257,c->c.green/257,c->c.blue/257);
-            if(c->type==COLOR_EXTENSION) for(GList* e=c->ext;e;e=e->next) g_string_append_printf(legend,"%s%s",e==c->ext?"":" ",(char*)e->data);
-            else g_string_append(legend,c->type==COLOR_FOLDER ? "folder" : "default / unlisted extensions");
-            char* key=g_strdup_printf("color-%u",number++);
-            g_key_file_set_string(frame,"legend",key,legend->str); g_free(key); g_string_free(legend,TRUE);
-        }
+        map_add_legend(frame);
         frame_path=g_strconcat(argv[3],".frame",NULL);
         gsize length; char* data=g_key_file_to_data(frame,&length,NULL);
         gboolean written=g_file_set_contents(frame_path,data,length,&error); g_free(data); if(!written) goto failed;
         printf("PNG %d %d\nframe %s\n",width,height,frame_path);
-        print_node("root",selected);
+        map_print_node("root",selected);
     }
     result=0;
 failed:
     if(error) {g_printerr("%s\n",error->message); g_error_free(error);}
-    if(surface) cairo_surface_destroy(surface);
     if(info) tree_info_destroy(info);
     tree_destroy(root); g_key_file_free(frame);
     g_free(snapshot); g_free(frame_path); g_free(hash); g_free(path); g_free(palette); g_free(mode);

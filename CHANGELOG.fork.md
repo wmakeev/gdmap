@@ -8,6 +8,8 @@ This file records user-visible changes made in the fork. See [ChangeLog](ChangeL
 
 ### Added
 
+- Added `gdmap-cli explore SNAPSHOT` to inspect an overview, expand nodes, view a subtree PNG and pick files by coordinates in one offline session.
+
 - Headless snapshot maps with shared GTK rendering, PNG frame parameters and palette legends, point lookup, subtree rendering, preview coordinate conversion and adjustable lighting. Batch point lookup keeps a prepared map in memory for repeated clicks.
 
 - Compact `gdmap-cli overview` and `expand` operations show large files, branch totals, repeated directory groups, file counts and largest-file shares, with bounded output and byte-safe navigation by node number or original path.

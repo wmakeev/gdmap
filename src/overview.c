@@ -255,13 +255,41 @@ gboolean snapshot_overview(tree_t* root, gboolean expand, const char* path, gint
 }
 
 /* Keep the same preorder IDs and subtree totals for the lifetime of the session. */
-void snapshot_expand_batch(tree_t* root, guint limit)
+GArray* snapshot_index_new(tree_t* root)
 {
     View view = {0};
     view.expand = TRUE;
     view.selected_id = -1;
     view.index = g_array_new(FALSE, FALSE, sizeof(Info));
     collect(root, &view);
+    return view.index;
+}
+
+tree_t* snapshot_index_lookup(GArray* index, const char* number)
+{
+    char* end;
+    guint64 id = g_ascii_strtoull(number, &end, 10);
+    if (!g_ascii_isdigit(number[0]) || *end || id >= index->len) return NULL;
+    return g_array_index(index, Info, id).node;
+}
+
+void snapshot_index_expand(GArray* index, tree_t* node, guint limit)
+{
+    Top children = top_new(TRUE);
+    for (GList* item = node->entries; item; item = item->next) {
+        tree_t* child = item->data;
+        const Info* child_info = &g_array_index(index, Info, child->snapshot_index);
+        top_add(&children, child_info, limit);
+    }
+    print_header();
+    print_info("root", &g_array_index(index, Info, node->snapshot_index));
+    print_top("children", &children);
+    g_array_free(children.rows, TRUE);
+}
+
+void snapshot_expand_batch(tree_t* root, guint limit)
+{
+    GArray* index = snapshot_index_new(root);
     puts("ready");
     fflush(stdout);
     char line[128];
@@ -273,25 +301,11 @@ void snapshot_expand_batch(tree_t* root, guint limit)
         }
         g_strstrip(line);
         if (!strcmp(line, "quit")) break;
-        char* end;
-        guint64 id = g_ascii_strtoull(line, &end, 10);
-        if (!g_ascii_isdigit(line[0]) || *end || id >= view.index->len) {
-            puts("error expected a node number from the snapshot");
-        } else {
-            const Info* selected = &g_array_index(view.index, Info, id);
-            Top children = top_new(TRUE);
-            for (GList* item = selected->node->entries; item; item = item->next) {
-                tree_t* child = item->data;
-                const Info* child_info = &g_array_index(view.index, Info, child->snapshot_index);
-                top_add(&children, child_info, limit);
-            }
-            print_header();
-            print_info("root", selected);
-            print_top("children", &children);
-            g_array_free(children.rows, TRUE);
-        }
+        tree_t* selected = snapshot_index_lookup(index, line);
+        if (selected) snapshot_index_expand(index, selected, limit);
+        else puts("error expected a node number from the snapshot");
         puts("end");
         fflush(stdout);
     }
-    g_array_free(view.index, TRUE);
+    g_array_free(index, TRUE);
 }

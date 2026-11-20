@@ -1,4 +1,5 @@
 /* GdMap fork: GPL-2.0-only. See LICENSES/GPL-2.0.txt. */
+#include "explore.h"
 #include "snapshot.h"
 #include "overview.h"
 #include "map_cli.h"
@@ -38,6 +39,7 @@ int main(int argc, char** argv)
                 strcmp(argv[i], "--help") && strcmp(argv[i], "-h")) ++i;
             continue;
         }
+        if (!strcmp(argv[i], "explore")) return explore_main(argc, argv);
         if (!strcmp(argv[i], "render") || !strcmp(argv[i], "hit")) return map_cli_main(argc, argv);
         break;
     }
@@ -53,7 +55,7 @@ int main(int argc, char** argv)
         {"allocated-size", 0, 0, G_OPTION_ARG_NONE, &allocated_size, "Use allocated bytes when positive and smaller than file size", NULL},
         {NULL, 0, 0, 0, NULL, NULL, NULL}
     };
-    GOptionContext* context = g_option_context_new("scan FOLDER SNAPSHOT | inspect SNAPSHOT | overview SNAPSHOT | expand SNAPSHOT | render SNAPSHOT PNG | hit PNG.frame --x X --y Y");
+    GOptionContext* context = g_option_context_new("scan FOLDER SNAPSHOT | inspect SNAPSHOT | overview SNAPSHOT | expand SNAPSHOT | render SNAPSHOT PNG | hit PNG.frame --x X --y Y | explore SNAPSHOT");
     g_option_context_set_summary(context, "Scan once, then inspect the saved tree without accessing the source or user preferences.");
     g_option_context_add_main_entries(context, entries, NULL);
     GError* error = NULL;
@@ -92,6 +94,7 @@ int main(int argc, char** argv)
         if (!root) goto failed;
     } else {
         g_printerr("Usage: gdmap-cli [--leave-device] [--allocated-size] scan FOLDER SNAPSHOT\n"
+                   "       gdmap-cli explore SNAPSHOT\n"
                    "       gdmap-cli inspect SNAPSHOT\n"
                    "       gdmap-cli [--limit N] overview SNAPSHOT\n"
                    "       gdmap-cli [--limit N] [--path PATH | --node N] expand SNAPSHOT\n");

@@ -30,7 +30,7 @@ executable('gdmap', sources,
   install: true,
 )
 
-cli = executable('gdmap-cli', ['cli.c', 'snapshot.c', 'overview.c', 'tree.c', 'treemap.c', 'colors.c', 'utils.c', 'map_cli.c'],
+cli = executable('gdmap-cli', ['cli.c', 'explore.c', 'snapshot.c', 'overview.c', 'tree.c', 'treemap.c', 'colors.c', 'utils.c', 'map_cli.c'],
   dependencies: deps,
   c_args: cflags,
   include_directories: [config_dir],
@@ -50,5 +50,10 @@ test('snapshot-overview', python,
 
 test('snapshot-map', python,
   args: [files('test_map.py'), cli, meson.project_source_root()],
+  timeout: 30,
+)
+
+test('snapshot-explore', python,
+  args: [files('test_explore.py'), cli],
   timeout: 30,
 )

@@ -40,6 +40,26 @@ The tab-separated output contains the node index, parent index, kind (`directory
 
 CLI scans default to reported file sizes and stay on the root filesystem. Use `--allocated-size` to count allocated bytes when positive and smaller than the file size, or `--leave-device` to descend onto other filesystems. Symbolic links count their own size, hard links count once per name, and special files are skipped. A directory's size is the sum of accepted children; inaccessible descendants may be skipped by the scanner. These sizes do not guarantee how much space deletion would free. A root that cannot be scanned causes a nonzero exit status. The CLI neither reads nor writes the user's settings or palette and does not require a display.
 
+## Interactive snapshot exploration
+
+Run `gdmap-cli explore SNAPSHOT` to keep one snapshot in memory while switching between its numeric overview and treemap. The session opens with the overview. Use a node number from any result in the next command.
+
+```sh
+./build/local/bin/gdmap-cli explore /tmp/src.gdmap
+```
+
+| Command in the session | Result |
+|---|---|
+| `overview` | Largest files, branches and repeated directory groups. |
+| `expand NODE` | Immediate children, counts, bytes and omitted totals. |
+| `map NODE` | PNG path on the `image` line, original pixel dimensions, selected node, its parent if present, and a color legend. Use `map 0` for the whole snapshot. |
+| `hit X Y` | File or directory at those coordinates on the current map, plus its parent within the map. Use either node number with `expand` or `map`. |
+| `help`, `quit` | Show commands or close the session. EOF also closes it. |
+
+For example, type `map 0`, open the PNG printed by the program, and type `hit 500 300` to inspect that location. Coordinates are in the original PNG pixels, measured from the top left. To examine the file's neighbors, use `expand` with the returned parent number. Numeric requests leave the current map available. A successful map of another node replaces the temporary PNG; normal session exit removes it. For a persistent image use the standalone `render` command below.
+
+Defaults are 1536 × 1024 pixels, square layout, lighting 0.55, and 10 rows per numeric section. Use `--width`, `--height`, `--lighting`, `--limit` or `--palette PATH` on startup. The built-in palette works without a display or user profile. For programmatic use, read the startup response through the line `end`. Send one command per line and read through `end` after each, including errors. `quit` closes the stream.
+
 ## Compact snapshot overview
 
 `gdmap-cli overview SNAPSHOT` lists the largest files, branches and repeated directory names. `gdmap-cli expand SNAPSHOT` lists the root's children; select a branch using its printed node number or its exact original absolute path:
