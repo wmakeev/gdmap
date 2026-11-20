@@ -26,6 +26,20 @@ meson install -C build
 
 Use `./build/local/bin/gdmap --folder /` to scan the root directory at startup.
 
+## Saved scans without a display
+
+`gdmap-cli scan FOLDER SNAPSHOT` scans once, saves the tree, and prints its records. `gdmap-cli inspect SNAPSHOT` prints the saved records in a new process without accessing the original folder. Keep the snapshot outside the scanned folder. For example:
+
+```sh
+./build/local/bin/gdmap-cli scan ./src /tmp/src.gdmap
+./build/local/bin/gdmap-cli inspect /tmp/src.gdmap
+meson test -C build --print-errorlogs
+```
+
+The tab-separated output contains the node index, parent index, kind (`directory`, `file`, or `symlink`), bytes, and original absolute path. The root is index zero and references itself. Paths use C escapes for arbitrary filename bytes, tabs and newlines. Children retain the scanner's descending size order, including its original order for ties. The header records the scan policy. The versioned binary GVariant snapshot stores byte names, node kinds, sizes and parent references in little-endian form; readers reject invalid records and depths greater than 1024.
+
+CLI scans default to reported file sizes and stay on the root filesystem. Use `--allocated-size` to count allocated bytes when positive and smaller than the file size, or `--leave-device` to descend onto other filesystems. Symbolic links count their own size, hard links count once per name, and special files are skipped. A directory's size is the sum of accepted children; inaccessible descendants may be skipped by the scanner. These sizes do not guarantee how much space deletion would free. A root that cannot be scanned causes a nonzero exit status. The CLI neither reads nor writes the user's settings or palette and does not require a display.
+
 ## License
 
 The combined project and changes specific to this fork are available under the [GNU General Public License version 2.0 only](LICENSES/GPL-2.0.txt). Upstream GTK 3 port contributions are licensed under GPL-2.0-or-later unless otherwise stated.

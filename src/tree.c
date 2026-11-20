@@ -21,18 +21,17 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdio.h>
-#include <gtk/gtk.h>
+#include <glib.h>
 
 #include "tree.h"
 #include "utils.h"
-#include "gui_main.h"
-#include "preferences.h"
 
 static ProgressFunc TheProgressFunc = NULL;
 static void* TheProgressData = NULL;
 static gint64 LastProgressUpdate = 0;
 static gboolean Aborted = FALSE;
 static dev_t RootDevice = 0;
+static tree_scan_options ScanOptions;
 
 #ifndef S_ISSOCK
 # define S_ISSOCK(mode) 0
@@ -73,6 +72,7 @@ char* tree_full_name(tree_t* tree)
 
 void tree_destroy(tree_t* tree)
 {
+    if (!tree) return;
     g_list_free_full(tree->entries, (GDestroyNotify)tree_destroy);
     g_free(tree->name);
     g_free(tree);
@@ -136,7 +136,7 @@ static tree_t* tree_scan_rec(const char* dirname, const char* shortname, int dep
     }
     else if ( S_ISDIR(buf.st_mode) )
     {
-        if (!pref_get_leave_device() && buf.st_dev != RootDevice)
+        if (!ScanOptions.leave_device && buf.st_dev != RootDevice)
         {
 /*             g_message("Skip new device: %s", dirname); */
             return NULL;
@@ -190,10 +190,12 @@ static tree_t* tree_scan_rec(const char* dirname, const char* shortname, int dep
         if (S_ISREG(buf.st_mode) && ssize && ssize < rsize)
         {
 /*             g_message("sparse %s ("FF"/"FF")", dirname, ssize, rsize); */
-            if (pref_get_use_reported_size())
+            if (ScanOptions.use_reported_size)
             {
 /*                 g_message("-reported: ("FF")", rsize); */
-                return tree_new(shortname, rsize, depth);
+                tree = tree_new(shortname, rsize, depth);
+                tree->is_symlink = S_ISLNK(buf.st_mode);
+                return tree;
             }
             else
             {
@@ -203,15 +205,18 @@ static tree_t* tree_scan_rec(const char* dirname, const char* shortname, int dep
         }
         else
         {
-            return tree_new(shortname, rsize, depth);
+            tree = tree_new(shortname, rsize, depth);
+            tree->is_symlink = S_ISLNK(buf.st_mode);
+            return tree;
         }
     }
 }
 
-tree_t* tree_load(const char* folder, ProgressFunc func, void* data, unsigned depth)
+tree_t* tree_load_with_options(const char* folder, ProgressFunc func, void* data, unsigned depth, const tree_scan_options* options)
 {
     tree_t* tree;
 
+    ScanOptions = *options;
     TheProgressFunc = func;
     TheProgressData = data;
     LastProgressUpdate = 0;

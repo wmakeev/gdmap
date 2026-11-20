@@ -6,6 +6,8 @@ This file records user-visible changes made in the fork. See [ChangeLog](ChangeL
 
 ### Added
 
+- Headless `gdmap-cli scan` and `inspect` operations save and reopen a local scan with its original paths, node kinds, sizes, child order and measurement policy, without changing user preferences.
+
 - Treemap context menu for opening a folder in the file manager and copying a tile's full path. File tiles open their containing folders.
 - **Scan Root (/)** in the File menu and on the toolbar to start a root scan without the folder chooser.
 - Russian translations for the new actions and messages.

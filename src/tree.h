@@ -25,10 +25,18 @@ struct _tree_t {
   char* name;
   gint64 size;
   gboolean is_directory;
+  gboolean is_symlink;
   GList* entries;
   tree_t* parent;
   unsigned depth;
 };
+
+typedef struct {
+  gboolean leave_device;
+  gboolean use_reported_size;
+} tree_scan_options;
+
+tree_t* tree_load_with_options(const char* folder, ProgressFunc func, void* data, unsigned depth, const tree_scan_options* options);
 
 tree_t* tree_load(const char* folder, ProgressFunc func, void* data, unsigned depth);
 
