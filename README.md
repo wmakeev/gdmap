@@ -52,6 +52,8 @@ CLI scans default to reported file sizes and stay on the root filesystem. Use `-
 
 Node numbers match `inspect` and stay valid for the same snapshot. Paths are displayed as C-escaped bytes, including UTF-8; copy the node number into `--node` to avoid decoding or shell escaping. `--path` accepts actual filename bytes, rather than the displayed escapes. Both operations use the saved tree even after the source moves and preserve the user's settings.
 
+For a series of expansions, run `gdmap-cli expand SNAPSHOT --batch`. After `ready`, send one node number per line. Each response uses the ordinary expansion format and ends with `end`. An invalid number returns an error for that request. Send `quit` or close stdin to finish. The process retains the snapshot and subtree counts in memory. Node numbers from `hit` work in this session, and any number from an expansion can be passed to `render --node` on the same snapshot.
+
 Each node row gives bytes, regular-file count, symlink count and the largest regular file's percentage of that node's bytes (`none` for zero bytes). The default limit is 10 rows per section and per group's member list. Expansions and group member lists report the number and bytes of omitted children or members. Repeated groups combine directories with the same final path component, count only the outermost occurrence when those directories nest, and sort by total bytes. Different branches and different groups can overlap, so their rows must not be added together; omitted overlapping branches or groups report a count without an additive byte total. All sizes retain the snapshot's measurement policy.
 
 ## Snapshot maps and point lookup

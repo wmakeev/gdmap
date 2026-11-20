@@ -41,10 +41,11 @@ int main(int argc, char** argv)
         if (!strcmp(argv[i], "render") || !strcmp(argv[i], "hit")) return map_cli_main(argc, argv);
         break;
     }
-    gboolean leave_device = FALSE, allocated_size = FALSE;
+    gboolean leave_device = FALSE, allocated_size = FALSE, batch = FALSE;
     gint limit = 10, node_id = -1;
     char* selected_path = NULL;
     GOptionEntry entries[] = {
+        {"batch", 0, 0, G_OPTION_ARG_NONE, &batch, "Keep the snapshot open; expand node numbers from stdin", NULL},
         {"limit", 0, 0, G_OPTION_ARG_INT, &limit, "Maximum rows per overview section or expansion (default 10)", "N"},
         {"node", 0, 0, G_OPTION_ARG_INT, &node_id, "Expand a node number from overview or inspect", "N"},
         {"path", 0, 0, G_OPTION_ARG_FILENAME, &selected_path, "Expand an exact original absolute path (raw filename bytes)", "PATH"},
@@ -70,6 +71,11 @@ int main(int argc, char** argv)
         g_free(selected_path);
         return 2;
     }
+    if (batch && (argc != 3 || strcmp(argv[1], "expand") || selected_path || node_id >= 0)) {
+        g_printerr("Use expand SNAPSHOT --batch, then supply node numbers on stdin.\n");
+        g_free(selected_path);
+        return 2;
+    }
     tree_scan_options options = {leave_device, !allocated_size};
     tree_t* root = NULL;
     if (argc == 4 && !strcmp(argv[1], "scan")) {
@@ -91,7 +97,9 @@ int main(int argc, char** argv)
                    "       gdmap-cli [--limit N] [--path PATH | --node N] expand SNAPSHOT\n");
         return 2;
     }
-    if (!strcmp(argv[1], "overview") || !strcmp(argv[1], "expand")) {
+    if (batch) {
+        snapshot_expand_batch(root, limit);
+    } else if (!strcmp(argv[1], "overview") || !strcmp(argv[1], "expand")) {
         if (!snapshot_overview(root, !strcmp(argv[1], "expand"), selected_path, node_id, limit, &error)) goto failed;
     } else {
         inspect(root, &options);

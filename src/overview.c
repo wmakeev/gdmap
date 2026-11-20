@@ -23,7 +23,8 @@ typedef struct {
 } Group;
 
 typedef struct {
-    guint next, limit;
+    guint limit;
+    GArray* index;
     gint selected_id;
     tree_t* selected_node;
     Info selected;
@@ -65,14 +66,16 @@ static void free_group(gpointer value)
 
 static Info collect(tree_t* node, View* view)
 {
-    Info info = {node, view->next++, 0, 0, 0};
+    Info info = {node, node->snapshot_index, 0, 0, 0};
     if ((view->selected_id >= 0 && info.id == (guint)view->selected_id) ||
         node == view->selected_node) {
         view->selected_node = node;
         view->found = TRUE;
     }
+    if (view->index && info.id >= view->index->len)
+        g_array_set_size(view->index, info.id + 1);
     const char* basename = node->parent ? node->name : view->root_name;
-    gboolean outer = node->is_directory && !g_hash_table_contains(view->active, basename);
+    gboolean outer = !view->expand && node->is_directory && !g_hash_table_contains(view->active, basename);
     if (outer) g_hash_table_add(view->active, (gpointer)basename);
     if (!node->is_directory) {
         info.files = !node->is_symlink;
@@ -84,6 +87,10 @@ static Info collect(tree_t* node, View* view)
         info.files += child.files;
         info.links += child.links;
         info.largest = MAX(info.largest, child.largest);
+    }
+    if (view->index) {
+        g_array_index(view->index, Info, info.id) = info;
+        return info;
     }
     if (node == view->selected_node) view->selected = info;
     if (view->expand) {
@@ -105,6 +112,11 @@ static Info collect(tree_t* node, View* view)
     }
     if (outer) g_hash_table_remove(view->active, basename);
     return info;
+}
+
+static void print_header(void)
+{
+    puts("# kind\tnode\tbytes\tfiles\tsymlinks\tlargest-file-percent\tpath (C-escaped bytes; use --node to expand literally)");
 }
 
 static void print_info(const char* kind, const Info* info)
@@ -196,7 +208,7 @@ gboolean snapshot_overview(tree_t* root, gboolean expand, const char* path, gint
     if (!view.found) {
         g_set_error_literal(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Node does not exist in the snapshot");
     } else {
-        puts("# kind\tnode\tbytes\tfiles\tsymlinks\tlargest-file-percent\tpath (C-escaped bytes; use --node to expand literally)");
+        print_header();
         print_info("root", &view.selected);
         if (expand) {
             print_top("children", &view.children);
@@ -240,4 +252,46 @@ gboolean snapshot_overview(tree_t* root, gboolean expand, const char* path, gint
     g_array_free(view.branches.rows, TRUE);
     g_array_free(view.children.rows, TRUE);
     return view.found;
+}
+
+/* Keep the same preorder IDs and subtree totals for the lifetime of the session. */
+void snapshot_expand_batch(tree_t* root, guint limit)
+{
+    View view = {0};
+    view.expand = TRUE;
+    view.selected_id = -1;
+    view.index = g_array_new(FALSE, FALSE, sizeof(Info));
+    collect(root, &view);
+    puts("ready");
+    fflush(stdout);
+    char line[128];
+    while (fgets(line, sizeof(line), stdin)) {
+        if (!strchr(line, '\n') && !feof(stdin)) {
+            int ch;
+            do { ch = getchar(); } while (ch != '\n' && ch != EOF);
+            line[0] = '\0';
+        }
+        g_strstrip(line);
+        if (!strcmp(line, "quit")) break;
+        char* end;
+        guint64 id = g_ascii_strtoull(line, &end, 10);
+        if (!g_ascii_isdigit(line[0]) || *end || id >= view.index->len) {
+            puts("error expected a node number from the snapshot");
+        } else {
+            const Info* selected = &g_array_index(view.index, Info, id);
+            Top children = top_new(TRUE);
+            for (GList* item = selected->node->entries; item; item = item->next) {
+                tree_t* child = item->data;
+                const Info* child_info = &g_array_index(view.index, Info, child->snapshot_index);
+                top_add(&children, child_info, limit);
+            }
+            print_header();
+            print_info("root", selected);
+            print_top("children", &children);
+            g_array_free(children.rows, TRUE);
+        }
+        puts("end");
+        fflush(stdout);
+    }
+    g_array_free(view.index, TRUE);
 }

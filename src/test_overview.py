@@ -71,6 +71,16 @@ with tempfile.TemporaryDirectory(prefix='.overview-test-', dir=project) as tempo
         node = next(line.split('\t')[1] for line in direct.splitlines() if line.startswith('root\t'))
         assert run('--node', node, 'expand', snapshot) == direct
         assert '/item' in direct
+    # A persistent session must return the ordinary rows even after an invalid request.
+    ids = ['0', node, '0']
+    batch = subprocess.run([cli, '--limit', '2', 'expand', snapshot, '--batch'],
+                           input=('invalid\n' + '\n'.join(ids) + '\nquit\n').encode(),
+                           capture_output=True, check=True, env=environment, timeout=10)
+    responses = batch.stdout.decode('ascii').split('end\n')
+    assert responses[0].startswith('ready\nerror ')
+    assert responses[1:] == [run('--limit', '2', '--node', i, 'expand', snapshot) for i in ids] + ['']
+    run('--node', '0', 'expand', snapshot, '--batch', success=False)
+    run('overview', snapshot, '--batch', success=False)
     run('--path', source / 'missing', 'expand', snapshot, success=False)
     run('--node', '99999', 'expand', snapshot, success=False)
     run('--limit', '0', 'overview', snapshot, success=False)

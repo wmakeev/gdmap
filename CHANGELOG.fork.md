@@ -4,6 +4,8 @@ This file records user-visible changes made in the fork. See [ChangeLog](ChangeL
 
 ## Unreleased
 
+- Added `gdmap-cli expand --batch` for repeated numeric exploration of one loaded snapshot, including nodes selected on the map.
+
 ### Added
 
 - Headless snapshot maps with shared GTK rendering, PNG frame parameters and palette legends, point lookup, subtree rendering, preview coordinate conversion and adjustable lighting. Batch point lookup keeps a prepared map in memory for repeated clicks.
