@@ -4,6 +4,7 @@ sources = [
   'colors.c',
   'filter.c',
   'gui_main.c',
+  'treemap.c',
   'gui_support.c',
   'main.c',
   'preferences.c',
@@ -29,8 +30,9 @@ executable('gdmap', sources,
   install: true,
 )
 
-cli = executable('gdmap-cli', ['cli.c', 'snapshot.c', 'overview.c', 'tree.c'],
-  dependencies: dependency('glib-2.0', version: '>=2.38'),
+cli = executable('gdmap-cli', ['cli.c', 'snapshot.c', 'overview.c', 'tree.c', 'treemap.c', 'colors.c', 'utils.c', 'map_cli.c'],
+  dependencies: deps,
+  c_args: cflags,
   include_directories: [config_dir],
   install: true,
 )
@@ -43,5 +45,10 @@ test('snapshot-roundtrip', python,
 
 test('snapshot-overview', python,
   args: [files('test_overview.py'), cli, meson.project_source_root()],
+  timeout: 30,
+)
+
+test('snapshot-map', python,
+  args: [files('test_map.py'), cli, meson.project_source_root()],
   timeout: 30,
 )

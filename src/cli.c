@@ -1,6 +1,7 @@
 /* GdMap fork: GPL-2.0-only. See LICENSES/GPL-2.0.txt. */
 #include "snapshot.h"
 #include "overview.h"
+#include "map_cli.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -29,6 +30,17 @@ static void inspect(tree_t* root, const tree_scan_options* options)
 
 int main(int argc, char** argv)
 {
+    /* Find the command, skipping values of options placed before it. */
+    for (int i=1; i<argc; ++i) {
+        if (argv[i][0]=='-') {
+            if (!strchr(argv[i], '=') && strcmp(argv[i], "--leave-device") &&
+                strcmp(argv[i], "--allocated-size") && strcmp(argv[i], "--parent") && strcmp(argv[i], "--batch") &&
+                strcmp(argv[i], "--help") && strcmp(argv[i], "-h")) ++i;
+            continue;
+        }
+        if (!strcmp(argv[i], "render") || !strcmp(argv[i], "hit")) return map_cli_main(argc, argv);
+        break;
+    }
     gboolean leave_device = FALSE, allocated_size = FALSE;
     gint limit = 10, node_id = -1;
     char* selected_path = NULL;
@@ -40,7 +52,7 @@ int main(int argc, char** argv)
         {"allocated-size", 0, 0, G_OPTION_ARG_NONE, &allocated_size, "Use allocated bytes when positive and smaller than file size", NULL},
         {NULL, 0, 0, 0, NULL, NULL, NULL}
     };
-    GOptionContext* context = g_option_context_new("scan FOLDER SNAPSHOT | inspect SNAPSHOT | overview SNAPSHOT | expand SNAPSHOT");
+    GOptionContext* context = g_option_context_new("scan FOLDER SNAPSHOT | inspect SNAPSHOT | overview SNAPSHOT | expand SNAPSHOT | render SNAPSHOT PNG | hit PNG.frame --x X --y Y");
     g_option_context_set_summary(context, "Scan once, then inspect the saved tree without accessing the source or user preferences.");
     g_option_context_add_main_entries(context, entries, NULL);
     GError* error = NULL;

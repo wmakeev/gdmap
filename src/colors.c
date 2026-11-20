@@ -422,3 +422,12 @@ void colors_init(void)
     }
     g_free(filename);
 }
+
+/* Headless callers use an explicit palette or built-in defaults, never HOME. */
+gboolean colors_init_headless(const char* filename)
+{
+    if (filename && !colors_load(filename)) return FALSE;
+    if (!filename) colors_create_default();
+    else colors_assure_defaults();
+    return TRUE;
+}

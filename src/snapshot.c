@@ -75,6 +75,7 @@ tree_t* snapshot_load(const char* filename, tree_scan_options* options, GError**
         if (i && (!ancestor || !ancestor->is_directory || ancestor->depth >= 1024)) valid = FALSE;
         if (!valid) { g_variant_unref(name_value); goto invalid; }
         tree_t* node = g_new0(tree_t, 1);
+        node->snapshot_index = i;
         node->name = g_strndup(name, n);
         node->size = size;
         node->is_directory = kind == 1;

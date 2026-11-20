@@ -54,6 +54,28 @@ Node numbers match `inspect` and stay valid for the same snapshot. Paths are dis
 
 Each node row gives bytes, regular-file count, symlink count and the largest regular file's percentage of that node's bytes (`none` for zero bytes). The default limit is 10 rows per section and per group's member list. Expansions and group member lists report the number and bytes of omitted children or members. Repeated groups combine directories with the same final path component, count only the outermost occurrence when those directories nest, and sort by total bytes. Different branches and different groups can overlap, so their rows must not be added together; omitted overlapping branches or groups report a count without an additive byte total. All sizes retain the snapshot's measurement policy.
 
+## Snapshot maps and point lookup
+
+`render` builds a PNG without a display and writes a compact `PNG.frame` beside it. The frame records the absolute snapshot filename, its SHA-256, image dimensions, selected node, layout mode, depth, lighting and palette legend. Keep it with the PNG and retain the snapshot at its recorded location. `hit` refuses a changed snapshot. No list of file rectangles is stored in the frame. These commands use the same layout, Cairo painting and half-open point lookup as GTK; CLI defaults use the built-in palette and never load or save the user's profile.
+
+```sh
+./build/local/bin/gdmap-cli render /tmp/src.gdmap /tmp/src.png --width 1200 --height 800
+./build/local/bin/gdmap-cli hit /tmp/src.png.frame --x 400 --y 250
+./build/local/bin/gdmap-cli hit /tmp/src.png.frame --x 200 --y 125 --preview-width 600 --preview-height 400
+./build/local/bin/gdmap-cli render /tmp/src.gdmap /tmp/branch.png --node 42 --depth 3 --lighting 0.35
+./build/local/bin/gdmap-cli render /tmp/src.gdmap /tmp/branch.png --path '/original/scan/root/branch' --mode standard
+```
+
+Coordinates start at the top left. The one-pixel outer border is a miss. Shared boundaries belong to the tile on the right or below. Hit rows contain kind, bytes, C-escaped original path and `node=N`; use that number with `render --node N` or `expand --node N`, including for names containing arbitrary bytes. A second row identifies the parent within the rendered subtree; `--parent` selects it. A miss prints `miss`. PNG dimensions are the original coordinate space; pass both preview dimensions to transform coordinates from a scaled display. Dimensions must be 3–32767 pixels, with at most 100 million pixels total. The default layout is `square`; `standard` alternates split axes using the snapshot's original depths. `--depth N` limits visible depth relative to the selected root; zero is unlimited. Zero-byte entries have no tile in a nonempty directory; an empty root can still be selected inside its blank frame.
+
+The `.frame` file's `[legend]` section lists base colors and extensions, with default and folder colors separately. `--palette /explicit/path/colors.xml` reads an explicit GdMap palette without changing it. The default lighting is `1`, matching GTK's original cushions; `--lighting 0.35` softens shadows and `0` uses flat base colors. Lighting changes colors, never geometry. GTK continues to use its existing preferences and palette.
+
+For repeated clicks on a large snapshot, use one prepared process. `hit --batch` loads the snapshot and calculates geometry once, prints `ready WIDTH HEIGHT`, then accepts one `X Y` or `parent X Y` line at a time. Each answer ends with `end` and is flushed immediately. `quit` or EOF closes it. Preview dimensions and `--parent` can also be supplied as process-wide options. This keeps each subsequent click independent of snapshot loading time and avoids a server.
+
+```sh
+printf '400 250\nparent 400 250\n0 0\nquit\n' | ./build/local/bin/gdmap-cli hit /tmp/src.png.frame --batch
+```
+
 ## License
 
 The combined project and changes specific to this fork are available under the [GNU General Public License version 2.0 only](LICENSES/GPL-2.0.txt). Upstream GTK 3 port contributions are licensed under GPL-2.0-or-later unless otherwise stated.

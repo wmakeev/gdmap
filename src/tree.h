@@ -29,6 +29,7 @@ struct _tree_t {
   GList* entries;
   tree_t* parent;
   unsigned depth;
+  guint snapshot_index; /* Stable preorder index assigned when loading a snapshot. */
 };
 
 typedef struct {

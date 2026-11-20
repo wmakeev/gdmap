@@ -29,6 +29,7 @@ typedef struct {
 } color_t;
 
 void colors_init();
+gboolean colors_init_headless(const char* filename);
 
 const GdkColor* color_get_by_type(ColorType type);
 const GdkColor* color_get_by_ext(const char* ext);

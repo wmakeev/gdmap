@@ -6,6 +6,8 @@ This file records user-visible changes made in the fork. See [ChangeLog](ChangeL
 
 ### Added
 
+- Headless snapshot maps with shared GTK rendering, PNG frame parameters and palette legends, point lookup, subtree rendering, preview coordinate conversion and adjustable lighting. Batch point lookup keeps a prepared map in memory for repeated clicks.
+
 - Compact `gdmap-cli overview` and `expand` operations show large files, branch totals, repeated directory groups, file counts and largest-file shares, with bounded output and byte-safe navigation by node number or original path.
 
 - Headless `gdmap-cli scan` and `inspect` operations save and reopen a local scan with its original paths, node kinds, sizes, child order and measurement policy, without changing user preferences.
