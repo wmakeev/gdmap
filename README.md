@@ -28,6 +28,8 @@ Use `./build/local/bin/gdmap --folder /` to scan the root directory at startup.
 
 ## Saved scans without a display
 
+[Walk through a real scan of a Linux fonts folder](docs/cli-walkthrough.md) to see how a tile on the map leads to a file and how to check its share of the total.
+
 `gdmap-cli scan FOLDER SNAPSHOT` scans once, saves the tree, and prints its records. `gdmap-cli inspect SNAPSHOT` prints the saved records in a new process without accessing the original folder. Keep the snapshot outside the scanned folder. For example:
 
 ```sh
